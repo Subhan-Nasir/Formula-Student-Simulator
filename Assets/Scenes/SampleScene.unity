@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.5160588, g: 0.5288891, b: 0.59037656, a: 1}
+  m_IndirectSpecularColor: {r: 0.4534638, g: 0.46951967, b: 0.5371067, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -3203,7 +3203,7 @@ Light:
   m_Type: 1
   m_Shape: 0
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_Intensity: 20.78
+  m_Intensity: 1
   m_Range: 10
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
@@ -3213,9 +3213,9 @@ Light:
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
-    m_Bias: 0.05
-    m_NormalBias: 0.4
-    m_NearPlane: 0.2
+    m_Bias: 0
+    m_NormalBias: 0
+    m_NearPlane: 0.1
     m_CullingMatrixOverride:
       e00: 1
       e01: 0
@@ -3242,7 +3242,7 @@ Light:
     serializedVersion: 2
     m_Bits: 4294967295
   m_RenderingLayerMask: 1
-  m_Lightmapping: 2
+  m_Lightmapping: 4
   m_LightShadowCasterMode: 0
   m_AreaSize: {x: 1, y: 1}
   m_BounceIntensity: 15.41
@@ -3260,13 +3260,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 705507993}
-  m_LocalRotation: {x: 0.043540094, y: -0.21631928, z: -0.028753826, w: 0.9749275}
-  m_LocalPosition: {x: 0, y: 3, z: 0}
+  m_LocalRotation: {x: 0.14194706, y: -0.21811837, z: -0.00672196, w: 0.96552074}
+  m_LocalPosition: {x: 0.3, y: 10.3, z: 0.7}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 3
-  m_LocalEulerAnglesHint: {x: 4.155, y: -25.177, z: -4.307}
+  m_LocalEulerAnglesHint: {x: 15.734, y: -26.077, z: -4.463}
 --- !u!1 &705581659
 GameObject:
   m_ObjectHideFlags: 0
@@ -4975,6 +4975,8 @@ GameObject:
   - component: {fileID: 1240391178}
   - component: {fileID: 1240391183}
   - component: {fileID: 1240391182}
+  - component: {fileID: 1240391185}
+  - component: {fileID: 1240391184}
   m_Layer: 0
   m_Name: Raycast Reworked
   m_TagString: Untagged
@@ -5029,9 +5031,10 @@ MonoBehaviour:
   primaryGearRatio: 2.111
   finalDriveRatio: 4.67
   idleRPM: 1500
+  maxRPM: 14000
   auxillaryLoss: 0.15
   maxEngineBrakingTorque: 5
-  totalDrivetrainInertia: 5
+  totalDrivetrainInertia: 50
   COM_Fidner: {fileID: 490260644}
   naturalLength: 0.6
   springTravel: 0.1
@@ -5105,7 +5108,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1240391177}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cf830f5cfb6624b60b19c2b91af27ebf, type: 3}
   m_Name: 
@@ -5117,7 +5120,7 @@ AudioSource:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1240391177}
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 8300000, guid: 2a59514fe77cc449e8c4ed3c6d079cf6, type: 3}
@@ -5206,6 +5209,50 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &1240391184
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1240391177}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a577ce5589b5f1b4ea25a9a9733bb1ee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  eq: {fileID: 1240391185}
+  carController: {fileID: 1240391178}
+  startOffValue: 0.35
+  Load: 0
+  loadLerpSpeed: 15
+  lowAccelClip: {fileID: 8300000, guid: ed4c160f53d06014ca647007837f2b7a, type: 3}
+  lowDecelClip: {fileID: 8300000, guid: ed4c160f53d06014ca647007837f2b7a, type: 3}
+  highAccelClip: {fileID: 8300000, guid: 02a9d73ca79f847488587753f792ffad, type: 3}
+  highDecelClip: {fileID: 8300000, guid: 2f989c29f2da0984d8b8709ccdb4b0e9, type: 3}
+  Turbo: {fileID: 0}
+  turboVolume: 0
+  Pitch: 1
+  lowPitchMin: 0.5
+  lowPitchMax: 4
+  highPitchMultiplier: 0.4
+  pitchMultiplier: 1
+--- !u!114 &1240391185
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1240391177}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d57e7a09c8fb7f5409abca10338c78b7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  filterOn: 1
+  lowFreq: 1
+  midFreq: 1
+  highFreq: 1
 --- !u!54 &1242851940
 Rigidbody:
   m_ObjectHideFlags: 0

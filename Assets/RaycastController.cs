@@ -28,6 +28,7 @@ public class RaycastController : MonoBehaviour{
     public float primaryGearRatio;
     public float finalDriveRatio;
     public float idleRPM = 1500;
+    public float maxRPM = 14000;
     public float auxillaryLoss = 0.15f;
     public float maxEngineBrakingTorque = 5;
     public float totalDrivetrainInertia = 1.5f;
@@ -140,6 +141,10 @@ public class RaycastController : MonoBehaviour{
     private float brakeBiasUp;
     private float brakeBiasDown;
     private float brakeBiasTimer;
+    
+    // needed for engine sound
+    private float previousSpeed;
+    private bool isAcclerating;
     
 
 
@@ -269,7 +274,7 @@ public class RaycastController : MonoBehaviour{
         if(brakeBiasUp > 0 & brakeBiasTimer > 0.2f){
             brakeBias += 0.1f;
             brakeBiasTimer = 0;
-            Debug.Log("brake bias increased");
+            // Debug.Log("brake bias increased");
         }
         else if(brakeBiasDown > 0 & brakeBiasTimer > 0.2f){
             brakeBias -= 0.1f;
@@ -283,7 +288,7 @@ public class RaycastController : MonoBehaviour{
             wheels[i].brakeBias = brakeBias;
         }
 
-        Debug.Log($" Brake bias = {wheels[0].brakeBias}, brakeBiasUp = {brakeBiasUp}, brakeBiasDown = {brakeBiasDown}, timer = {brakeBiasTimer}");
+        // Debug.Log($" Brake bias = {wheels[0].brakeBias}, brakeBiasUp = {brakeBiasUp}, brakeBiasDown = {brakeBiasDown}, timer = {brakeBiasTimer}");
         gearTimer += Time.deltaTime;
         brakeBiasTimer += Time.deltaTime;
 
@@ -339,7 +344,12 @@ public class RaycastController : MonoBehaviour{
         }
 
         showTimer();
+        
+        previousSpeed = speed;
         speed = rb.velocity.magnitude;
+
+        if(speed >= previousSpeed){isAcclerating = true;}
+
         drag = (5f * 1.225f * Mathf.Pow(speed,2) * 0.947f)/2;
         lift = (0.17f * 1.225f * Mathf.Pow(speed,2) * 0.947f)/2;
         // Debug.Log($" Drag = {drag}, Lift = {lift}");
@@ -470,6 +480,7 @@ public class RaycastController : MonoBehaviour{
 
     public float getEngineRPM(){return engineRPM;}
     public int getCurrentGear(){return currentGear;}
+    public bool checkIfAcclerating(){return isAcclerating;}
 
 
     public float getAntiRollForce(Suspension leftSuspension, Suspension rightSuspension, float antiRollStiffness, float wheelId){
