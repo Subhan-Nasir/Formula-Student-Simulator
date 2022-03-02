@@ -26,6 +26,8 @@ public class Suspension{
     public Vector3 forceVector; 
     public bool contact;
 
+    
+
     public Suspension(float id, float restLength, float springTravel, float springStiffness, float dampingCoefficient, float bumpStiffness, float bumpTravel, float wheelRadius){
         this.id = id;
         this.naturalLength = restLength;
@@ -77,6 +79,28 @@ public class Suspension{
         return forceVector;
 
     }
+
+    public static float elasticLoadTransferFront( float Kf, float Kr, float Mf, float Mr, float Hcg, float HrcF, float HrcR, float a, float tf){
+        float Welastic = (Kf/(Kf + Kr)) * ( (Mf * (Hcg - HrcF) + Mr * (Hcg -HrcR))*a/ tf);
+        return Welastic;
+    }
+
+    public static float elasticLoadTransferRear(float Kf, float Kr, float Mf, float Mr, float Hcg, float HrcF, float HrcR, float a, float tr){
+        float Welastic = (Kr/(Kf + Kr)) * ( (Mf * (Hcg - HrcF) + Mr * (Hcg -HrcR))*a/ tr);
+        return Welastic;
+
+    }
+
+    public static float geometricLoadTransferFront( float Mf, float a, float Hrcf, float tf){
+        float Wgeometric = (Mf * a * Hrcf)/tf;
+        return Wgeometric;
+    }
+
+    public static float geometricLoadTransferRear(float Mr, float a, float Hrcr, float tr){
+        float Wgeometric = (Mr * a * Hrcr )/tr;
+        return Wgeometric;
+    }
+
 
 
     

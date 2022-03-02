@@ -46,7 +46,7 @@ public class RaycastController : MonoBehaviour{
 
 
     [Header("Centre of mass")]    
-    public GameObject COM_Fidner;
+    public GameObject COM_Finder;
 
     [Header("Suspension Settings")]
     public float naturalLength;
@@ -146,12 +146,46 @@ public class RaycastController : MonoBehaviour{
     private float previousSpeed;
     private bool isAcclerating;
     
+    private float COM_height;
+    private float frontRCheight;
+    private float rearRCheight;
+    private float COMLateralVelocity;
+    private float COMLateralVelocityPrevious;
+    private float COMLateralAcceleration;
+    private float massFront;
+    private float massRear;
+
+    private float elasticLoadTransferFront; 
+    private float elasticLoadTransferRear;
+
+    private float geometricLoadTransferFront;
+    private float geometricLoadTransferRear;
+
+    private float totalLoadTransferFront;
+    private float totalLoadTransferRear;
+    
+    private float rollCenterHeightFront; // 0.030602
+    private float rollCenterHeightRear; // 0.060289
+
+    private float rollStiffnessFront;
+    private float rollStiffnessRear;
+
+    private float trackFront;
+    private float trackRear;
+
+    private float loadFront;
+    private float loadRear;
+
+    private float baseLoadFront;
+    private float baseLoadRear;
+
+    private float wheelVerticalLoad;
 
 
 
     void OnValidate(){
         keys = new NewControls();
-        rb.centerOfMass = COM_Fidner.transform.localPosition;
+        rb.centerOfMass = COM_Finder.transform.localPosition;
              
                            
         
@@ -211,6 +245,21 @@ public class RaycastController : MonoBehaviour{
         cc=this;
         rb.inertiaTensor = new Vector3(123.1586f,61.15857f,112f);
         rb.inertiaTensorRotation = Quaternion.Euler(33.5407f,0,0);
+        COM_height = COM_Finder.transform.position.y;
+        massFront = rb.mass *  Mathf.Abs((COM_Finder.transform.position.z - springs[2].transform.position.z)/(springs[0].transform.position.z - springs[2].transform.position.z));
+        massRear = rb.mass *  Mathf.Abs((COM_Finder.transform.position.z - springs[0].transform.position.z)/(springs[0].transform.position.z - springs[2].transform.position.z));
+
+        rollCenterHeightFront = 0.030602f;
+        rollCenterHeightRear = 0.060289f;
+        rollStiffnessFront = 1;
+        rollStiffnessRear = 1;
+
+        trackFront = Mathf.Abs(wheelObjects[1].transform.position.x - wheelObjects[0].transform.position.x);
+        trackRear = Mathf.Abs(wheelObjects[3].transform.position.x - wheelObjects[2].transform.position.x);
+
+        baseLoadFront = massFront * 9.81f/2;
+        baseLoadRear = massRear * 9.81f/2;
+
         
     }
 
@@ -308,12 +357,69 @@ public class RaycastController : MonoBehaviour{
     }
 
     void FixedUpdate(){
+
+        COM_height = COM_Finder.transform.position.y;
+
+        COMLateralVelocityPrevious = COMLateralVelocity;
+        // COMLateralVelocity = COM_Finder.transform.InverseTransformDirection(rb.GetPointVelocity(COM_Finder.transform.position)).x;
+        // COMLateralVelocity = rb.GetPointVelocity(COM_Finder.transform.position).x;
+        COMLateralVelocity = COM_Finder.transform.InverseTransformDirection(rb.velocity).x;               
+        COMLateralAcceleration = (COMLateralVelocity - COMLateralVelocityPrevious)/Time.fixedDeltaTime;
+        // COMLateralAcceleration = Mathf.Clamp(COMLateralAcceleration, -5,5);
         
- 
+        elasticLoadTransferFront = Suspension.elasticLoadTransferFront(rollStiffnessFront,
+                                                                        rollStiffnessRear,
+                                                                        massFront,massRear,
+                                                                        COM_height,
+                                                                        rollCenterHeightFront,
+                                                                        rollCenterHeightRear,
+                                                                        COMLateralAcceleration, 
+                                                                        trackFront);
+
+        elasticLoadTransferRear = Suspension.elasticLoadTransferRear(rollStiffnessFront, 
+                                                                        rollStiffnessRear,
+                                                                        massFront, 
+                                                                        massRear, 
+                                                                        COM_height, 
+                                                                        rollCenterHeightFront, 
+                                                                        rollCenterHeightRear, 
+                                                                        COMLateralAcceleration, 
+                                                                        trackRear);
+
+        geometricLoadTransferFront = Suspension.geometricLoadTransferFront(massFront, COMLateralAcceleration, rollCenterHeightFront, trackFront);
+        geometricLoadTransferRear = Suspension.geometricLoadTransferRear(massRear, COMLateralAcceleration, rollCenterHeightRear, trackRear);
+
+        totalLoadTransferFront = elasticLoadTransferFront + geometricLoadTransferFront;
+        totalLoadTransferRear = elasticLoadTransferRear + geometricLoadTransferRear;
+
+        Debug.Log($"W_geometric_front = {geometricLoadTransferFront}, W_geometric_rear = { geometricLoadTransferRear}, W_elastic_front = {elasticLoadTransferFront}, W_elastic_rear = {elasticLoadTransferRear},  lateral acceleration = {COMLateralAcceleration}, massFront = {massFront}, massRear = {massRear}, tf = {trackFront}, tr = {trackRear}");
+
         for(int i = 0; i<springs.Count; i++){   
 
             bool contact = Physics.Raycast(springs[i].transform.position, -transform.up, out RaycastHit hit, naturalLength + springTravel + wheelRadius);
-          
+            if(COMLateralVelocity >= 0f){
+                if(i == 0){
+                    wheelVerticalLoad = baseLoadFront + totalLoadTransferFront;
+                }
+                else if( i == 1){
+                    wheelVerticalLoad = baseLoadFront - totalLoadTransferFront;
+                }
+                else if(i == 2){
+                    wheelVerticalLoad = baseLoadRear + totalLoadTransferRear;
+                }
+                else{
+                    wheelVerticalLoad = baseLoadRear - totalLoadTransferRear;
+                }
+
+            }
+            else{
+                if(i == 0| i == 1){wheelVerticalLoad = baseLoadFront;}
+                else{ wheelVerticalLoad = baseLoadRear;}
+            }
+            
+
+            // Debug.Log($" wheel id {i}: vertical load = {wheelVerticalLoad}, lateral acceleration = {COMLateralAcceleration}");
+
             if(contact){            
                 
                 if(i == 2 | i == 3){
@@ -322,10 +428,10 @@ public class RaycastController : MonoBehaviour{
 
                 // Force vectors from suspension, wheel and anti rollbars.
                 Vector3 suspensionForceVector = suspensions[i].getUpdatedForce(hit, Time.fixedDeltaTime, contact);          
-                Vector3 wheelForceVector = wheels[i].getUpdatedForce(userInput, gearRatios[currentGear + 1], finalDriveRatio, primaryGearRatio, hit, Time.fixedDeltaTime, suspensions[i].forceVector.magnitude);            
+                Vector3 wheelForceVector = wheels[i].getUpdatedForce(userInput, gearRatios[currentGear + 1], finalDriveRatio, primaryGearRatio, hit, Time.fixedDeltaTime, wheelVerticalLoad);            
                 Vector3 antiRollForceVector = getAntiRollForce(suspensions[2], suspensions[3], antiRollStiffness, i) * hit.normal;
 
-                rb.AddForceAtPosition(wheelForceVector + suspensionForceVector, hit.point + new Vector3 (0,0.1f,0)); 
+                rb.AddForceAtPosition(wheelForceVector + suspensionForceVector, hit.point + new Vector3 (0,0f,0)); 
                 
                 
 
@@ -358,6 +464,12 @@ public class RaycastController : MonoBehaviour{
         // rb.AddForceAtPosition( lift*transform.up, COM_Fidner.transform.position);
         FL_LateralForce = wheels[0].lateralForce;
         RL_LateralForce = wheels[3].lateralForce;
+
+        
+
+        
+
+        
     }
     
 
@@ -381,39 +493,39 @@ public class RaycastController : MonoBehaviour{
         }
     }
 
-    void OnDrawGizmos(){
+    // void OnDrawGizmos(){
 
-        Gizmos.color = Color.white;
-        Gizmos.DrawWireSphere( transform.TransformPoint(rb.centerOfMass),0.2f);
+    //     Gizmos.color = Color.white;
+    //     Gizmos.DrawWireSphere( transform.TransformPoint(rb.centerOfMass),0.2f);
         
-        for(int i = 0; i < springs.Count; i++){
+    //     for(int i = 0; i < springs.Count; i++){
         
                         
-            // Gizmos.color = Color.blue;
-            Ray ray = new Ray(springs[i].transform.position, -transform.up);           
-            // Gizmos.DrawLine(ray.origin, -suspensions[i].springLength * transform.up + springs[i].transform.position);
+    //         // Gizmos.color = Color.blue;
+    //         Ray ray = new Ray(springs[i].transform.position, -transform.up);           
+    //         // Gizmos.DrawLine(ray.origin, -suspensions[i].springLength * transform.up + springs[i].transform.position);
 
             
-            Gizmos.color = Color.yellow;
-            // Gizmos.DrawLine(-suspensions[i].springLength * transform.up + springs[i].transform.position, -suspensions[i].springLength * transform.up + springs[i].transform.position + transform.up * -wheelRadius);
+    //         Gizmos.color = Color.yellow;
+    //         // Gizmos.DrawLine(-suspensions[i].springLength * transform.up + springs[i].transform.position, -suspensions[i].springLength * transform.up + springs[i].transform.position + transform.up * -wheelRadius);
             
         
-            Gizmos.color = Color.white;
+    //         Gizmos.color = Color.white;
 
-            Gizmos.DrawRay(wheels[i].wheelObject.transform.position, wheels[i].wheelObject.transform.right * (wheels[i].lateralForce/1000));
-            Gizmos.DrawRay(wheels[i].wheelObject.transform.position, wheels[i].wheelObject.transform.forward * (wheels[i].longitudinalForce/1000));
-            Gizmos.DrawRay(wheels[i].wheelObject.transform.position, wheels[i].wheelObject.transform.up * wheels[i].verticalLoad/1000);
-            Gizmos.DrawRay(COM_Fidner.transform.position, -drag * transform.forward /1000);
-            Gizmos.color = Color.yellow;
-            if(i == 2 | i == 3){
-                Gizmos.DrawRay(wheels[i].wheelObject.transform.position, wheels[i].wheelObject.transform.up * antiRollForces[i-2]/1000);
-            }
+    //         Gizmos.DrawRay(wheels[i].wheelObject.transform.position, wheels[i].wheelObject.transform.right * (wheels[i].lateralForce/1000));
+    //         Gizmos.DrawRay(wheels[i].wheelObject.transform.position, wheels[i].wheelObject.transform.forward * (wheels[i].longitudinalForce/1000));
+    //         Gizmos.DrawRay(wheels[i].wheelObject.transform.position, wheels[i].wheelObject.transform.up * wheels[i].verticalLoad/1000);
+    //         Gizmos.DrawRay(COM_Finder.transform.position, -drag * transform.forward /1000);
+    //         Gizmos.color = Color.yellow;
+    //         if(i == 2 | i == 3){
+    //             Gizmos.DrawRay(wheels[i].wheelObject.transform.position, wheels[i].wheelObject.transform.up * antiRollForces[i-2]/1000);
+    //         }
 
-            // Gizmos.DrawRay(wheels[i].wheelObject.transform.position, wheels[i].forceVector/1000 );
+    //         // Gizmos.DrawRay(wheels[i].wheelObject.transform.position, wheels[i].forceVector/1000 );
             
-        }
+    //     }
         
-    }
+    // }
 
     void ApplySteering(){
 

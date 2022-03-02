@@ -810,7 +810,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4241866643649457907, guid: e14ca435a37814faf99dcb296feede7e, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4241866643649457908, guid: e14ca435a37814faf99dcb296feede7e, type: 3}
       propertyPath: m_Pivot.x
@@ -2300,7 +2300,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 490260644}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.252, z: -1.179}
+  m_LocalPosition: {x: 0, y: 0.252, z: -1.687}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1240391181}
@@ -2604,7 +2604,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &595942830
 RectTransform:
   m_ObjectHideFlags: 0
@@ -5034,8 +5034,8 @@ MonoBehaviour:
   maxRPM: 14000
   auxillaryLoss: 0.15
   maxEngineBrakingTorque: 5
-  totalDrivetrainInertia: 50
-  COM_Fidner: {fileID: 490260644}
+  totalDrivetrainInertia: 25
+  COM_Finder: {fileID: 490260644}
   naturalLength: 0.6
   springTravel: 0.1
   springStiffness: 20000
@@ -5061,7 +5061,7 @@ BoxCollider:
   m_GameObject: {fileID: 1240391177}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
-  m_Enabled: 0
+  m_Enabled: 1
   serializedVersion: 2
   m_Size: {x: 1, y: 0.9494834, z: 1.2724509}
   m_Center: {x: 0, y: 0.6559007, z: -1.2467673}
@@ -5216,7 +5216,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1240391177}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a577ce5589b5f1b4ea25a9a9733bb1ee, type: 3}
   m_Name: 
@@ -5231,11 +5231,11 @@ MonoBehaviour:
   highAccelClip: {fileID: 8300000, guid: 02a9d73ca79f847488587753f792ffad, type: 3}
   highDecelClip: {fileID: 8300000, guid: 2f989c29f2da0984d8b8709ccdb4b0e9, type: 3}
   Turbo: {fileID: 0}
-  turboVolume: 0
+  turboVolume: 2
   Pitch: 1
-  lowPitchMin: 0.5
-  lowPitchMax: 4
-  highPitchMultiplier: 0.4
+  lowPitchMin: 0.83
+  lowPitchMax: 7
+  highPitchMultiplier: 1
   pitchMultiplier: 1
 --- !u!114 &1240391185
 MonoBehaviour:
@@ -5244,7 +5244,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1240391177}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d57e7a09c8fb7f5409abca10338c78b7, type: 3}
   m_Name: 
