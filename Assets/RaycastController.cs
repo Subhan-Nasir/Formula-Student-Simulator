@@ -181,6 +181,9 @@ public class RaycastController : MonoBehaviour{
 
     private float wheelVerticalLoad;
 
+    // front: 1.055
+    // rear: 1.101
+    
 
 
     void OnValidate(){
@@ -358,7 +361,8 @@ public class RaycastController : MonoBehaviour{
 
     void FixedUpdate(){
 
-        COM_height = COM_Finder.transform.position.y;
+        // COM_height = 0.252f;
+        COM_height = COM_Finder.transform.position.y - transform.position.y;
 
         COMLateralVelocityPrevious = COMLateralVelocity;
         // COMLateralVelocity = COM_Finder.transform.InverseTransformDirection(rb.GetPointVelocity(COM_Finder.transform.position)).x;
@@ -389,10 +393,11 @@ public class RaycastController : MonoBehaviour{
         geometricLoadTransferFront = Suspension.geometricLoadTransferFront(massFront, COMLateralAcceleration, rollCenterHeightFront, trackFront);
         geometricLoadTransferRear = Suspension.geometricLoadTransferRear(massRear, COMLateralAcceleration, rollCenterHeightRear, trackRear);
 
-        totalLoadTransferFront = elasticLoadTransferFront + geometricLoadTransferFront;
-        totalLoadTransferRear = elasticLoadTransferRear + geometricLoadTransferRear;
+        totalLoadTransferFront = (elasticLoadTransferFront + geometricLoadTransferFront);
+        totalLoadTransferRear = (elasticLoadTransferRear + geometricLoadTransferRear);
 
-        Debug.Log($"W_geometric_front = {geometricLoadTransferFront}, W_geometric_rear = { geometricLoadTransferRear}, W_elastic_front = {elasticLoadTransferFront}, W_elastic_rear = {elasticLoadTransferRear},  lateral acceleration = {COMLateralAcceleration}, massFront = {massFront}, massRear = {massRear}, tf = {trackFront}, tr = {trackRear}");
+        // Debug.Log($"W_geometric_front = {geometricLoadTransferFront}, W_geometric_rear = { geometricLoadTransferRear}, W_elastic_front = {elasticLoadTransferFront}, W_elastic_rear = {elasticLoadTransferRear},  lateral acceleration = {COMLateralAcceleration}, massFront = {massFront}, massRear = {massRear}, tf = {trackFront}, tr = {trackRear}");
+        Debug.Log($"com height = {COM_height}, track front = {trackFront}, track rear = {trackRear}");
 
         for(int i = 0; i<springs.Count; i++){   
 
