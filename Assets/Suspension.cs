@@ -100,6 +100,10 @@ public class Suspension{
         float Wgeometric = (Mr * a * Hrcr )/tr;
         return Wgeometric;
     }
+    public static float LongitudinalLoadTransfer(float M, float a, float Hcg, float wheelBase){
+        float WLongitudinal = (M * a * Hcg )/wheelBase;
+        return WLongitudinal;
+    }
 
 
 

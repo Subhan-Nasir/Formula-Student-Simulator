@@ -160,6 +160,7 @@ public class RaycastController : MonoBehaviour{
 
     private float geometricLoadTransferFront;
     private float geometricLoadTransferRear;
+    private float longitudnialLoadTransfer;
 
     private float totalLoadTransferFront;
     private float totalLoadTransferRear;
@@ -180,6 +181,11 @@ public class RaycastController : MonoBehaviour{
     private float baseLoadRear;
 
     private float wheelVerticalLoad;
+
+    private float COMlongitudinalVelocity;
+    private float COMlongitudinalVelocityPrevious;
+    private float COMlongitudinalAcceleration;
+
 
     // front: 1.055
     // rear: 1.101
@@ -365,10 +371,14 @@ public class RaycastController : MonoBehaviour{
         COM_height = COM_Finder.transform.position.y - transform.position.y;
 
         COMLateralVelocityPrevious = COMLateralVelocity;
+        COMlongitudinalVelocityPrevious = COMlongitudinalVelocity;
+
         // COMLateralVelocity = COM_Finder.transform.InverseTransformDirection(rb.GetPointVelocity(COM_Finder.transform.position)).x;
         // COMLateralVelocity = rb.GetPointVelocity(COM_Finder.transform.position).x;
-        COMLateralVelocity = COM_Finder.transform.InverseTransformDirection(rb.velocity).x;               
+        COMLateralVelocity = COM_Finder.transform.InverseTransformDirection(rb.velocity).x;  
+        COMlongitudinalVelocity = COM_Finder.transform.InverseTransformDirection(rb.velocity).z;               
         COMLateralAcceleration = (COMLateralVelocity - COMLateralVelocityPrevious)/Time.fixedDeltaTime;
+        COMlongitudinalAcceleration = (COMlongitudinalVelocity -COMlongitudinalVelocityPrevious)/Time.fixedDeltaTime;
         // COMLateralAcceleration = Mathf.Clamp(COMLateralAcceleration, -5,5);
         
         elasticLoadTransferFront = Suspension.elasticLoadTransferFront(rollStiffnessFront,
@@ -392,9 +402,11 @@ public class RaycastController : MonoBehaviour{
 
         geometricLoadTransferFront = Suspension.geometricLoadTransferFront(massFront, COMLateralAcceleration, rollCenterHeightFront, trackFront);
         geometricLoadTransferRear = Suspension.geometricLoadTransferRear(massRear, COMLateralAcceleration, rollCenterHeightRear, trackRear);
-
+        longitudnialLoadTransfer = Suspension.LongitudinalLoadTransfer(rb.mass, COMlongitudinalAcceleration, COM_height, wheelBase);
+        
         totalLoadTransferFront = (elasticLoadTransferFront + geometricLoadTransferFront);
         totalLoadTransferRear = (elasticLoadTransferRear + geometricLoadTransferRear);
+        
 
         // Debug.Log($"W_geometric_front = {geometricLoadTransferFront}, W_geometric_rear = { geometricLoadTransferRear}, W_elastic_front = {elasticLoadTransferFront}, W_elastic_rear = {elasticLoadTransferRear},  lateral acceleration = {COMLateralAcceleration}, massFront = {massFront}, massRear = {massRear}, tf = {trackFront}, tr = {trackRear}");
         Debug.Log($"com height = {COM_height}, track front = {trackFront}, track rear = {trackRear}");
@@ -404,16 +416,16 @@ public class RaycastController : MonoBehaviour{
             bool contact = Physics.Raycast(springs[i].transform.position, -transform.up, out RaycastHit hit, naturalLength + springTravel + wheelRadius);
             if(COMLateralVelocity >= 0f){
                 if(i == 0){
-                    wheelVerticalLoad = baseLoadFront + totalLoadTransferFront;
+                    wheelVerticalLoad = baseLoadFront + totalLoadTransferFront - longitudnialLoadTransfer;
                 }
                 else if( i == 1){
-                    wheelVerticalLoad = baseLoadFront - totalLoadTransferFront;
+                    wheelVerticalLoad = baseLoadFront - totalLoadTransferFront - longitudnialLoadTransfer;
                 }
                 else if(i == 2){
-                    wheelVerticalLoad = baseLoadRear + totalLoadTransferRear;
+                    wheelVerticalLoad = baseLoadRear + totalLoadTransferRear + longitudnialLoadTransfer;
                 }
                 else{
-                    wheelVerticalLoad = baseLoadRear - totalLoadTransferRear;
+                    wheelVerticalLoad = baseLoadRear - totalLoadTransferRear + longitudnialLoadTransfer;
                 }
 
             }
