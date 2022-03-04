@@ -5034,7 +5034,7 @@ MonoBehaviour:
   maxRPM: 14000
   auxillaryLoss: 0.15
   maxEngineBrakingTorque: 5
-  totalDrivetrainInertia: 5
+  totalDrivetrainInertia: 50
   COM_Finder: {fileID: 490260644}
   naturalLength: 0.6
   springTravel: 0.1
@@ -5216,7 +5216,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1240391177}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a577ce5589b5f1b4ea25a9a9733bb1ee, type: 3}
   m_Name: 
@@ -5244,7 +5244,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1240391177}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d57e7a09c8fb7f5409abca10338c78b7, type: 3}
   m_Name: 
