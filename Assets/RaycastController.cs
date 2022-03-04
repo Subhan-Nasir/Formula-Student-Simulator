@@ -11,6 +11,10 @@ public class RaycastController : MonoBehaviour{
 
     [Header("0 to 60 Timer")]
     public bool enableTimer;
+    
+    [Header("Tokyo Drift Mode")]
+
+    public bool tokyoDriftMode=false;
 
     [Header("Car Components ")]
     public Rigidbody rb;    
@@ -18,7 +22,7 @@ public class RaycastController : MonoBehaviour{
     public List<GameObject> wheelObjects;
     public List<GameObject> meshes;
 
-    public static RaycastController cc;
+    // public static RaycastController cc;
 
     [Header("Engine")]
     public AnimationCurve engineCurve;
@@ -251,7 +255,7 @@ public class RaycastController : MonoBehaviour{
     void Start(){
         //
 
-        cc=this;
+        // cc=this;
         rb.inertiaTensor = new Vector3(123.1586f,61.15857f,112f);
         rb.inertiaTensorRotation = Quaternion.Euler(33.5407f,0,0);
         COM_height = COM_Finder.transform.position.y;
@@ -409,7 +413,7 @@ public class RaycastController : MonoBehaviour{
         
 
         // Debug.Log($"W_geometric_front = {geometricLoadTransferFront}, W_geometric_rear = { geometricLoadTransferRear}, W_elastic_front = {elasticLoadTransferFront}, W_elastic_rear = {elasticLoadTransferRear},  lateral acceleration = {COMLateralAcceleration}, massFront = {massFront}, massRear = {massRear}, tf = {trackFront}, tr = {trackRear}");
-        Debug.Log($"com height = {COM_height}, track front = {trackFront}, track rear = {trackRear}");
+        //Debug.Log($"com height = {COM_height}, track front = {trackFront}, track rear = {trackRear}");
 
         for(int i = 0; i<springs.Count; i++){   
 
@@ -645,6 +649,8 @@ public class RaycastController : MonoBehaviour{
         
 
     }
+
+   
 
 }
 

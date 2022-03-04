@@ -9,6 +9,10 @@ using System;
 
 
 public class Wheel{
+
+    // void Start(){
+        // wc=this;
+    // }
     
     public float id;
     public GameObject wheelObject;
@@ -19,6 +23,8 @@ public class Wheel{
     public float momentOfInertia;
     public float totalDrivetrainInertia;  
     public float rrCoefficient = 0.0003f;
+
+    // public static Wheel wc;
 
 
     public float slipAngle;
@@ -308,6 +314,7 @@ public class Wheel{
 
     }
 
-    
+    // public float getSlipAngle(){return slipAngle;}
 
+    // public float getSlipRatio(){return slipRatio;}
 }

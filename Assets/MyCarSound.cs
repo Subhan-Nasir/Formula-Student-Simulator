@@ -4,17 +4,66 @@ using UnityEngine;
 
 public class MyCarSound : MonoBehaviour
 {
-    private float audioPitch;
-    AudioSource audioSource;
+    public AudioSource[] audioSource;
+    private AudioSource engineAudioSource;
+    private AudioSource skidAudioSource;
+    private AudioSource tokyoDriftSource;
+
+    private float[] Volumes= new float[4];
+
+
+
+    public RaycastController carController;
+    private Wheel[] wheelList;
     // Start is called before the first frame update
     void Start()
     {
-       audioSource=GetComponent<AudioSource>(); 
+        audioSource=GetComponents<AudioSource>();
+        engineAudioSource=audioSource[0];
+        skidAudioSource=audioSource[1];
+        tokyoDriftSource=audioSource[2];
+        wheelList = carController.getWheels();
+        Debug.Log(audioSource[2]);
     }
 
     // Update is called once per frame
     void Update()
     {
-      audioSource.pitch=(7*RaycastController.cc.getEngineRPM()/12350)+0.06478f;  
+        engineAudioSource.pitch=(7*carController.getEngineRPM()/12350)+0.06478f;  
+        
+        for(int i=0;i<4;i++){
+            if((wheelList[i].slipRatio-0.15f])>=(wheelList[i].slipAngle-0.2f)){
+                Volumes[i]=(0.265f*wheelList[i].slipRatio)-0.015f;
+            }
+            else {
+                Volumes[i]=(0.164f*wheelList[i].slipAngle)-0.008f;
+            }
+        }
+        
+
+        if( Mathf.Abs(wheelList[3].slipRatio) > 0.15f ){
+            skidAudioSource.volume= Volumes.Sum();
+            skidAudioSource.Play();
+            //Debug.Log("Slipping");
+        }
+        else if(Mathf.Abs(wheelList[3].slipAngle) > 0.2f){
+            skidAudioSource.volume= Volumes.Sum();
+            skidAudioSource.Play();
+        }
+        else{
+            skidAudioSource.Stop();
+        }
+
+        if(carController.tokyoDriftMode==true){
+            tokyoDriftSource.Play();
+
+            //Debug.Log("LOL");
+
+
+        }
+
+
+
+      
     }
 }
