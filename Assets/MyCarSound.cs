@@ -13,18 +13,18 @@
 
 
 
-//     public RaycastController carController;
-//     private Wheel[] wheelList;
-//     // Start is called before the first frame update
-//     void Start()
-//     {
-//         audioSource=GetComponents<AudioSource>();
-//         engineAudioSource=audioSource[0];
-//         skidAudioSource=audioSource[1];
-//         tokyoDriftSource=audioSource[2];
-//         wheelList = carController.getWheels();
-//         Debug.Log(audioSource[2]);
-//     }
+    public RaycastController carController;
+    private Wheel[] wheelList;
+    // Start is called before the first frame update
+    void Start()
+    {
+        audioSource=GetComponents<AudioSource>();
+        engineAudioSource=audioSource[0];
+        skidAudioSource=audioSource[1];
+        tokyoDriftSource=audioSource[2];
+        wheelList = carController.getWheels();
+        
+    }
 
 //     // Update is called once per frame
 //     void Update()
