@@ -32,34 +32,31 @@ public class MyCarSound : MonoBehaviour
         engineAudioSource.pitch=(7*carController.getEngineRPM()/12350)+0.06478f;  
         
         for(int i=0;i<4;i++){
-            if((wheelList[i].slipRatio-0.15f])>=(wheelList[i].slipAngle-0.2f)){
-                Volumes[i]=(0.265f*wheelList[i].slipRatio)-0.015f;
+            if((wheelList[i].slipRatio-0.15f)>=(wheelList[i].slipAngle-0.2f)){
+                Volumes[i]=1.1f*((0.265f*wheelList[i].slipRatio)-0.015f);
             }
             else {
-                Volumes[i]=(0.164f*wheelList[i].slipAngle)-0.008f;
+                Volumes[i]=1.1f*((0.164f*wheelList[i].slipAngle)-0.008f);
             }
-        }
+        
         
 
-        if( Mathf.Abs(wheelList[3].slipRatio) > 0.15f ){
-            skidAudioSource.volume= Volumes.Sum();
-            skidAudioSource.Play();
-            //Debug.Log("Slipping");
-        }
-        else if(Mathf.Abs(wheelList[3].slipAngle) > 0.2f){
-            skidAudioSource.volume= Volumes.Sum();
-            skidAudioSource.Play();
-        }
-        else{
-            skidAudioSource.Stop();
-        }
+            if( Mathf.Abs(wheelList[i].slipRatio) > 0.15f || (Mathf.Abs(wheelList[i].slipAngle) > 0.2f)){
+                skidAudioSource.volume= Volumes[0]+Volumes[1]+Volumes[2]+Volumes[3];
+                skidAudioSource.Play();
+                Debug.Log("Slipping");
+            }
+            else{
+             skidAudioSource.Stop();
+            }
 
-        if(carController.tokyoDriftMode==true){
-            tokyoDriftSource.Play();
+            if(carController.tokyoDriftMode==true){
+             tokyoDriftSource.Play();
 
-            //Debug.Log("LOL");
+                //Debug.Log("LOL");
 
 
+             }
         }
 
 
