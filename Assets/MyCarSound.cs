@@ -1,15 +1,15 @@
-// using System.Collections;
-// using System.Collections.Generic;
-// using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
-// public class MyCarSound : MonoBehaviour
-// {
-//     public AudioSource[] audioSource;
-//     private AudioSource engineAudioSource;
-//     private AudioSource skidAudioSource;
-//     private AudioSource tokyoDriftSource;
+public class MyCarSound : MonoBehaviour
+{
+    public AudioSource[] audioSource;
+    private AudioSource engineAudioSource;
+    private AudioSource skidAudioSource;
+    private AudioSource tokyoDriftSource;
 
-//     private float[] Volumes= new float[4];
+    private float[] Volumes= new float[4];
 
 
 
@@ -26,10 +26,10 @@
         
     }
 
-//     // Update is called once per frame
-//     void Update()
-//     {
-//         engineAudioSource.pitch=(7*carController.getEngineRPM()/12350)+0.06478f;  
+    // Update is called once per frame
+    void Update()
+    {
+        engineAudioSource.pitch=(7*carController.getEngineRPM()/12350)+0.06478f;  
         
         for(int i=0;i<4;i++){
             if((wheelList[i].slipRatio-0.15f)>=(wheelList[i].slipAngle-0.2f)){
@@ -62,5 +62,5 @@
 
 
       
-//     }
-// }
+    }
+}
