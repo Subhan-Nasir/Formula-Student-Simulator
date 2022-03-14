@@ -18,10 +18,10 @@ public class RLUI : MonoBehaviour{
     private int i;
 
 
-    private float nextUpdate=0.069f;
+    private float nextUpdate=0.2f;
     void Update(){
         if(Time.time>=nextUpdate){
-            nextUpdate=Time.time+0.069f;
+            nextUpdate=Time.time+0.2f;
         
             RaycastController new_car = carObject.GetComponent<RaycastController>();
     

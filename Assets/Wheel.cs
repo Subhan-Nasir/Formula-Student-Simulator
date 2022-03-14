@@ -68,10 +68,11 @@ public class Wheel{
     public float omega;
 
     public float verticalLoad;
+    public float tyreEfficiency;
     
 
 
-    public Wheel(float id, GameObject wheelObject, GameObject wheelMesh, Rigidbody rb, float wheelRadius, float wheelMass, float brakeBias, float totalDrivetrainInertia, Dictionary<string, float> longitudinalConstants, Dictionary<string, float> lateralConstants){
+    public Wheel(float id, GameObject wheelObject, GameObject wheelMesh, Rigidbody rb, float wheelRadius, float wheelMass, float brakeBias, float totalDrivetrainInertia, float tyreEfficiency, Dictionary<string, float> longitudinalConstants, Dictionary<string, float> lateralConstants){
         this.id = id;
         this.wheelObject = wheelObject;
         this.wheelMesh = wheelMesh;
@@ -81,6 +82,7 @@ public class Wheel{
         this.momentOfInertia = 0.5f * wheelMass * Mathf.Pow(wheelRadius, 2);
         this.brakeBias = brakeBias;
         this.totalDrivetrainInertia = totalDrivetrainInertia;
+        this.tyreEfficiency = tyreEfficiency;
 
 
         this.B_long = longitudinalConstants["B"];
@@ -177,9 +179,11 @@ public class Wheel{
 
         lateralVelocity = wheelVelocityLS.x;
         longitudinalVelocity = wheelVelocityLS.z;              
-               
-        fLongLimit = 0.7f*tyreCurvePeak(c_long, m_long, D_long, verticalLoad);
-        fLatLimit = 0.7f*tyreCurvePeak(c_lat, m_lat, D_lat, verticalLoad);
+        
+       
+
+        fLongLimit = tyreEfficiency * tyreCurvePeak(c_long, m_long, D_long, verticalLoad);
+        fLatLimit = tyreEfficiency * tyreCurvePeak(c_lat, m_lat, D_lat, verticalLoad);
         
         fLongDynamicLimit = dynamicPeakLongitudinal(lateralForce, fLongLimit, fLatLimit);
         fLatDynamicLimit = dynamicPeakLateral(longitudinalForce, fLongLimit, fLatLimit);
