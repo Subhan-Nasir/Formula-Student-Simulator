@@ -29,7 +29,7 @@ public class MyCarSound : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        engineAudioSource.pitch=(6*carController.getEngineRPM()/12350)+0.06478f;  
+        engineAudioSource.pitch=(7*carController.getEngineRPM()/12350)+0.06478f;  
         
         
         for(int i=0;i<4;i++){
