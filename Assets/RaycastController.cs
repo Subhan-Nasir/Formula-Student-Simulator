@@ -60,6 +60,18 @@ public class RaycastController : MonoBehaviour{
     public float springStiffness;    
     public float dampingCoefficient;
 
+    public float frontNaturalLength;
+    public float frontSpringTravel;
+    public float frontSpringStiffness;
+    public float frontDampingCoefficient;
+
+    public float rearNaturalLength;
+    public float rearSpringTravel;
+    public float rearSpringStiffness;
+    public float rearDampingCoefficient;
+
+    
+
     [Header("Bump stops")] 
     public float bumpStiffness;
     public float bumpTravel;
@@ -210,9 +222,20 @@ public class RaycastController : MonoBehaviour{
                            
         
         for (int i = 0; i < 4; i++){
-            suspensions[i] = new Suspension(i, naturalLength, springTravel, springStiffness, dampingCoefficient, bumpStiffness, bumpTravel, wheelRadius);                     
+
+            
+            // suspensions[i] = new Suspension(i, naturalLength, springTravel, springStiffness, dampingCoefficient, bumpStiffness, bumpTravel, wheelRadius);                     
             wheels[i] = new Wheel(i, wheelObjects[i], meshes[i], rb, wheelRadius, wheelMass, brakeBias, totalDrivetrainInertia, tyreEfficiency, longitudinalConstants, lateralConstants);
             
+            if(i == 1| i == 2){
+                suspensions[i] = new Suspension(i, frontNaturalLength, frontSpringTravel, frontSpringStiffness, frontDampingCoefficient, bumpStiffness, bumpTravel, wheelRadius);
+            }
+            else{
+                suspensions[i] = new Suspension(i, rearNaturalLength, rearSpringTravel, rearSpringStiffness, rearDampingCoefficient, bumpStiffness, bumpTravel, wheelRadius);
+
+            }
+
+
         }
         
                 
@@ -434,7 +457,7 @@ public class RaycastController : MonoBehaviour{
                            
         COMLateralAcceleration = (COMLateralVelocity - COMLateralVelocityPrevious)/Time.fixedDeltaTime;
         COMlongitudinalAcceleration = (COMlongitudinalVelocity -COMlongitudinalVelocityPrevious)/Time.fixedDeltaTime;
-        COMLateralAcceleration = Mathf.Clamp(COMLateralAcceleration, -50,50);
+        COMLateralAcceleration = Mathf.Clamp(COMLateralAcceleration, -5,5);
         
         elasticLoadTransferFront = Suspension.elasticLoadTransferFront(rollStiffnessFront,
                                                                         rollStiffnessRear,
@@ -469,7 +492,7 @@ public class RaycastController : MonoBehaviour{
         // Debug.Log($"Longitudinal Accleration: {COMlongitudinalAcceleration}, lateral acceleration = {COMLateralAcceleration} ");
         for(int i = 0; i<springs.Count; i++){   
 
-            bool contact = Physics.Raycast(springs[i].transform.position, -transform.up, out RaycastHit hit, naturalLength + springTravel + wheelRadius);
+            bool contact = Physics.Raycast(springs[i].transform.position, -transform.up, out RaycastHit hit, suspensions[i].naturalLength + suspensions[i].springTravel + wheelRadius);
             if(COMLateralVelocity >= 0f){
                 if(i == 0){
                     wheelVerticalLoad = baseLoadFront + totalLoadTransferFront - longitudnialLoadTransfer;
@@ -674,7 +697,7 @@ public class RaycastController : MonoBehaviour{
     public float getEngineRPM(){return engineRPM;}
     public int getCurrentGear(){return currentGear;}
     public bool checkIfAcclerating(){return isAcclerating;}
-
+    public float getUserInput(){return userInput;}
 
     public float getAntiRollForce(Suspension leftSuspension, Suspension rightSuspension, float antiRollStiffness, float wheelId){
 

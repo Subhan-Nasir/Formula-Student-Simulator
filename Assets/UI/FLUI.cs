@@ -18,10 +18,10 @@ public class FLUI : MonoBehaviour{
     private int i;
 
 
-    private float nextUpdate=0.2f;
+    private float nextUpdate=0.1f;
     void Update(){
         if(Time.time>=nextUpdate){
-            nextUpdate=Time.time+0.2f;
+            nextUpdate=Time.time+0.1f;
         
             RaycastController new_car = carObject.GetComponent<RaycastController>();
     

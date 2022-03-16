@@ -200,22 +200,22 @@ public class Wheel{
         if(userInput <0){
             if(Mathf.Abs(longitudinalVelocity) > 1){
                 if(id == 2 | id == 3){
-                    brakingTorque = 400* userInput * (1 - brakeBias);
+                    brakingTorque = 4000* userInput * (1 - brakeBias);
                 }
                 else{
-                    brakingTorque = 400 * userInput * brakeBias;
+                    brakingTorque = 4000 * userInput * brakeBias;
                 }
 
                 
             }
             else if (Mathf.Abs(longitudinalVelocity) <= 1){
-                brakingTorque = 400 * userInput ;
+                brakingTorque = 4000 * userInput ;
 
                 if(id == 2 | id == 3){
-                    brakingTorque = 400* userInput * longitudinalVelocity * (1 - brakeBias);
+                    brakingTorque = 4000* userInput * longitudinalVelocity * (1 - brakeBias);
                 }
                 else{
-                    brakingTorque = 400 * userInput * longitudinalVelocity * brakeBias;
+                    brakingTorque = 4000 * userInput * longitudinalVelocity * brakeBias;
                 }
             }
             
