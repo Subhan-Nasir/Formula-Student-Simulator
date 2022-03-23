@@ -55,16 +55,17 @@ public class RaycastController : MonoBehaviour{
     public GameObject COM_Finder;
 
     [Header("Suspension Settings")]
-    public float naturalLength;
-    public float springTravel;
-    public float springStiffness;    
-    public float dampingCoefficient;
+    // public float naturalLength;
+    // public float springTravel;
+    // public float springStiffness;    
+    // public float dampingCoefficient;
 
     public float frontNaturalLength;
     public float frontSpringTravel;
     public float frontSpringStiffness;
     public float frontDampingCoefficient;
 
+    [Header(" ")]
     public float rearNaturalLength;
     public float rearSpringTravel;
     public float rearSpringStiffness;
@@ -204,7 +205,7 @@ public class RaycastController : MonoBehaviour{
     private float COMlongitudinalVelocity;
     private float COMlongitudinalVelocityPrevious;
     private float COMlongitudinalAcceleration;
-    private float velocitySum = 0;
+    // private float velocitySum = 0;
 
     // front: 1.055
     // rear: 1.101
@@ -413,18 +414,18 @@ public class RaycastController : MonoBehaviour{
         Vector3 FLposition = FLHub.transform.localPosition;
         Vector3 FRposition = FRHub.transform.localPosition;
 
-        FLHistory.AddEntry(FLposition);
-        FRHistory.AddEntry(FRposition);
+        // FLHistory.AddEntry(FLposition);
+        // FRHistory.AddEntry(FRposition);
 
-        // Debug.Log($"FL: ({FLposition.x}, {FLposition.y}, {FLposition.z}), FR: ({FRposition.x}, {FRposition.y}, {FRposition.z})");
-        Vector3[] FLHistoryArray = FLHistory.getArray();
-        Vector3[] FRHistoryArray = FRHistory.getArray();
+        // // Debug.Log($"FL: ({FLposition.x}, {FLposition.y}, {FLposition.z}), FR: ({FRposition.x}, {FRposition.y}, {FRposition.z})");
+        // Vector3[] FLHistoryArray = FLHistory.getArray();
+        // Vector3[] FRHistoryArray = FRHistory.getArray();
 
-        Debug.Log("****************************************************************");
-        for(int i = 0; i < FLHistoryArray.Length; i++){
-            Debug.Log($"FL: X = {FLHistoryArray[i].x}, Y = {FLHistoryArray[i].y},  Z = {FLHistoryArray[i].z}, FR: X = {FLHistoryArray[i].x}, Y = {FLHistoryArray[i].y}, Z = {FLHistoryArray[i].z}");
-        }
-        Debug.Log("****************************************************************");
+        // Debug.Log("****************************************************************");
+        // for(int i = 0; i < FLHistoryArray.Length; i++){
+        //     Debug.Log($"FL: X = {FLHistoryArray[i].x}, Y = {FLHistoryArray[i].y},  Z = {FLHistoryArray[i].z}, FR: X = {FLHistoryArray[i].x}, Y = {FLHistoryArray[i].y}, Z = {FLHistoryArray[i].z}");
+        // }
+        // Debug.Log("****************************************************************");
 
 
         // COM_height = 0.252f;
@@ -433,25 +434,22 @@ public class RaycastController : MonoBehaviour{
         COMLateralVelocityPrevious = COMLateralVelocity;
         COMlongitudinalVelocityPrevious = COMlongitudinalVelocity;
 
-        // COMLateralVelocity = transform.InverseTransformDirection(rb.GetPointVelocity(COM_Finder.transform.position)).x;
+        COMLateralVelocity = COM_Finder.transform.InverseTransformDirection(rb.GetPointVelocity(COM_Finder.transform.position)).x;
+       
+        Debug.Log($"Lateral Velocity = {COMLateralVelocity}");       
         COMlongitudinalVelocity = transform.InverseTransformDirection(rb.GetPointVelocity(COM_Finder.transform.position)).z;
        
         // COMLateralVelocity = rb.GetRelativePointVelocity(COM_Finder.transform.position).x;
         // COMlongitudinalVelocity = rb.GetRelativePointVelocity(COM_Finder.transform.position).z;
 
-        velocitySum = 0;
-        for(int i = 0; i<4; i++){
-            velocitySum += wheels[i].lateralVelocity;
+        // velocitySum = 0;
+        // for(int i = 0; i<4; i++){
+        //     velocitySum += wheels[i].lateralVelocity;
 
-        }
+        // }
 
-        COMLateralVelocity = velocitySum/4;
-
-        
-
-        
-
-        
+        // COMLateralVelocity = velocitySum/4;
+     
         // COMLateralVelocity = Vector3.Dot(rb.velocity, transform.right);
         // COMlongitudinalVelocity = Vector3.Dot(rb.velocity, transform.forward);
                            
@@ -493,7 +491,7 @@ public class RaycastController : MonoBehaviour{
         for(int i = 0; i<springs.Count; i++){   
 
             bool contact = Physics.Raycast(springs[i].transform.position, -transform.up, out RaycastHit hit, suspensions[i].naturalLength + suspensions[i].springTravel + wheelRadius);
-            if(COMLateralVelocity >= 0f){
+            if(Mathf.Abs(COMLateralVelocity) >= 0f){
                 if(i == 0){
                     wheelVerticalLoad = baseLoadFront + totalLoadTransferFront - longitudnialLoadTransfer;
                 }
@@ -529,9 +527,7 @@ public class RaycastController : MonoBehaviour{
 
                 rb.AddForceAtPosition(wheelForceVector + suspensionForceVector, hit.point + new Vector3 (0,0f,0)); 
                 
-                
-
-                
+                               
 
                 float averageRearRPM = (9.5493f)*(wheels[2].omega + wheels[3].omega)/2;
                 if(currentGear != 0){
@@ -606,27 +602,27 @@ public class RaycastController : MonoBehaviour{
             // Gizmos.DrawLine(-suspensions[i].springLength * transform.up + springs[i].transform.position, -suspensions[i].springLength * transform.up + springs[i].transform.position + transform.up * -wheelRadius);
             
         
-            Gizmos.color = Color.yellow;
-            Gizmos.DrawRay(wheels[i].wheelObject.transform.position, wheels[i].longitudinalVelocity * wheels[i].wheelObject.transform.forward);
-            Gizmos.DrawRay(wheels[i].wheelObject.transform.position, -wheels[i].lateralVelocity * wheels[i].wheelObject.transform.right);
+            // Gizmos.color = Color.yellow;
+            // Gizmos.DrawRay(wheels[i].wheelObject.transform.position, wheels[i].longitudinalVelocity * wheels[i].wheelObject.transform.forward);
+            // Gizmos.DrawRay(wheels[i].wheelObject.transform.position, -wheels[i].lateralVelocity * wheels[i].wheelObject.transform.right);
 
             // Gizmos.DrawRay(wheels[i].wheelObject.transform.position, wheels[i].wheelObject.transform.right * (wheels[i].lateralForce/1000));
             // Gizmos.DrawRay(wheels[i].wheelObject.transform.position, wheels[i].wheelObject.transform.forward * (wheels[i].longitudinalForce/1000));
             // Gizmos.DrawRay(wheels[i].wheelObject.transform.position, wheels[i].wheelObject.transform.up * wheels[i].verticalLoad/1000);
             // Gizmos.DrawRay(COM_Finder.transform.position, -drag * transform.forward /1000);
           
-            Gizmos.color = Color.yellow;
-            if(i == 2 | i == 3){
-                Gizmos.DrawRay(wheels[i].wheelObject.transform.position, wheels[i].wheelObject.transform.up * antiRollForces[i-2]/1000);
-            }
+            // Gizmos.color = Color.yellow;
+            // if(i == 2 | i == 3){
+            //     Gizmos.DrawRay(wheels[i].wheelObject.transform.position, wheels[i].wheelObject.transform.up * antiRollForces[i-2]/1000);
+            // }
 
             // Gizmos.DrawRay(wheels[i].wheelObject.transform.position, wheels[i].forceVector/1000 );
             
         }
 
         Gizmos.color = Color.white;
-        Gizmos.DrawRay(COM_Finder.transform.position, COMlongitudinalVelocity * transform.forward);
-        Gizmos.DrawRay(COM_Finder.transform.position, (velocitySum/4)* transform.right);
+        Gizmos.DrawRay(COM_Finder.transform.position, COMlongitudinalAcceleration * transform.forward);
+        Gizmos.DrawRay(COM_Finder.transform.position, COMLateralAcceleration* transform.right);
         
         
     }

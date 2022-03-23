@@ -167,11 +167,13 @@ public class Wheel{
 
     public Vector3 getUpdatedForce(float userInput, float currentGearRatio, float finalDriveRatio, float primaryGearRatio, RaycastHit hit, float timeDelta, float verticalLoad){
         
-        this.verticalLoad = verticalLoad;
         // Debug.Log(userInput);
         if(verticalLoad < 0){
             verticalLoad = 0;
         }
+        
+        this.verticalLoad = verticalLoad;
+        
        
         
         wheelObject.transform.position = hit.point + hit.normal * wheelRadius;

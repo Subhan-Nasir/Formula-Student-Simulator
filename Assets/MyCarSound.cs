@@ -53,7 +53,7 @@ public class MyCarSound : MonoBehaviour
                     skidAudioSource.Play();
                 }
                 
-                Debug.Log("Slipping");
+                // Debug.Log("Slipping");
                 
             }
             else{
