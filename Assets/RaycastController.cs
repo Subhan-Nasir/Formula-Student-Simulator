@@ -475,8 +475,8 @@ public class RaycastController : MonoBehaviour{
         geometricLoadTransferRear = Suspension.geometricLoadTransferRear(massRear, COMLateralAcceleration, rollCenterHeightRear, trackRear);
         longitudnialLoadTransfer = Suspension.LongitudinalLoadTransfer(rb.mass, COMlongitudinalAcceleration, COM_height, wheelBase);
         
-        totalLoadTransferFront = (elasticLoadTransferFront + geometricLoadTransferFront);
-        totalLoadTransferRear = (elasticLoadTransferRear + geometricLoadTransferRear);
+        totalLoadTransferFront = ( suspensions[0].force + suspensions[1].force + geometricLoadTransferFront);
+        totalLoadTransferRear = ( suspensions[2].force + suspensions[3].force + geometricLoadTransferRear);
         
 
         // Debug.Log($"W_geometric_front = {geometricLoadTransferFront}, W_geometric_rear = { geometricLoadTransferRear}, W_elastic_front = {elasticLoadTransferFront}, W_elastic_rear = {elasticLoadTransferRear},  lateral acceleration = {COMLateralAcceleration}, massFront = {massFront}, massRear = {massRear}, tf = {trackFront}, tr = {trackRear}");

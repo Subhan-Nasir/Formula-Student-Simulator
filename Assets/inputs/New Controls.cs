@@ -78,17 +78,6 @@ public class @NewControls : IInputActionCollection, IDisposable
             ""bindings"": [
                 {
                     ""name"": """",
-                    ""id"": ""80a10106-baa6-4f2d-b725-0e4486882e4e"",
-                    ""path"": ""<HID::obp̌pedals̞obp ped obp pedals⟥⟩⟱Ϧ>/rx"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""Throttle"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
                     ""id"": ""01ac6beb-02f0-4101-bc54-d88112e28f8e"",
                     ""path"": ""<Keyboard>/w"",
                     ""interactions"": """",
@@ -111,12 +100,12 @@ public class @NewControls : IInputActionCollection, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""9c267555-4d0c-434c-8a77-04f2500bf05c"",
-                    ""path"": ""<HID::obp̌pedals̞obp ped obp pedals⟥⟩⟱Ϧ>/rz"",
+                    ""id"": ""e2187b6b-2aca-48a3-93e1-844c265a9fe5"",
+                    ""path"": ""<HID::Precision Sim Engineering SWD>/stick/left"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""Brake"",
+                    ""action"": ""Throttle"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -135,6 +124,17 @@ public class @NewControls : IInputActionCollection, IDisposable
                     ""name"": """",
                     ""id"": ""fb3b7d49-f234-4c85-9c19-adcf807e5f83"",
                     ""path"": ""<XInputController>/leftTrigger"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Brake"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""4272e191-9a01-4e6c-8a35-e84f0cbf7bcd"",
+                    ""path"": ""<HID::Precision Sim Engineering SWD>/trigger"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
