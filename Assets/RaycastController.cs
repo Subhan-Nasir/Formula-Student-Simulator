@@ -414,30 +414,25 @@ public class RaycastController : MonoBehaviour{
         Vector3 FLposition = FLHub.transform.localPosition;
         Vector3 FRposition = FRHub.transform.localPosition;
 
-        // FLHistory.AddEntry(FLposition);
-        // FRHistory.AddEntry(FRposition);
-
-        // // Debug.Log($"FL: ({FLposition.x}, {FLposition.y}, {FLposition.z}), FR: ({FRposition.x}, {FRposition.y}, {FRposition.z})");
-        // Vector3[] FLHistoryArray = FLHistory.getArray();
-        // Vector3[] FRHistoryArray = FRHistory.getArray();
-
-        // Debug.Log("****************************************************************");
-        // for(int i = 0; i < FLHistoryArray.Length; i++){
-        //     Debug.Log($"FL: X = {FLHistoryArray[i].x}, Y = {FLHistoryArray[i].y},  Z = {FLHistoryArray[i].z}, FR: X = {FLHistoryArray[i].x}, Y = {FLHistoryArray[i].y}, Z = {FLHistoryArray[i].z}");
-        // }
-        // Debug.Log("****************************************************************");
-
-
+        
         // COM_height = 0.252f;
         COM_height = COM_Finder.transform.position.y - transform.position.y;
 
         COMLateralVelocityPrevious = COMLateralVelocity;
         COMlongitudinalVelocityPrevious = COMlongitudinalVelocity;
 
-        COMLateralVelocity = COM_Finder.transform.InverseTransformDirection(rb.GetPointVelocity(COM_Finder.transform.position)).x;
-       
-        Debug.Log($"Lateral Velocity = {COMLateralVelocity}");       
+        // COMLateralVelocity = COM_Finder.transform.InverseTransformDirection(rb.GetPointVelocity(COM_Finder.transform.position)).x;
+        // COMLateralVelocity = Mathf.Sign(steerInput) * Vector3.Project(rb.velocity, COM_Finder.transform.right.normalized).magnitude;
+        // COMLateralVelocity = transform.InverseTransformDirection(rb.velocity).x;         
+        // COMLateralVelocity = -Vector3.Dot(rb.velocity, transform.right.normalized);
+
+        Vector3 temp = new Vector3(-rb.velocity.x, rb.velocity.y, rb.velocity.z);
+        Vector3 rotatedVelocity = Quaternion.LookRotation(transform.right) * temp;
+        COMLateralVelocity = rotatedVelocity.z;
+
         COMlongitudinalVelocity = transform.InverseTransformDirection(rb.GetPointVelocity(COM_Finder.transform.position)).z;
+
+        Debug.Log($"Lateral Velocity = {COMLateralVelocity}");   
        
         // COMLateralVelocity = rb.GetRelativePointVelocity(COM_Finder.transform.position).x;
         // COMlongitudinalVelocity = rb.GetRelativePointVelocity(COM_Finder.transform.position).z;
@@ -522,7 +517,7 @@ public class RaycastController : MonoBehaviour{
 
                 // Force vectors from suspension, wheel and anti rollbars.
                 Vector3 suspensionForceVector = suspensions[i].getUpdatedForce(hit, Time.fixedDeltaTime, contact);          
-                Vector3 wheelForceVector = wheels[i].getUpdatedForce(userInput, gearRatios[currentGear + 1], finalDriveRatio, primaryGearRatio, hit, Time.fixedDeltaTime, wheelVerticalLoad);            
+                Vector3 wheelForceVector = wheels[i].getUpdatedForce(userInput, gearRatios[currentGear + 1], finalDriveRatio, primaryGearRatio, hit, Time.fixedDeltaTime, suspensionForceVector.magnitude);            
                 Vector3 antiRollForceVector = getAntiRollForce(suspensions[2], suspensions[3], antiRollStiffness, i) * hit.normal;
 
                 rb.AddForceAtPosition(wheelForceVector + suspensionForceVector, hit.point + new Vector3 (0,0f,0)); 
@@ -621,8 +616,8 @@ public class RaycastController : MonoBehaviour{
         }
 
         Gizmos.color = Color.white;
-        Gizmos.DrawRay(COM_Finder.transform.position, COMlongitudinalAcceleration * transform.forward);
-        Gizmos.DrawRay(COM_Finder.transform.position, COMLateralAcceleration* transform.right);
+        Gizmos.DrawRay(COM_Finder.transform.position, COMlongitudinalVelocity * transform.forward);
+        Gizmos.DrawRay(COM_Finder.transform.position, COMLateralVelocity* transform.right);
         
         
     }

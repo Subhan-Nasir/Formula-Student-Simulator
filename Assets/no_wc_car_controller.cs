@@ -14,7 +14,7 @@ public class no_wc_car_controller : MonoBehaviour{
     
     
     [Header("Centre of mass")]    
-    public GameObject COM_Fidner;
+    public GameObject COM_Finder;
 
     [Header("Suspension")]
     public float restLength;
@@ -94,9 +94,12 @@ public class no_wc_car_controller : MonoBehaviour{
    private float[] omega = new float[4];
    private float[] theta = new float[4];
 
+   private float COMLateralVelocity;
+   private float COMlongitudinalVelocity;
+
     private void Awake(){
         keys = new NewControls();
-        rb.centerOfMass = COM_Fidner.transform.localPosition;
+        rb.centerOfMass = COM_Finder.transform.localPosition;
 
     }
 
@@ -151,6 +154,11 @@ public class no_wc_car_controller : MonoBehaviour{
     }
 
     void FixedUpdate(){
+
+        COMLateralVelocity = COM_Finder.transform.InverseTransformDirection(rb.GetPointVelocity(COM_Finder.transform.position)).x;     
+               
+        COMlongitudinalVelocity = transform.InverseTransformDirection(rb.GetPointVelocity(COM_Finder.transform.position)).z;
+        Debug.Log($"Lateral Velocity = {COMLateralVelocity}");
         
 
 
@@ -269,34 +277,38 @@ public class no_wc_car_controller : MonoBehaviour{
         Gizmos.color = Color.white;
         Gizmos.DrawWireSphere( transform.TransformPoint(rb.centerOfMass),0.2f);
 
-        for(int i = 0; i < springs.Count; i++){
+        // for(int i = 0; i < springs.Count; i++){
         
 
-            // Vector3 direction = -transform.up *(springLength[i]+wheelRadius);
-            // Gizmos.DrawRay(springs[i].transform.position, direction);
+        //     // Vector3 direction = -transform.up *(springLength[i]+wheelRadius);
+        //     // Gizmos.DrawRay(springs[i].transform.position, direction);
           
-            Gizmos.color = Color.white;
-            // Gizmos.DrawSphere(springs[i].transform.position, 0.1f);
+        //     Gizmos.color = Color.white;
+        //     // Gizmos.DrawSphere(springs[i].transform.position, 0.1f);
 
             
-            Gizmos.color = Color.blue;
-            Ray ray = new Ray(springs[i].transform.position, -transform.up);           
-            Gizmos.DrawLine(ray.origin, -springLength[i] * transform.up + springs[i].transform.position);
+        //     Gizmos.color = Color.blue;
+        //     Ray ray = new Ray(springs[i].transform.position, -transform.up);           
+        //     Gizmos.DrawLine(ray.origin, -springLength[i] * transform.up + springs[i].transform.position);
 
-            // Gizmos.color = Color.green;
-            // if(i == 0 | i == 1){
-            //     Gizmos.DrawRay(wheels[i].transform.position, wheelVelocitiesLS[i]);
-            // }
+        //     // Gizmos.color = Color.green;
+        //     // if(i == 0 | i == 1){
+        //     //     Gizmos.DrawRay(wheels[i].transform.position, wheelVelocitiesLS[i]);
+        //     // }
             
 
-            Gizmos.color = Color.yellow;
-            Gizmos.DrawLine(-springLength[i] * transform.up + springs[i].transform.position, -springLength[i] * transform.up + springs[i].transform.position + transform.up * -wheelRadius);
-            // Gizmos.DrawSphere((springs[i].transform.position) + (springLength[i]+wheelRadius)*(-transform.up),0.1f);
+        //     Gizmos.color = Color.yellow;
+        //     Gizmos.DrawLine(-springLength[i] * transform.up + springs[i].transform.position, -springLength[i] * transform.up + springs[i].transform.position + transform.up * -wheelRadius);
+        //     // Gizmos.DrawSphere((springs[i].transform.position) + (springLength[i]+wheelRadius)*(-transform.up),0.1f);
         
-            Gizmos.color = Color.white;
-            Gizmos.DrawRay(wheels[i].transform.position, wheels[i].transform.right * (0.5f));
-            Gizmos.DrawRay(wheels[i].transform.position, wheels[i].transform.forward * (0.5f));
-        }
+        //     Gizmos.color = Color.white;
+        //     Gizmos.DrawRay(wheels[i].transform.position, wheels[i].transform.right * (0.5f));
+        //     Gizmos.DrawRay(wheels[i].transform.position, wheels[i].transform.forward * (0.5f));
+        // }
+
+        Debug.DrawRay(COM_Finder.transform.position, COMlongitudinalVelocity*COM_Finder.transform.forward);
+        Debug.DrawRay(COM_Finder.transform.position, COMLateralVelocity*COM_Finder.transform.right);
+        
         
     }
 
