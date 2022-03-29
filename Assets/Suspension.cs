@@ -81,6 +81,14 @@ public class Suspension{
 
     }
 
+
+    // Kf, Kr = front and rear roll stifness
+    // Mf, Mr = front and rear mass
+    // Hcg = Centre of mass height
+    // HrcF, HrcR = front and rear roll centre height
+    // a = acceleration
+    // tf, tr = front and rear track
+
     public static float elasticLoadTransferFront( float Kf, float Kr, float Mf, float Mr, float Hcg, float HrcF, float HrcR, float a, float tf){
         float Welastic = (Kf/(Kf + Kr)) * ( (Mf * (Hcg - HrcF) + Mr * (Hcg -HrcR))*a/ tf);
         return Welastic;

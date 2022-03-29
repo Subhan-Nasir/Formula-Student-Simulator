@@ -208,6 +208,17 @@
                 },
                 {
                     "name": "",
+                    "id": "1d27cb0d-ef0c-46b1-8778-37f8cf703abe",
+                    "path": "<XInputController>/buttonNorth",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ShiftUp",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "d51d0cb9-9cd0-411b-ae48-dadd0e981f68",
                     "path": "<Keyboard>/q",
                     "interactions": "",
@@ -221,6 +232,17 @@
                     "name": "",
                     "id": "932ca621-9c67-4313-9731-550295869f5a",
                     "path": "<HID::Precision Sim Engineering SWD>/button14",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ShiftDown",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "3b3e6397-95a3-43d6-8778-24f1568fa9dd",
+                    "path": "<XInputController>/buttonWest",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
