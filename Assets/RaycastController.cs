@@ -291,7 +291,7 @@ public class RaycastController : MonoBehaviour{
         // rb.inertiaTensorRotation = Quaternion.Euler(33.5407f,0,0);
         rb.inertiaTensorRotation = Quaternion.Euler(350,350,350);
 
-        COM_height = COM_Finder.transform.position.y;
+        COM_height = COM_Finder.transform.position.y - transform.position.y;
 
 
         massFront = rb.mass *  Mathf.Abs((COM_Finder.transform.position.z - springs[2].transform.position.z)/(springs[0].transform.position.z - springs[2].transform.position.z));
@@ -461,10 +461,17 @@ public class RaycastController : MonoBehaviour{
         // rb.AddForceAtPosition( lift*transform.up, COM_Fidner.transform.position);
         FL_LateralForce = wheels[0].lateralForce;
         RL_LateralForce = wheels[3].lateralForce;
-
+        
         
     }
     
+
+
+    void updateRollcentreHeights(){
+
+        
+    }
+
 
     void updateCOMaccleerations(){        
         // COM_height = 0.252f;
@@ -483,8 +490,10 @@ public class RaycastController : MonoBehaviour{
         COMLateralVelocity = rotatedVelocity.z;
 
         COMlongitudinalVelocity = transform.InverseTransformDirection(rb.GetPointVelocity(COM_Finder.transform.position)).z;
+        float x =Vector3.Dot(rb.velocity, transform.right);
+        
 
-        Debug.Log($"Lateral Velocity = {COMLateralVelocity}");   
+        Debug.Log($"Global velocity vector = {rb.velocity}, Local velocity vector = {x}");   
        
         // COMLateralVelocity = rb.GetRelativePointVelocity(COM_Finder.transform.position).x;
         // COMlongitudinalVelocity = rb.GetRelativePointVelocity(COM_Finder.transform.position).z;
@@ -569,6 +578,8 @@ public class RaycastController : MonoBehaviour{
         }
     }
 
+    
+
     void showTimer(){
         float carSpeed = rb.velocity.z;
         if(carSpeed > 0 & speedReached == false){
@@ -593,6 +604,7 @@ public class RaycastController : MonoBehaviour{
 
         Gizmos.color = Color.white;
         Gizmos.DrawWireSphere( transform.TransformPoint(rb.centerOfMass),0.1f);
+        Gizmos.DrawWireSphere( transform.position,0.1f);
         
         for(int i = 0; i < springs.Count; i++){
         
@@ -629,6 +641,8 @@ public class RaycastController : MonoBehaviour{
         Gizmos.color = Color.white;
         Gizmos.DrawRay(COM_Finder.transform.position, COMlongitudinalVelocity * transform.forward);
         Gizmos.DrawRay(COM_Finder.transform.position, COMLateralVelocity* transform.right);
+
+      
         
         
     }
