@@ -62,7 +62,7 @@ public class engineAudio : MonoBehaviour{
         // m_CarController = transform.root.gameObject.GetComponent<carController>();
         // IN = transform.root.gameObject.GetComponent<inputs>();
 
-        lowPitchMax = (carController.maxRPM / 1000) / 2;
+        // lowPitchMax = (carController.maxRPM / 1000) / 2;
         
     }
 
