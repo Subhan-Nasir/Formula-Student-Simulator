@@ -90,8 +90,14 @@ public class Suspension{
     // tf, tr = front and rear track
 
     public static float elasticLoadTransferFront( float Kf, float Kr, float Mf, float Mr, float Hcg, float HrcF, float HrcR, float a, float tf){
-        float Welastic = (Kf/(Kf + Kr)) * ( (Mf * (Hcg - HrcF) + Mr * (Hcg -HrcR))*a/ tf);
+        float Welastic = (Kf/(Kf + Kr)) * ( (Mf * (Hcg - HrcF) + Mr * (Hcg -HrcR))*a/ tf);        
         return Welastic;
+    }
+
+    public static float transientElasticLoadTransfer(float rollStiffness, float rollAngle, float trackWidth){
+        float  Welastic = rollAngle*rollStiffness/trackWidth;
+        return Welastic;
+
     }
 
     public static float elasticLoadTransferRear(float Kf, float Kr, float Mf, float Mr, float Hcg, float HrcF, float HrcR, float a, float tr){
@@ -145,6 +151,8 @@ public class Suspension{
         return y;
 
     }
+
+
 
 
 

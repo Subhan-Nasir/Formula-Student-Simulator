@@ -74,6 +74,10 @@ public class drive_script : MonoBehaviour
     private float engineTorque;
     private float wheelTorque;
 
+    private Vector3 currentPosition;
+    private Vector3 previousPosition;
+    private Vector3 globalVelocity;
+    private Vector3 localVelocity;
 
 
     private void Awake(){
@@ -205,8 +209,25 @@ public class drive_script : MonoBehaviour
                 Debug.Log($"Timer = {theTime}");
         }
 
+        currentPosition = transform.position;
+        globalVelocity = (currentPosition - previousPosition)/Time.fixedDeltaTime;
+        float lateralVelocity = Vector3.Dot(globalVelocity, transform.right);       
+        
         
 
+
+        Debug.Log($"lateral velocity = {lateralVelocity}");
+        // Debug.Log($"position = {currentPosition}");
+
+        previousPosition = currentPosition;
+
+
+        
+
+    }
+    
+    void OnDrawGizmos(){
+        // Debug.DrawRay(transform.position, new Vector3(lateralVelocity,0,0));
     }
 
     // Function to drive the the car (accerlerate/decelerate and steer)
@@ -337,7 +358,7 @@ public class drive_script : MonoBehaviour
     }
 
    
-
+    
     
 
 

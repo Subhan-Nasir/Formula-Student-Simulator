@@ -13,7 +13,6 @@ public class RaycastController : MonoBehaviour{
     public bool enableTimer;
     
     [Header("Tokyo Drift Mode")]
-
     public bool tokyoDriftMode=false;
 
     [Header("Car Components ")]
@@ -116,7 +115,7 @@ public class RaycastController : MonoBehaviour{
     private Wheel[] wheels = new Wheel[4];
 
     [Header("Steering")]
-    public float steerAngle = 20f;
+    public float parallelSteerAngle = 20f;
     public float steerSpeed = 10f;
 
     private float wheel_x;
@@ -130,11 +129,21 @@ public class RaycastController : MonoBehaviour{
     private float steerAngleRight;
 
     
-    [Header("Ackermann Steering")]
-    public bool enableAckermannSteering = true;
+    [Header("Anti-Ackermann Steering")]
+    public bool enableAntiAckermann = true;
+    public float innerSteerAngle = 19;
+    public float outerSteerAngle = 23;
+
+    [Header("Load transfer")]
     public float wheelBase = 1.5f;
     public float rearTrack = 1.085f;
-    public float turnRadius = 3.14f;
+    // public float turnRadius = 3.14f;
+
+    [Header("Rack Travel (mm)")]   
+    public float maxRackTravel = 40;
+    private float rackTravel;
+
+
     private Vector3 steeringForce;
 
     private NewControls keys;
@@ -182,11 +191,11 @@ public class RaycastController : MonoBehaviour{
     private float geometricLoadTransferRear;
     private float longitudnialLoadTransfer;
 
-    private float totalLoadTransferFront;
-    private float totalLoadTransferRear;
+    private float lateralLoadTransferFront;
+    private float lateralLoadTransferRear;
     
-    private float rollCenterHeightFront; // 0.030602
-    private float rollCenterHeightRear; // 0.060289
+    private float rollCentreHeightFront; // 0.030602
+    private float rollCentreHeightRear; // 0.060289
 
     private float rollStiffnessFront;
     private float rollStiffnessRear;
@@ -205,6 +214,14 @@ public class RaycastController : MonoBehaviour{
     private float COMlongitudinalVelocity;
     private float COMlongitudinalVelocityPrevious;
     private float COMlongitudinalAcceleration;
+
+    private float wheelRateFL;
+    private float wheelRateFR;
+    private float wheelRateRL;
+    private float wheelRateRR;
+
+    private float[] wheelTravels = new float[4];
+
     // private float velocitySum = 0;
 
     // front: 1.055
@@ -214,6 +231,41 @@ public class RaycastController : MonoBehaviour{
     private History<Vector3> FLHistory = new History<Vector3>(3);
     private History<Vector3> FRHistory = new History<Vector3>(3);
 
+    private float totalLateralLoadTransferMeasured;
+    private float totalLateralLoadTransferTheoretical;
+
+    private float rollAngleFront;
+    private float rollAngleRear;
+
+    private Vector3[] currentPosition = new Vector3[4];
+    private Vector3[] previousPosition = new Vector3[4];
+    private Vector3[] globalVelocity = new Vector3[4];
+    private Vector3[] localVelocity = new Vector3[4];
+    private float[] lateralVelocity = new float[4];
+    
+    private Vector3 fLcurrentPosition;
+    private Vector3 fLpreviousPosition;
+    private Vector3 fLglobalVelocity;
+    private Vector3 fLlocalVelocity;
+    private float fLlateralVelocity;
+
+    private Vector3 fRcurrentPosition;
+    private Vector3 fRpreviousPosition;
+    private Vector3 fRglobalVelocity;
+    private Vector3 fRlocalVelocity;
+    private float fRlateralVelocity;
+
+    private Vector3 rLcurrentPosition;
+    private Vector3 rLpreviousPosition;
+    private Vector3 rLglobalVelocity;
+    private Vector3 rLlocalVelocity;
+    private float rLlateralVelocity;
+
+    private Vector3 rRcurrentPosition;
+    private Vector3 rRpreviousPosition;
+    private Vector3 rRglobalVelocity;
+    private Vector3 rRlocalVelocity;
+    private float rRlateralVelocity;
 
     void OnValidate(){
         keys = new NewControls();
@@ -297,13 +349,11 @@ public class RaycastController : MonoBehaviour{
         massFront = rb.mass *  Mathf.Abs((COM_Finder.transform.position.z - springs[2].transform.position.z)/(springs[0].transform.position.z - springs[2].transform.position.z));
         massRear = rb.mass *  Mathf.Abs((COM_Finder.transform.position.z - springs[0].transform.position.z)/(springs[0].transform.position.z - springs[2].transform.position.z));
 
-        rollCenterHeightFront = 0.030602f;
-        rollCenterHeightRear = 0.060289f;
-        rollStiffnessFront = 1;
-        rollStiffnessRear = 1;
-
         trackFront = Mathf.Abs(wheelObjects[1].transform.position.x - wheelObjects[0].transform.position.x);
         trackRear = Mathf.Abs(wheelObjects[3].transform.position.x - wheelObjects[2].transform.position.x);
+
+        rollStiffnessFront = Mathf.Pow(trackFront,2) * (frontSpringStiffness)/(360/Mathf.PI);
+        rollStiffnessRear =  Mathf.Pow(trackRear,2) * (rearSpringStiffness)/(360/Mathf.PI);
 
         baseLoadFront = massFront * 9.81f/2;
         baseLoadRear = massRear * 9.81f/2;
@@ -404,7 +454,6 @@ public class RaycastController : MonoBehaviour{
        
 
         ApplySteering();     
-         
     }
 
     void FixedUpdate(){
@@ -412,9 +461,16 @@ public class RaycastController : MonoBehaviour{
         Vector3 FLposition = FLHub.transform.localPosition;
         Vector3 FRposition = FRHub.transform.localPosition;
 
+        updateWheelTravels();
+        updateRackTravel();
+        updateWheelRates();
+        updateRollStiffnesses();
+        updateRollAngles();
+        updateLoadTransfers();
+        updateRollcentreHeights();
         updateCOMaccleerations();
         updateVerticalLoad();    
-
+        
         
         for(int i = 0; i<springs.Count; i++){   
 
@@ -462,15 +518,61 @@ public class RaycastController : MonoBehaviour{
         FL_LateralForce = wheels[0].lateralForce;
         RL_LateralForce = wheels[3].lateralForce;
         
-        
-    }
-    
+        // Debug.Log($"Vertical Loads = {wheels[0].verticalLoad}, {wheels[1].verticalLoad}, {wheels[2].verticalLoad}, {wheels[3].verticalLoad} , Front Load transfer = {totalLoadTransferFront}, Rear load transfer = {totalLoadTransferRear}");
+        // Debug.Log($"Elastic = {elasticLoadTransferFront}, geometric = {geometricLoadTransferFront} ");
+        // Debug.Log($"roll centre front = {rollCentreHeightFront}, roll centre rear = {rollCentreHeightRear} ");
+        // Debug.Log($"mass front = {massFront}, mass rear = {massRear}, lateral acc = {COMLateralAcceleration}, trackFront = {trackFront}, track rear = {trackRear}  ");
 
+        // Debug.Log($"measured = {totalLateralLoadTransferMeasured}, theoretical = {totalLateralLoadTransferTheoretical} ");
+        // Debug.Log($"front roll stiffness = {rollStiffnessFront}, rear roll stiffness = {rollStiffnessRear}");
+
+        // Debug.Log($"Roll angle front = {rollAngleFront}, roll angle rear = {rollAngleRear}");
+
+        
+
+
+    }
+
+    
+    void updateWheelTravels(){        
+        for(int i = 0; i<4; i++){
+            wheelTravels[i] = 1000 * (suspensions[i].naturalLength - suspensions[i].springLength); // mm
+        }
+    }
 
     void updateRollcentreHeights(){
-
         
+
+        float rollcentreFL = 29.05f - 0.03924f*(wheelTravels[0]) + 0.003029f*rackTravel - 0.0006878f*Mathf.Pow(wheelTravels[0],2) + 0.000353f*wheelTravels[0]*rackTravel - 0.0000917f*Mathf.Pow(rackTravel,2) + 8.601E-6f*Mathf.Pow(wheelTravels[0],3) + 1.04E-6f*(Mathf.Pow(wheelTravels[0],2))*rackTravel + 6.995E-6f*(wheelTravels[0]*Mathf.Pow(rackTravel,2)); 
+        float rollcentreFR =  29.05f - 0.03924f*(wheelTravels[1]) + 0.003029f*rackTravel - 0.0006878f*Mathf.Pow(wheelTravels[1],2) + 0.000353f*wheelTravels[1]*rackTravel - 0.0000917f*Mathf.Pow(rackTravel,2) + 8.601E-6f*Mathf.Pow(wheelTravels[1],3) + 1.04E-6f*(Mathf.Pow(wheelTravels[1],2))*rackTravel + 6.995E-6f*(wheelTravels[1]*Mathf.Pow(rackTravel,2));
+        float rollcentreRL = -0.0005f * Mathf.Pow(wheelTravels[2],2) - 1.2702f * wheelTravels[2] + 69.395f;
+        float rollcentreRR = -0.0005f * Mathf.Pow(wheelTravels[3],2) - 1.2702f * wheelTravels[3] + 69.395f;
+        
+        rollCentreHeightFront = (rollcentreFL + rollcentreFR)/2000; // average and conversion to metres 
+        rollCentreHeightRear = (rollcentreRL + rollcentreRR)/2000; // average and conversion to metres 
+
     }
+
+    void updateWheelRates(){
+        
+        wheelRateFL = 1000*(47.15f + 0.02513f*wheelTravels[0] + 0.003504f*rackTravel + 0.0008393f*Mathf.Pow(wheelTravels[0],2) + 0.0002012f*wheelTravels[0]*rackTravel + 0.0001072f*Mathf.Pow(rackTravel,2) - 4.053E-5f*Mathf.Pow(wheelTravels[0],3) - 5.693E-6f*Mathf.Pow(wheelTravels[0],2)*rackTravel + 5.118E-6f*wheelTravels[0]*Mathf.Pow(rackTravel,2)); 
+        wheelRateFR = 1000*(47.15f + 0.02513f*wheelTravels[1] + 0.003504f*rackTravel + 0.0008393f*Mathf.Pow(wheelTravels[1],2) + 0.0002012f*wheelTravels[1]*rackTravel + 0.0001072f*Mathf.Pow(rackTravel,2) - 4.053E-5f*Mathf.Pow(wheelTravels[1],3) - 5.693E-6f*Mathf.Pow(wheelTravels[1],2)*rackTravel + 5.118E-6f*wheelTravels[1]*Mathf.Pow(rackTravel,2)); 
+        wheelRateRL = 1000*(-4E-5f*Mathf.Pow(wheelTravels[2] ,3) + 0.0009f*Mathf.Pow(wheelTravels[2] ,2) - 0.029f*wheelTravels[2] + 41.945f);
+        wheelRateRR = 1000*(-4E-5f*Mathf.Pow(wheelTravels[3] ,3) + 0.0009f*Mathf.Pow(wheelTravels[3] ,2) - 0.029f*wheelTravels[3] + 41.945f);
+
+        suspensions[0].springStiffness = wheelRateFL;
+        suspensions[0].dampingCoefficient = wheelRateFL/10;
+        
+        suspensions[1].springStiffness = wheelRateFR;
+        suspensions[1].dampingCoefficient = wheelRateFR/10;
+        
+        suspensions[2].springStiffness = wheelRateRL;
+        suspensions[2].dampingCoefficient = wheelRateRL/10;
+
+        suspensions[3].springStiffness = wheelRateRR;
+        suspensions[3].dampingCoefficient = wheelRateRR/10;
+        
+    } 
 
 
     void updateCOMaccleerations(){        
@@ -480,20 +582,65 @@ public class RaycastController : MonoBehaviour{
         COMLateralVelocityPrevious = COMLateralVelocity;
         COMlongitudinalVelocityPrevious = COMlongitudinalVelocity;
 
-        // COMLateralVelocity = COM_Finder.transform.InverseTransformDirection(rb.GetPointVelocity(COM_Finder.transform.position)).x;
+        COMLateralVelocity = COM_Finder.transform.InverseTransformDirection(rb.GetPointVelocity(COM_Finder.transform.position)).x;
         // COMLateralVelocity = Mathf.Sign(steerInput) * Vector3.Project(rb.velocity, COM_Finder.transform.right.normalized).magnitude;
         // COMLateralVelocity = transform.InverseTransformDirection(rb.velocity).x;         
         // COMLateralVelocity = -Vector3.Dot(rb.velocity, transform.right.normalized);
 
-        Vector3 temp = new Vector3(-rb.velocity.x, rb.velocity.y, rb.velocity.z);
-        Vector3 rotatedVelocity = Quaternion.LookRotation(transform.right) * temp;
-        COMLateralVelocity = rotatedVelocity.z;
+        // Vector3 temp = new Vector3(-rb.velocity.x, rb.velocity.y, rb.velocity.z);
+        // Vector3 rotatedVelocity = Quaternion.LookRotation(transform.right) * temp;
+        // COMLateralVelocity = rotatedVelocity.z;
 
         COMlongitudinalVelocity = transform.InverseTransformDirection(rb.GetPointVelocity(COM_Finder.transform.position)).z;
-        float x =Vector3.Dot(rb.velocity, transform.right);
+
+        fLcurrentPosition = wheels[0].wheelObject.transform.position;
+        fLglobalVelocity = (fLcurrentPosition - fLpreviousPosition)/Time.fixedDeltaTime;
+        float fLlateralVelocity = Vector3.Dot(fLglobalVelocity, wheels[0].wheelObject.transform.right);
+        fLpreviousPosition = fLcurrentPosition;
+        // Debug.Log(fLlateralVelocity);
+
+        fRcurrentPosition = wheels[0].wheelObject.transform.position;
+        fRglobalVelocity = (fRcurrentPosition - fRpreviousPosition)/Time.fixedDeltaTime;
+        float fRlateralVelocity = Vector3.Dot(fRglobalVelocity, wheels[0].wheelObject.transform.right);
+        fRpreviousPosition = fRcurrentPosition;
+        // Debug.Log(fLlateralVelocity);
+
+        rLcurrentPosition = wheels[0].wheelObject.transform.position;
+        rLglobalVelocity = (rLcurrentPosition - rLpreviousPosition)/Time.fixedDeltaTime;
+        float rLlateralVelocity = Vector3.Dot(rLglobalVelocity, wheels[0].wheelObject.transform.right);
+        rLpreviousPosition = rLcurrentPosition;
+        // Debug.Log(fLlateralVelocityrR
+
+        rRcurrentPosition = wheels[0].wheelObject.transform.position;
+        rRglobalVelocity = (rRcurrentPosition - rRpreviousPosition)/Time.fixedDeltaTime;
+        float rRlateralVelocity = Vector3.Dot(rRglobalVelocity, wheels[0].wheelObject.transform.right);
+        rRpreviousPosition = rRcurrentPosition;
+        // Debug.Log(fLlateralVelocity);
+
+        COMLateralVelocity = -(fLlateralVelocity + fRlateralVelocity + rLlateralVelocity + rRlateralVelocity)/4;
+
+        Debug.Log($"average = {(fLlateralVelocity + fRlateralVelocity + rLlateralVelocity + rRlateralVelocity)/4}");
+
+        // for(int i = 0; i<4; i++){
+        //     currentPosition[i] = wheels[i].wheelObject.transform.position;
+        //     globalVelocity[i] = (currentPosition[i] - previousPosition[i])/Time.fixedDeltaTime;
+        //     lateralVelocity[i] = Vector3.Dot(globalVelocity[i], wheels[3].wheelObject.transform.right);
+        //     previousPosition[i] = currentPosition[i];
+        // }
+        
+        // float sum = 0;
+        // for( var i = 0; i < 4; i++) {
+        //     sum += lateralVelocity[i];
+        // }
+        // float average = sum / 4;
+
+
+        // Debug.Log($"lateral velocities = {lateralVelocity[0]}, {lateralVelocity[1]}, {lateralVelocity[2]}, {lateralVelocity[3]}, average = {average}");
+        // Debug.Log($"position = {currentPosition}");
+
         
 
-        Debug.Log($"Global velocity vector = {rb.velocity}, Local velocity vector = {x}");   
+                
        
         // COMLateralVelocity = rb.GetRelativePointVelocity(COM_Finder.transform.position).x;
         // COMlongitudinalVelocity = rb.GetRelativePointVelocity(COM_Finder.transform.position).z;
@@ -513,8 +660,13 @@ public class RaycastController : MonoBehaviour{
         COMLateralAcceleration = Mathf.Clamp(COMLateralAcceleration, -5,5);
         
         COMlongitudinalAcceleration = (COMlongitudinalVelocity -COMlongitudinalVelocityPrevious)/Time.fixedDeltaTime;
+        // Debug.Log($"Lateral velocity = {COMLateralVelocity}");
         
-        
+    }
+
+    void updateRollAngles(){
+        rollAngleFront = -Mathf.Rad2Deg * Mathf.Atan((wheelTravels[0] - wheelTravels[1])/1000*trackFront);
+        rollAngleRear =  -Mathf.Rad2Deg * Mathf.Atan((wheelTravels[2] - wheelTravels[3])/1000*trackRear);
     }
 
     void updateLoadTransfers(){
@@ -522,10 +674,11 @@ public class RaycastController : MonoBehaviour{
         elasticLoadTransferFront = Suspension.elasticLoadTransferFront(
             rollStiffnessFront,
             rollStiffnessRear,
-            massFront,massRear,
+            massFront,
+            massRear,
             COM_height,
-            rollCenterHeightFront,             
-            rollCenterHeightRear,
+            rollCentreHeightFront,             
+            rollCentreHeightRear,
             COMLateralAcceleration, 
             trackFront
         );
@@ -536,18 +689,26 @@ public class RaycastController : MonoBehaviour{
             massFront, 
             massRear, 
             COM_height, 
-            rollCenterHeightFront, 
-            rollCenterHeightRear, 
+            rollCentreHeightFront, 
+            rollCentreHeightRear, 
             COMLateralAcceleration, 
             trackRear
         );
 
-        geometricLoadTransferFront = Suspension.geometricLoadTransferFront(massFront, COMLateralAcceleration, rollCenterHeightFront, trackFront);
-        geometricLoadTransferRear = Suspension.geometricLoadTransferRear(massRear, COMLateralAcceleration, rollCenterHeightRear, trackRear);
+        // elasticLoadTransferFront = Suspension.transientElasticLoadTransfer(rollStiffnessFront, rollAngleFront, trackFront);
+        // elasticLoadTransferRear = Suspension.transientElasticLoadTransfer(rollStiffnessRear, rollAngleRear, trackRear);
+
+        geometricLoadTransferFront = Suspension.geometricLoadTransferFront(massFront, COMLateralAcceleration, rollCentreHeightFront, trackFront);
+        geometricLoadTransferRear = Suspension.geometricLoadTransferRear(massRear, COMLateralAcceleration, rollCentreHeightRear, trackRear);
+        
         longitudnialLoadTransfer = Suspension.LongitudinalLoadTransfer(rb.mass, COMlongitudinalAcceleration, COM_height, wheelBase);
         
-        totalLoadTransferFront = ( elasticLoadTransferFront + geometricLoadTransferFront);
-        totalLoadTransferRear = ( elasticLoadTransferRear + geometricLoadTransferRear);
+        lateralLoadTransferFront = ( elasticLoadTransferFront + geometricLoadTransferFront);
+        lateralLoadTransferRear = ( elasticLoadTransferRear + geometricLoadTransferRear);
+
+        totalLateralLoadTransferMeasured = lateralLoadTransferFront + lateralLoadTransferRear;
+        totalLateralLoadTransferTheoretical = (rb.mass * COMLateralAcceleration * COM_height)/(0.5f*(trackFront + trackRear));
+
         
     }
 
@@ -556,16 +717,16 @@ public class RaycastController : MonoBehaviour{
         for(int i = 0; i<4; i++){
             if(Mathf.Abs(COMLateralVelocity) >= 0f){
                 if(i == 0){
-                    verticalLoad = baseLoadFront + totalLoadTransferFront - longitudnialLoadTransfer;
+                    verticalLoad = baseLoadFront + lateralLoadTransferFront - longitudnialLoadTransfer;
                 }
                 else if( i == 1){
-                    verticalLoad = baseLoadFront - totalLoadTransferFront - longitudnialLoadTransfer;
+                    verticalLoad = baseLoadFront - lateralLoadTransferFront - longitudnialLoadTransfer;
                 }
                 else if(i == 2){
-                    verticalLoad = baseLoadRear + totalLoadTransferRear + longitudnialLoadTransfer;
+                    verticalLoad = baseLoadRear + lateralLoadTransferRear + longitudnialLoadTransfer;
                 }
                 else{
-                    verticalLoad = baseLoadRear - totalLoadTransferRear + longitudnialLoadTransfer;
+                    verticalLoad = baseLoadRear - lateralLoadTransferRear + longitudnialLoadTransfer;
                 }
 
             }
@@ -578,7 +739,12 @@ public class RaycastController : MonoBehaviour{
         }
     }
 
-    
+
+
+    void updateRollStiffnesses(){
+        rollStiffnessFront = Mathf.Pow(trackFront,2) * 0.5f*(wheelRateFL + wheelRateFR)/(360/Mathf.PI);
+        rollStiffnessRear =  Mathf.Pow(trackRear,2) *  0.5f*(wheelRateRL + wheelRateRR)/(360/Mathf.PI);
+    }
 
     void showTimer(){
         float carSpeed = rb.velocity.z;
@@ -649,39 +815,56 @@ public class RaycastController : MonoBehaviour{
 
     void ApplySteering(){
 
-         // Applies Ackermann sterring if it is enabled.
-        if(enableAckermannSteering){
-            //Steering right
-            if(steerInput > 0){
-                steerAngleLeft = Mathf.Rad2Deg * Mathf.Atan(wheelBase / (turnRadius - (rearTrack/2))) * steerInput;
-                steerAngleRight = Mathf.Rad2Deg * Mathf.Atan(wheelBase / (turnRadius + (rearTrack/2))) * steerInput;
+        // // Applies Ackermann sterring if it is enabled.
+        // if(enableAntiAckermann){
+        //     //Steering right
+        //     if(steerInput > 0){
+        //         steerAngleLeft = Mathf.Rad2Deg * Mathf.Atan(wheelBase / (turnRadius - (rearTrack/2))) * steerInput;
+        //         steerAngleRight = Mathf.Rad2Deg * Mathf.Atan(wheelBase / (turnRadius + (rearTrack/2))) * steerInput;
 
-            }//Steering left            
-            else if (steerInput < 0){
-                steerAngleLeft = Mathf.Rad2Deg * Mathf.Atan(wheelBase / (turnRadius + (rearTrack/2))) * steerInput;
-                steerAngleRight = Mathf.Rad2Deg * Mathf.Atan(wheelBase / (turnRadius - (rearTrack/2))) * steerInput;
+        //     }//Steering left            
+        //     else if (steerInput < 0){
+        //         steerAngleLeft = Mathf.Rad2Deg * Mathf.Atan(wheelBase / (turnRadius + (rearTrack/2))) * steerInput;
+        //         steerAngleRight = Mathf.Rad2Deg * Mathf.Atan(wheelBase / (turnRadius - (rearTrack/2))) * steerInput;
                 
 
-            } // Not steering
-            else{
-                steerAngleLeft = 0;
-                steerAngleRight = 0;
+        //     } // Not steering
+        //     else{
+        //         steerAngleLeft = 0;
+        //         steerAngleRight = 0;
 
-            }
+        //     }
             
+        // }
+        // // If Ackermann steering is disabled, both wheels have the same steer angle.
+        // else{
+
+        //     steerAngleLeft = steerAngle * steerInput;
+        //     steerAngleRight = steerAngle * steerInput;           
+
+        // }
+
+        
+        if(enableAntiAckermann){
+            if(steerInput >= 0){
+                steerAngleLeft = outerSteerAngle * steerInput;
+                steerAngleRight = innerSteerAngle * steerInput;
+            }
+            else{
+                steerAngleLeft = innerSteerAngle * steerInput;
+                steerAngleRight = outerSteerAngle * steerInput;
+            }
         }
-        // If Ackermann steering is disabled, both wheels have the same steer angle.
         else{
-
-            steerAngleLeft = steerAngle * steerInput;
-            steerAngleRight = steerAngle * steerInput;           
-
+            steerAngleLeft = parallelSteerAngle * steerInput;
+            steerAngleRight = parallelSteerAngle * steerInput;
         }
+        
 
         // wheelAngleLeft = Mathf.Lerp(wheelAngleLeft, steerAngleLeft, steerSpeed * Time.deltaTime);
         // wheelAngleRight = Mathf.Lerp(wheelAngleRight, steerAngleRight, steerSpeed * Time.deltaTime);
-        wheelAngleLeft=steerAngleRight;
-        wheelAngleRight=steerAngleLeft;
+        wheelAngleLeft=steerAngleLeft;
+        wheelAngleRight=steerAngleRight;
 
 
         wheelObjects[0].transform.localRotation = Quaternion.Euler(
@@ -696,6 +879,10 @@ public class RaycastController : MonoBehaviour{
 
     }
 
+    void updateRackTravel(){
+        rackTravel =  maxRackTravel * steerInput;       
+
+    }
 
     // Use these for the UI:
     public Suspension[] getSuspensions(){
