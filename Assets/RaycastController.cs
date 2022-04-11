@@ -706,15 +706,21 @@ public class RaycastController : MonoBehaviour{
 
 
         velocityVector = rb.GetPointVelocity(COM_Finder.transform.position);
-        accelerationVector = (velocityVector - previousVelocityVector)/Time.fixedDeltaTime;
-        float lateralAcceleration = Vector3.Dot(accelerationVector, transform.right.normalized);
-        float longitudinalAcceleration = Vector3.Dot(accelerationVector, transform.forward.normalized);
-        COMlongitudinalAcceleration = longitudinalAcceleration;
-        COMLateralAcceleration = lateralAcceleration;
+        accelerationVector = (velocityVector - previousVelocityVector)/Time.fixedDeltaTime;        
+
+        // COMLateralVelocity = Vector3.Dot(velocityVector, transform.right.normalized);
+        // COMlongitudinalVelocity = Vector3.Dot(velocityVector, transform.right.normalized);
+        
+        COMLateralAcceleration = Vector3.Dot(accelerationVector, transform.right.normalized);
+        COMlongitudinalAcceleration = Vector3.Dot(accelerationVector, transform.forward.normalized);
+
+
         previousVelocityVector = velocityVector;
 
+        // Debug.Log($"Longitudinal acceleration = {COMlongitudinalAcceleration}, lateral = {COMLateralAcceleration}");
+
         // Debug.Log($"Acceleration vector = ({accelerationVector.x}, {accelerationVector.y}, {accelerationVector.z})");
-        Debug.Log(lateralAcceleration);
+        
 
     }
 
@@ -763,25 +769,25 @@ public class RaycastController : MonoBehaviour{
         totalLateralLoadTransferMeasured = lateralLoadTransferFront + lateralLoadTransferRear;
         totalLateralLoadTransferTheoretical = (rb.mass * COMLateralAcceleration * COM_height)/(0.5f*(trackFront + trackRear));
 
-        // Debug.Log($"theoretical = {totalLateralLoadTransferTheoretical}, measured = {totalLateralLoadTransferMeasured}");
+        Debug.Log($"theoretical = {totalLateralLoadTransferTheoretical}, measured = {totalLateralLoadTransferMeasured}");
         
     }
 
     void updateVerticalLoad(){
         float verticalLoad;
         for(int i = 0; i<4; i++){
-            if(Mathf.Abs(COMLateralVelocity) >= 0f){
+            if(Mathf.Abs(COMLateralAcceleration) >= 0f){
                 if(i == 0){
-                    verticalLoad = baseLoadFront + lateralLoadTransferFront - longitudnialLoadTransfer;
-                }
-                else if( i == 1){
                     verticalLoad = baseLoadFront - lateralLoadTransferFront - longitudnialLoadTransfer;
                 }
+                else if( i == 1){
+                    verticalLoad = baseLoadFront + lateralLoadTransferFront - longitudnialLoadTransfer;
+                }
                 else if(i == 2){
-                    verticalLoad = baseLoadRear + lateralLoadTransferRear + longitudnialLoadTransfer;
+                    verticalLoad = baseLoadRear - lateralLoadTransferRear + longitudnialLoadTransfer;
                 }
                 else{
-                    verticalLoad = baseLoadRear - lateralLoadTransferRear + longitudnialLoadTransfer;
+                    verticalLoad = baseLoadRear + lateralLoadTransferRear + longitudnialLoadTransfer;
                 }
 
             }

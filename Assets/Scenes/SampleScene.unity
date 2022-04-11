@@ -5634,11 +5634,11 @@ MonoBehaviour:
   frontNaturalLength: 0.6
   frontSpringTravel: 0.1
   frontSpringStiffness: 20000
-  frontDampingCoefficient: 1000
+  frontDampingCoefficient: 2000
   rearNaturalLength: 0.6
   rearSpringTravel: 0.1
   rearSpringStiffness: 20000
-  rearDampingCoefficient: 1000
+  rearDampingCoefficient: 2000
   bumpStiffness: 100000
   bumpTravel: 0.05
   antiRollStiffness: 0
