@@ -48,8 +48,6 @@ public class RaycastController : MonoBehaviour{
     private float engineBraking;
 
 
-
-
     [Header("Centre of mass")]    
     public GameObject COM_Finder;
 
@@ -267,6 +265,14 @@ public class RaycastController : MonoBehaviour{
     private Vector3 rRlocalVelocity;
     private float rRlateralVelocity;
 
+    private History<float> lateralVelocityHisotry = new History<float>(5);
+    private float lateralV;
+    private float counter;
+
+    private Vector3 velocityVector;
+    private Vector3 previousVelocityVector;
+    private Vector3 accelerationVector;
+
     void OnValidate(){
         keys = new NewControls();
         rb.centerOfMass = COM_Finder.transform.localPosition;
@@ -339,9 +345,9 @@ public class RaycastController : MonoBehaviour{
        
         // cc=this;
         // rb.inertiaTensor = new Vector3(123.1586f,61.15857f,112f);
-        rb.inertiaTensor = new Vector3(350,350,350);
+        rb.inertiaTensor = new Vector3(250,250,75);
         // rb.inertiaTensorRotation = Quaternion.Euler(33.5407f,0,0);
-        rb.inertiaTensorRotation = Quaternion.Euler(350,350,350);
+        rb.inertiaTensorRotation = Quaternion.Euler(0,0,0);
 
         COM_height = COM_Finder.transform.position.y - transform.position.y;
 
@@ -575,93 +581,141 @@ public class RaycastController : MonoBehaviour{
     } 
 
 
-    void updateCOMaccleerations(){        
+    void updateCOMaccleerations(){       
+
+
         // COM_height = 0.252f;
         COM_height = COM_Finder.transform.position.y - transform.position.y;
 
-        COMLateralVelocityPrevious = COMLateralVelocity;
-        COMlongitudinalVelocityPrevious = COMlongitudinalVelocity;
+        // COMLateralVelocityPrevious = COMLateralVelocity;
+        // COMlongitudinalVelocityPrevious = COMlongitudinalVelocity;
 
-        COMLateralVelocity = COM_Finder.transform.InverseTransformDirection(rb.GetPointVelocity(COM_Finder.transform.position)).x;
-        // COMLateralVelocity = Mathf.Sign(steerInput) * Vector3.Project(rb.velocity, COM_Finder.transform.right.normalized).magnitude;
-        // COMLateralVelocity = transform.InverseTransformDirection(rb.velocity).x;         
-        // COMLateralVelocity = -Vector3.Dot(rb.velocity, transform.right.normalized);
+        // // COMLateralVelocity = COM_Finder.transform.InverseTransformDirection(rb.GetPointVelocity(COM_Finder.transform.position)).x;
+        // // COMLateralVelocity = Mathf.Sign(steerInput) * Vector3.Project(rb.velocity, COM_Finder.transform.right.normalized).magnitude;
+        // // COMLateralVelocity = transform.InverseTransformDirection(rb.velocity).x;         
+        // // COMLateralVelocity = -Vector3.Dot(rb.velocity, transform.right.normalized);
 
-        // Vector3 temp = new Vector3(-rb.velocity.x, rb.velocity.y, rb.velocity.z);
-        // Vector3 rotatedVelocity = Quaternion.LookRotation(transform.right) * temp;
-        // COMLateralVelocity = rotatedVelocity.z;
+        // // Vector3 temp = new Vector3(-rb.velocity.x, rb.velocity.y, rb.velocity.z);
+        // // Vector3 rotatedVelocity = Quaternion.LookRotation(transform.right) * temp;
+        // // COMLateralVelocity = rotatedVelocity.z;
 
-        COMlongitudinalVelocity = transform.InverseTransformDirection(rb.GetPointVelocity(COM_Finder.transform.position)).z;
+        // COMlongitudinalVelocity = transform.InverseTransformDirection(rb.GetPointVelocity(COM_Finder.transform.position)).z;
 
-        fLcurrentPosition = wheels[0].wheelObject.transform.position;
-        fLglobalVelocity = (fLcurrentPosition - fLpreviousPosition)/Time.fixedDeltaTime;
-        float fLlateralVelocity = Vector3.Dot(fLglobalVelocity, wheels[0].wheelObject.transform.right);
-        fLpreviousPosition = fLcurrentPosition;
-        // Debug.Log(fLlateralVelocity);
+        // // fLcurrentPosition = wheels[0].wheelObject.transform.position;
+        // // fLglobalVelocity = (fLcurrentPosition - fLpreviousPosition)/Time.fixedDeltaTime;
+        // // float fLlateralVelocity = Vector3.Dot(fLglobalVelocity, wheels[0].wheelObject.transform.right);
+        // // fLpreviousPosition = fLcurrentPosition;
+        // // // Debug.Log(fLlateralVelocity);
 
-        fRcurrentPosition = wheels[0].wheelObject.transform.position;
-        fRglobalVelocity = (fRcurrentPosition - fRpreviousPosition)/Time.fixedDeltaTime;
-        float fRlateralVelocity = Vector3.Dot(fRglobalVelocity, wheels[0].wheelObject.transform.right);
-        fRpreviousPosition = fRcurrentPosition;
-        // Debug.Log(fLlateralVelocity);
+        // // fRcurrentPosition = wheels[1].wheelObject.transform.position;
+        // // fRglobalVelocity = (fRcurrentPosition - fRpreviousPosition)/Time.fixedDeltaTime;
+        // // float fRlateralVelocity = Vector3.Dot(fRglobalVelocity, wheels[1].wheelObject.transform.right);
+        // // fRpreviousPosition = fRcurrentPosition;
+        // // // Debug.Log(fLlateralVelocity);
 
-        rLcurrentPosition = wheels[0].wheelObject.transform.position;
-        rLglobalVelocity = (rLcurrentPosition - rLpreviousPosition)/Time.fixedDeltaTime;
-        float rLlateralVelocity = Vector3.Dot(rLglobalVelocity, wheels[0].wheelObject.transform.right);
-        rLpreviousPosition = rLcurrentPosition;
-        // Debug.Log(fLlateralVelocityrR
+        // // rLcurrentPosition = wheels[2].wheelObject.transform.position;
+        // // rLglobalVelocity = (rLcurrentPosition - rLpreviousPosition)/Time.fixedDeltaTime;
+        // // float rLlateralVelocity = Vector3.Dot(rLglobalVelocity, wheels[2].wheelObject.transform.right);
+        // // rLpreviousPosition = rLcurrentPosition;
+        // // // Debug.Log(fLlateralVelocityrR
 
-        rRcurrentPosition = wheels[0].wheelObject.transform.position;
-        rRglobalVelocity = (rRcurrentPosition - rRpreviousPosition)/Time.fixedDeltaTime;
-        float rRlateralVelocity = Vector3.Dot(rRglobalVelocity, wheels[0].wheelObject.transform.right);
-        rRpreviousPosition = rRcurrentPosition;
-        // Debug.Log(fLlateralVelocity);
-
-        COMLateralVelocity = -(fLlateralVelocity + fRlateralVelocity + rLlateralVelocity + rRlateralVelocity)/4;
-
-        Debug.Log($"average = {(fLlateralVelocity + fRlateralVelocity + rLlateralVelocity + rRlateralVelocity)/4}");
-
-        // for(int i = 0; i<4; i++){
-        //     currentPosition[i] = wheels[i].wheelObject.transform.position;
-        //     globalVelocity[i] = (currentPosition[i] - previousPosition[i])/Time.fixedDeltaTime;
-        //     lateralVelocity[i] = Vector3.Dot(globalVelocity[i], wheels[3].wheelObject.transform.right);
-        //     previousPosition[i] = currentPosition[i];
-        // }
+        // // rRcurrentPosition = wheels[3].wheelObject.transform.position;
+        // // rRglobalVelocity = (rRcurrentPosition - rRpreviousPosition)/Time.fixedDeltaTime;
+        // // float rRlateralVelocity = Vector3.Dot(rRglobalVelocity, wheels[3].wheelObject.transform.right);
+        // // rRpreviousPosition = rRcurrentPosition;
+        // // // Debug.Log(fLlateralVelocity);
+        // // ///...
+        // // COMLateralVelocity = -(fLlateralVelocity + fRlateralVelocity + rLlateralVelocity + rRlateralVelocity)/4;
+        // // lateralVelocityHisotry.AddEntry(COMLateralVelocity);
         
-        // float sum = 0;
-        // for( var i = 0; i < 4; i++) {
-        //     sum += lateralVelocity[i];
-        // }
-        // float average = sum / 4;
+
+        // // for(int i = 0; i<4; i++){
+        // //     currentPosition[i] = wheels[i].wheelObject.transform.position;
+        // //     globalVelocity[i] = (currentPosition[i] - previousPosition[i])/Time.fixedDeltaTime;
+        // //     lateralVelocity[i] = Vector3.Dot(globalVelocity[i], wheels[3].wheelObject.transform.right);
+        // //     previousPosition[i] = currentPosition[i];
+        // // }
+        
+        // // float sum = 0;
+        // // for( var i = 0; i < 4; i++) {
+        // //     sum += lateralVelocity[i];
+        // // }
+        // // float average = sum / 4;
+
+        // // Debug.Log($"Average = {average}");
+        // // COMLateralVelocity = average;
 
 
-        // Debug.Log($"lateral velocities = {lateralVelocity[0]}, {lateralVelocity[1]}, {lateralVelocity[2]}, {lateralVelocity[3]}, average = {average}");
-        // Debug.Log($"position = {currentPosition}");
+
+        // // Debug.Log($"lateral velocities = {lateralVelocity[0]}, {lateralVelocity[1]}, {lateralVelocity[2]}, {lateralVelocity[3]}, average = {average}");
+        // // Debug.Log($"position = {currentPosition}");
 
         
 
                 
        
-        // COMLateralVelocity = rb.GetRelativePointVelocity(COM_Finder.transform.position).x;
-        // COMlongitudinalVelocity = rb.GetRelativePointVelocity(COM_Finder.transform.position).z;
+        // // COMLateralVelocity = rb.GetRelativePointVelocity(COM_Finder.transform.position).x;
+        // // COMlongitudinalVelocity = rb.GetRelativePointVelocity(COM_Finder.transform.position).z;
 
-        // velocitySum = 0;
-        // for(int i = 0; i<4; i++){
-        //     velocitySum += wheels[i].lateralVelocity;
+        // // velocitySum = 0;
+        // // for(int i = 0; i<4; i++){
+        // //     velocitySum += wheels[i].lateralVelocity;
 
-        // }
+        // // }
 
-        // COMLateralVelocity = velocitySum/4;
+        // // COMLateralVelocity = velocitySum/4;
      
-        // COMLateralVelocity = Vector3.Dot(rb.velocity, transform.right);
-        // COMlongitudinalVelocity = Vector3.Dot(rb.velocity, transform.forward);
+        // // COMLateralVelocity = Vector3.Dot(rb.velocity, transform.right);
+        // // COMlongitudinalVelocity = Vector3.Dot(rb.velocity, transform.forward);
 
-        COMLateralAcceleration = (COMLateralVelocity - COMLateralVelocityPrevious)/Time.fixedDeltaTime;
-        COMLateralAcceleration = Mathf.Clamp(COMLateralAcceleration, -5,5);
+        // // COMLateralAcceleration = (COMLateralVelocity - COMLateralVelocityPrevious)/Time.fixedDeltaTime;
+        // // COMLateralAcceleration = Mathf.Clamp(COMLateralAcceleration, -5,5);
+        // // float[] lateralVelocities = lateralVelocityHisotry.getArray();
+        // // // Debug.Log(lateralVelocities.Length);
+
+        // // if(Time.realtimeSinceStartup <= 1){
+        // //     COMLateralAcceleration = 0;
+        // // }
+        // // else{
+        // //     COMLateralAcceleration = (lateralVelocities[4] - lateralVelocities[0])/(4*Time.fixedDeltaTime);
+        // //     // COMLateralAcceleration = 0;
+        // // }
+
         
-        COMlongitudinalAcceleration = (COMlongitudinalVelocity -COMlongitudinalVelocityPrevious)/Time.fixedDeltaTime;
-        // Debug.Log($"Lateral velocity = {COMLateralVelocity}");
         
+        
+        
+        // COMlongitudinalAcceleration = (COMlongitudinalVelocity -COMlongitudinalVelocityPrevious)/Time.fixedDeltaTime;
+        // // Debug.Log($"Lateral velocity = {COMLateralVelocity}");
+        
+
+
+        // // Debug.Log($"acceleration = {COMLateralAcceleration}");
+        // // Debug.Log($"{lateralVelocities[0]}, {lateralVelocities[1]} ,{lateralVelocities[2]} ,{lateralVelocities[3]}, {lateralVelocities[4]}, ");
+
+        // // if(counter == 5){
+        // //     counter = 0;
+        // //     COMLateralAcceleration = (COMLateralVelocity - lateralV)/4*Time.fixedDeltaTime;
+        // //     lateralV = COMLateralVelocity;
+        // // }
+        // // else{
+        // //     counter += 1;            
+        // // }
+
+        // // Debug.Log($"lateral velocity = {COMLateralVelocity}, acceleration = {COMLateralAcceleration} ");
+
+
+        velocityVector = rb.GetPointVelocity(COM_Finder.transform.position);
+        accelerationVector = (velocityVector - previousVelocityVector)/Time.fixedDeltaTime;
+        float lateralAcceleration = Vector3.Dot(accelerationVector, transform.right.normalized);
+        float longitudinalAcceleration = Vector3.Dot(accelerationVector, transform.forward.normalized);
+        COMlongitudinalAcceleration = longitudinalAcceleration;
+        COMLateralAcceleration = lateralAcceleration;
+        previousVelocityVector = velocityVector;
+
+        // Debug.Log($"Acceleration vector = ({accelerationVector.x}, {accelerationVector.y}, {accelerationVector.z})");
+        Debug.Log(lateralAcceleration);
+
     }
 
     void updateRollAngles(){
@@ -671,32 +725,32 @@ public class RaycastController : MonoBehaviour{
 
     void updateLoadTransfers(){
 
-        elasticLoadTransferFront = Suspension.elasticLoadTransferFront(
-            rollStiffnessFront,
-            rollStiffnessRear,
-            massFront,
-            massRear,
-            COM_height,
-            rollCentreHeightFront,             
-            rollCentreHeightRear,
-            COMLateralAcceleration, 
-            trackFront
-        );
+        // elasticLoadTransferFront = Suspension.elasticLoadTransferFront(
+        //     rollStiffnessFront,
+        //     rollStiffnessRear,
+        //     massFront,
+        //     massRear,
+        //     COM_height,
+        //     rollCentreHeightFront,             
+        //     rollCentreHeightRear,
+        //     COMLateralAcceleration, 
+        //     trackFront
+        // );
 
-        elasticLoadTransferRear = Suspension.elasticLoadTransferRear(
-            rollStiffnessFront, 
-            rollStiffnessRear,
-            massFront, 
-            massRear, 
-            COM_height, 
-            rollCentreHeightFront, 
-            rollCentreHeightRear, 
-            COMLateralAcceleration, 
-            trackRear
-        );
+        // elasticLoadTransferRear = Suspension.elasticLoadTransferRear(
+        //     rollStiffnessFront, 
+        //     rollStiffnessRear,
+        //     massFront, 
+        //     massRear, 
+        //     COM_height, 
+        //     rollCentreHeightFront, 
+        //     rollCentreHeightRear, 
+        //     COMLateralAcceleration, 
+        //     trackRear
+        // );
 
-        // elasticLoadTransferFront = Suspension.transientElasticLoadTransfer(rollStiffnessFront, rollAngleFront, trackFront);
-        // elasticLoadTransferRear = Suspension.transientElasticLoadTransfer(rollStiffnessRear, rollAngleRear, trackRear);
+        elasticLoadTransferFront = Suspension.transientElasticLoadTransfer(rollStiffnessFront, rollAngleFront, trackFront);
+        elasticLoadTransferRear = Suspension.transientElasticLoadTransfer(rollStiffnessRear, rollAngleRear, trackRear);
 
         geometricLoadTransferFront = Suspension.geometricLoadTransferFront(massFront, COMLateralAcceleration, rollCentreHeightFront, trackFront);
         geometricLoadTransferRear = Suspension.geometricLoadTransferRear(massRear, COMLateralAcceleration, rollCentreHeightRear, trackRear);
@@ -709,6 +763,7 @@ public class RaycastController : MonoBehaviour{
         totalLateralLoadTransferMeasured = lateralLoadTransferFront + lateralLoadTransferRear;
         totalLateralLoadTransferTheoretical = (rb.mass * COMLateralAcceleration * COM_height)/(0.5f*(trackFront + trackRear));
 
+        // Debug.Log($"theoretical = {totalLateralLoadTransferTheoretical}, measured = {totalLateralLoadTransferMeasured}");
         
     }
 
