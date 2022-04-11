@@ -273,6 +273,8 @@ public class RaycastController : MonoBehaviour{
     private Vector3 previousVelocityVector;
     private Vector3 accelerationVector;
 
+    private float previousLongitudinalLoadTransfer;
+
     void OnValidate(){
         keys = new NewControls();
         rb.centerOfMass = COM_Finder.transform.localPosition;
@@ -762,7 +764,8 @@ public class RaycastController : MonoBehaviour{
         geometricLoadTransferRear = Suspension.geometricLoadTransferRear(massRear, COMLateralAcceleration, rollCentreHeightRear, trackRear);
         
         longitudnialLoadTransfer = Suspension.LongitudinalLoadTransfer(rb.mass, COMlongitudinalAcceleration, COM_height, wheelBase);
-        
+        // longitudnialLoadTransfer = Mathf.Lerp(previousLongitudinalLoadTransfer, longitudnialLoadTransfer, 0.002f);
+
         lateralLoadTransferFront = ( elasticLoadTransferFront + geometricLoadTransferFront);
         lateralLoadTransferRear = ( elasticLoadTransferRear + geometricLoadTransferRear);
 
@@ -770,6 +773,8 @@ public class RaycastController : MonoBehaviour{
         totalLateralLoadTransferTheoretical = (rb.mass * COMLateralAcceleration * COM_height)/(0.5f*(trackFront + trackRear));
 
         Debug.Log($"theoretical = {totalLateralLoadTransferTheoretical}, measured = {totalLateralLoadTransferMeasured}");
+
+        previousLongitudinalLoadTransfer = longitudnialLoadTransfer;
         
     }
 
