@@ -40,7 +40,7 @@ public class FLUI : MonoBehaviour{
             }  
 
             if (torqueLabel != null){
-                torqueLabel.text = Math.Round(wheelsList[i].torque,1).ToString();
+                torqueLabel.text = Math.Round(wheelsList[i].feedbackTorque,1).ToString();
             }  
 
             if (forceLabel != null){

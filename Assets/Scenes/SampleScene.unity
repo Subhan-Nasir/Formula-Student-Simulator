@@ -11779,7 +11779,7 @@ MonoBehaviour:
   - 1.33
   primaryGearRatio: 2.111
   finalDriveRatio: 4.67
-  idleRPM: 1500
+  idleRPM: 0
   maxRPM: 14000
   auxillaryLoss: 0.15
   maxEngineBrakingTorque: 5
@@ -11803,8 +11803,8 @@ MonoBehaviour:
   parallelSteerAngle: 20
   steerSpeed: 1
   enableAntiAckermann: 1
-  innerSteerAngle: 25
-  outerSteerAngle: 30
+  innerSteerAngle: 40
+  outerSteerAngle: 45
   wheelBase: 1.55
   rearTrack: 1.085
   maxRackTravel: 40

@@ -24,7 +24,7 @@ public class RaycastController : MonoBehaviour{
     public GameObject FLHub;
     public GameObject FRHub;
     // public static RaycastController cc;
-
+    
     [Header("Engine")]
     public AnimationCurve engineCurve;
 
@@ -275,6 +275,9 @@ public class RaycastController : MonoBehaviour{
 
     private float previousLongitudinalLoadTransfer;
 
+    private bool gearDelayOn = false;
+    private float gearDelayTimer = 0;
+
     void OnValidate(){
         keys = new NewControls();
         rb.centerOfMass = COM_Finder.transform.localPosition;
@@ -285,7 +288,7 @@ public class RaycastController : MonoBehaviour{
         for (int i = 0; i < 4; i++){
             
             // suspensions[i] = new Suspension(i, naturalLength, springTravel, springStiffness, dampingCoefficient, bumpStiffness, bumpTravel, wheelRadius);                     
-            wheels[i] = new Wheel(i, wheelObjects[i], meshes[i], rb, wheelRadius, wheelMass, brakeBias, totalDrivetrainInertia, tyreEfficiency, longitudinalConstants, lateralConstants);
+            wheels[i] = new Wheel(i, wheelObjects[i], meshes[i], rb, wheelRadius, wheelMass, brakeBias, totalDrivetrainInertia,idleRPM, maxRPM, tyreEfficiency, longitudinalConstants, lateralConstants);
             
             if(i == 0| i == 1){
                 suspensions[i] = new Suspension(i, frontNaturalLength, frontSpringTravel, frontSpringStiffness, frontDampingCoefficient, bumpStiffness, bumpTravel, wheelRadius);
@@ -418,11 +421,15 @@ public class RaycastController : MonoBehaviour{
         if(shiftUp == 1 & gearTimer > 0.2f){
             currentGear += 1;
             gearTimer = 0;
+            gearDelayOn = true;
+            
                      
         }
         else if(shiftDown == 1 & gearTimer > 0.2f){
             currentGear -= 1;
             gearTimer = 0;
+            gearDelayOn = true;
+            
                        
         }
         else{
@@ -450,12 +457,22 @@ public class RaycastController : MonoBehaviour{
         gearTimer += Time.deltaTime;
         brakeBiasTimer += Time.deltaTime;
 
+        if(gearDelayOn == true){
+            gearDelayTimer += Time.deltaTime;
+            userInput = -brake; // allows brake but no throttle
+        }
+
+        if(gearDelayTimer >= 0.2f){
+            gearDelayOn = false;
+            gearDelayTimer = 0;
+        }
+
 
         currentGear = Mathf.Clamp(currentGear, 1,5);
 
 
         
-        engineRPM = Mathf.Clamp(engineRPM, idleRPM, 14000);
+        engineRPM = Mathf.Clamp(engineRPM, idleRPM, maxRPM);
 
         engineTorque = (1-auxillaryLoss) * (engineCurve.Evaluate(engineRPM) * userInput);
         engineBraking = maxEngineBrakingTorque * (1 - userInput);      
@@ -502,6 +519,10 @@ public class RaycastController : MonoBehaviour{
                 if(currentGear != 0){
                     engineRPM = averageRearRPM * (gearRatios[currentGear + 1] * primaryGearRatio * finalDriveRatio);
                 }
+
+                engineRPM = Mathf.Clamp(engineRPM, idleRPM, 14000);
+
+
                 // Debug.Log($"Engine RPM = {engineRPM}, Engine Torque = {engineTorque}, Current Gear = {currentGear}, User Input = {userInput}");
                                 
             }
@@ -772,7 +793,7 @@ public class RaycastController : MonoBehaviour{
         totalLateralLoadTransferMeasured = lateralLoadTransferFront + lateralLoadTransferRear;
         totalLateralLoadTransferTheoretical = (rb.mass * COMLateralAcceleration * COM_height)/(0.5f*(trackFront + trackRear));
 
-        Debug.Log($"theoretical = {totalLateralLoadTransferTheoretical}, measured = {totalLateralLoadTransferMeasured}");
+        // Debug.Log($"theoretical = {totalLateralLoadTransferTheoretical}, measured = {totalLateralLoadTransferMeasured}");
 
         previousLongitudinalLoadTransfer = longitudnialLoadTransfer;
         

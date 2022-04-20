@@ -41,6 +41,9 @@ public class Wheel{
 
     public float lateralForce; //Sideways direction    
     public float longitudinalForce; // Forwards direction
+
+    public float engineIdleRPM;
+    public float engineMaxRPM;
     
     public Vector3 forceVector;
 
@@ -70,9 +73,10 @@ public class Wheel{
     public float verticalLoad;
     public float tyreEfficiency;
     
+    public float feedbackTorque;
 
 
-    public Wheel(float id, GameObject wheelObject, GameObject wheelMesh, Rigidbody rb, float wheelRadius, float wheelMass, float brakeBias, float totalDrivetrainInertia, float tyreEfficiency, Dictionary<string, float> longitudinalConstants, Dictionary<string, float> lateralConstants){
+    public Wheel(float id, GameObject wheelObject, GameObject wheelMesh, Rigidbody rb, float wheelRadius, float wheelMass, float brakeBias, float totalDrivetrainInertia, float engineIdleRPM, float engineMaxRPM, float tyreEfficiency, Dictionary<string, float> longitudinalConstants, Dictionary<string, float> lateralConstants){
         this.id = id;
         this.wheelObject = wheelObject;
         this.wheelMesh = wheelMesh;
@@ -82,6 +86,8 @@ public class Wheel{
         this.momentOfInertia = 0.5f * wheelMass * Mathf.Pow(wheelRadius, 2);
         this.brakeBias = brakeBias;
         this.totalDrivetrainInertia = totalDrivetrainInertia;
+        this.engineIdleRPM = engineIdleRPM;
+        this.engineMaxRPM = engineMaxRPM;
         this.tyreEfficiency = tyreEfficiency;
 
 
@@ -231,7 +237,8 @@ public class Wheel{
 
         // torque = engineTorque -getRollingResistance(verticalLoad, omega, wheelRadius, rrCoefficient) + brakingTorque - longitudinalForce*wheelRadius;
         
-        torque = wheelTorque + rollingResistance + brakingTorque; //- longitudinalForce*wheelRadius;
+        feedbackTorque = rollingResistance + brakingTorque - longitudinalForce*wheelRadius;
+        torque = wheelTorque + feedbackTorque;
         // Debug.Log($" Wheel ID: {id}, Torque = {torque}, wheelTorque = {wheelTorque}, rolling reisistance = {rollingResistance}, braking torque = {brakingTorque}, long force * wheel radius = {longitudinalForce*wheelRadius}");
 
         
@@ -267,7 +274,7 @@ public class Wheel{
         
         if(userInput >=0){
             if(id == 2 | id == 3){
-                omega = Mathf.Clamp(omega, (1/9.5493f) * 1650/(currentGearRatio * finalDriveRatio * primaryGearRatio), (1/9.5493f) * 14000/(currentGearRatio * finalDriveRatio * primaryGearRatio));
+                omega = Mathf.Clamp(omega, (1/9.5493f) * engineIdleRPM/(currentGearRatio * finalDriveRatio * primaryGearRatio), (1/9.5493f) * engineMaxRPM/(currentGearRatio * finalDriveRatio * primaryGearRatio));
             }
             else{
                 omega = Mathf.Clamp(omega, -100000000f,10000000000f);
@@ -313,6 +320,11 @@ public class Wheel{
         
         // Debug.Log($" Wheel id = {id}, Limits = ({fLongLimit},{fLatLimit}), Dynamic Limits = ({fLongDynamicLimit},{fLatDynamicLimit}), Forces = ({longitudinalForce},{lateralForce}), Load = {verticalLoad}");
         // Debug.Log($"Wheel id = {id}, Longitudinal Velocity = {longitudinalVelocity}, Lateral Velocity = {lateralVelocity}, slip ratio = {slipRatio}, slip angle = {slipAngle}");
+
+
+        if(id == 2 | id == 3){
+            Debug.Log($"ID = {id}, Rolling resistance = {rollingResistance}, Pacejka Torque = {-longitudinalForce*wheelRadius}, slip ratio = {slipRatio}");
+        }
 
 
         return forceVector;
