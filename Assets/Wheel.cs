@@ -231,7 +231,7 @@ public class Wheel{
 
         // torque = engineTorque -getRollingResistance(verticalLoad, omega, wheelRadius, rrCoefficient) + brakingTorque - longitudinalForce*wheelRadius;
         
-        torque = wheelTorque + rollingResistance + brakingTorque - longitudinalForce*wheelRadius;
+        torque = wheelTorque + rollingResistance + brakingTorque; //- longitudinalForce*wheelRadius;
         // Debug.Log($" Wheel ID: {id}, Torque = {torque}, wheelTorque = {wheelTorque}, rolling reisistance = {rollingResistance}, braking torque = {brakingTorque}, long force * wheel radius = {longitudinalForce*wheelRadius}");
 
         
