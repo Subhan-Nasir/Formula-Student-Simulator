@@ -47,6 +47,20 @@ public class RaycastController : MonoBehaviour{
     private float wheelTorque;
     private float engineBraking;
 
+    [Header("Differential")]
+    public float TBR = 2.9f; 
+    public float diffPreLoadTorque = 10;
+    
+
+    
+
+    private float diffHousingTorque; 
+    private float differentialTorque;
+    private float lockingCoefficient;
+    private float criticalHousingTorque;
+
+
+
 
     [Header("Centre of mass")]    
     public GameObject COM_Finder;
@@ -494,7 +508,10 @@ public class RaycastController : MonoBehaviour{
         updateLoadTransfers();
         updateRollcentreHeights();
         updateCOMaccleerations();
-        updateVerticalLoad();    
+        updateVerticalLoad();
+        calculateDiffTorques();
+
+       
         
         
         for(int i = 0; i<springs.Count; i++){   
@@ -547,16 +564,7 @@ public class RaycastController : MonoBehaviour{
         FL_LateralForce = wheels[0].lateralForce;
         RL_LateralForce = wheels[3].lateralForce;
         
-        // Debug.Log($"Vertical Loads = {wheels[0].verticalLoad}, {wheels[1].verticalLoad}, {wheels[2].verticalLoad}, {wheels[3].verticalLoad} , Front Load transfer = {totalLoadTransferFront}, Rear load transfer = {totalLoadTransferRear}");
-        // Debug.Log($"Elastic = {elasticLoadTransferFront}, geometric = {geometricLoadTransferFront} ");
-        // Debug.Log($"roll centre front = {rollCentreHeightFront}, roll centre rear = {rollCentreHeightRear} ");
-        // Debug.Log($"mass front = {massFront}, mass rear = {massRear}, lateral acc = {COMLateralAcceleration}, trackFront = {trackFront}, track rear = {trackRear}  ");
-
-        // Debug.Log($"measured = {totalLateralLoadTransferMeasured}, theoretical = {totalLateralLoadTransferTheoretical} ");
-        // Debug.Log($"front roll stiffness = {rollStiffnessFront}, rear roll stiffness = {rollStiffnessRear}");
-
-        // Debug.Log($"Roll angle front = {rollAngleFront}, roll angle rear = {rollAngleRear}");
-
+       
         
 
 
@@ -832,6 +840,55 @@ public class RaycastController : MonoBehaviour{
         rollStiffnessFront = Mathf.Pow(trackFront,2) * 0.5f*(wheelRateFL + wheelRateFR)/(360/Mathf.PI);
         rollStiffnessRear =  Mathf.Pow(trackRear,2) *  0.5f*(wheelRateRL + wheelRateRR)/(360/Mathf.PI);
     }
+
+    void calculateDiffTorques(){
+        diffHousingTorque = wheels[2].feedbackTorque + wheels[3].feedbackTorque;
+        differentialTorque = wheels[2].feedbackTorque - wheels[3].feedbackTorque;
+        lockingCoefficient = (TBR - 1)/(TBR+1);
+        criticalHousingTorque = diffPreLoadTorque/lockingCoefficient;
+
+        float feedbackRL= wheels[2].feedbackTorque;
+        float feedbackRR = wheels[3].feedbackTorque;
+
+        if(Mathf.Abs(diffHousingTorque) <= criticalHousingTorque){
+            // Regime 1
+            Debug.Log("REGIME 1");
+            if( Mathf.Abs(feedbackRL) <= Mathf.Abs(feedbackRR)){
+                wheels[3].diffLongForceLimit = (feedbackRL + Mathf.Sign(feedbackRL)*diffPreLoadTorque - wheels[3].rollingResistance - wheels[3].brakingTorque)/-wheelRadius;
+
+            }
+            else{
+
+                wheels[2].diffLongForceLimit = (feedbackRR + Mathf.Sign(feedbackRR)*diffPreLoadTorque - wheels[2].rollingResistance - wheels[2].brakingTorque)/-wheelRadius;
+
+            }
+
+        }
+        else{
+            // Regime 2
+            Debug.Log("REGIME 2");
+            if( Mathf.Abs(feedbackRL) <=  Mathf.Abs(feedbackRR)){
+                wheels[3].diffLongForceLimit = (feedbackRL *  TBR - wheels[3].rollingResistance - wheels[3].brakingTorque)/-wheelRadius;
+                wheels[2].diffLongForceLimit = 1000000;
+
+            }
+            else{
+                wheels[2].diffLongForceLimit = (feedbackRR *  TBR - wheels[2].rollingResistance - wheels[2].brakingTorque)/-wheelRadius;
+                wheels[3].diffLongForceLimit = 1000000;
+
+            }
+
+
+
+        }
+
+        Debug.Log($"Differential torque = {differentialTorque}, L/R = {feedbackRL/feedbackRR}, R/L = {feedbackRR/feedbackRL}");
+
+    
+
+
+    }
+
 
     void showTimer(){
         float carSpeed = rb.velocity.z;

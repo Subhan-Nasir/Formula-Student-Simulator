@@ -367,7 +367,7 @@ GameObject:
   - component: {fileID: 41388372}
   - component: {fileID: 41388371}
   m_Layer: 5
-  m_Name: Torque
+  m_Name: Feedback Torque
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -389,7 +389,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -30, y: 38}
+  m_AnchoredPosition: {x: -30, y: 53}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &41388371
@@ -414,10 +414,10 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 14
+    m_FontSize: 12
     m_FontStyle: 1
     m_BestFit: 0
-    m_MinSize: 10
+    m_MinSize: 1
     m_MaxSize: 40
     m_Alignment: 0
     m_AlignByGeometry: 0
@@ -425,7 +425,9 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Torque (Nm) |
+  m_Text: 'Feedback     |
+
+    Torque (Nm) |'
 --- !u!222 &41388372
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -700,7 +702,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -187, y: 39}
+  m_AnchoredPosition: {x: -187, y: 54.000023}
   m_SizeDelta: {x: 100, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &101189467
@@ -2629,6 +2631,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: CamParent
       objectReference: {fileID: 0}
+    - target: {fileID: 114076, guid: 1a9dca02feba5a740a65aa80ccaa457e, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 406594, guid: 1a9dca02feba5a740a65aa80ccaa457e, type: 3}
       propertyPath: m_RootOrder
       value: 8
@@ -2758,7 +2764,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 423, y: -76}
+  m_AnchoredPosition: {x: 423, y: -82}
   m_SizeDelta: {x: 750, y: 120}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &595942831
@@ -3457,7 +3463,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 705593908}
-  m_LocalRotation: {x: 0.29742217, y: -0.00000002845365, z: 0.000000008863871, w: 0.95474607}
+  m_LocalRotation: {x: 0.2974222, y: 6.7626777e-16, z: -3.9955624e-16, w: 0.95474607}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
@@ -3563,8 +3569,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 745512037}
-  m_LocalRotation: {x: 0.27032733, y: 0.000000016568405, z: -0.0000000046505697, w: 0.9627685}
-  m_LocalPosition: {x: 0, y: 1.7249999, z: -3.5270004}
+  m_LocalRotation: {x: 0.27032733, y: -0.000000016559435, z: 0.0000000046480495, w: 0.9627685}
+  m_LocalPosition: {x: 0, y: 1.7249999, z: -3.4300003}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 5039732436107993122}
@@ -4139,7 +4145,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 63, y: 38}
+  m_AnchoredPosition: {x: 63, y: 53.000023}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &895209004
@@ -4218,7 +4224,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -115, y: 39}
+  m_AnchoredPosition: {x: -115, y: 54.000023}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &907505742
@@ -5630,6 +5636,8 @@ MonoBehaviour:
   auxillaryLoss: 0.15
   maxEngineBrakingTorque: 5
   totalDrivetrainInertia: 17
+  TBR: 2.9
+  diffPreLoadTorque: 10
   COM_Finder: {fileID: 490260644}
   frontNaturalLength: 0.6
   frontSpringTravel: 0.1
@@ -6120,7 +6128,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 304, y: 37}
+  m_AnchoredPosition: {x: 304, y: 52.000023}
   m_SizeDelta: {x: 100, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1258519357
@@ -6156,7 +6164,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Omega |
+  m_Text: "Omega\n |"
 --- !u!222 &1258519358
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -6272,7 +6280,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1286713358}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.7249999, z: -3.5270004}
+  m_LocalPosition: {x: 0, y: 1.7249999, z: -3.4300003}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 705593909}
@@ -7821,7 +7829,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1545108228}
-  m_LocalRotation: {x: 0.24319059, y: 0.00000000834489, z: -0.0000000020922097, w: 0.9699786}
+  m_LocalRotation: {x: 0.24319059, y: -0.000000008423932, z: 0.0000000021120268, w: 0.9699786}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
@@ -8534,7 +8542,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 399, y: 37}
+  m_AnchoredPosition: {x: 399, y: 52.000023}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1701752254
@@ -8603,7 +8611,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1737950189}
-  m_LocalRotation: {x: 0.2703273, y: 0.000000016565773, z: -0.000000004651357, w: 0.9627685}
+  m_LocalRotation: {x: 0.2703273, y: -0.000000016556799, z: 0.000000004648838, w: 0.9627685}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
@@ -8687,7 +8695,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 205, y: 37}
+  m_AnchoredPosition: {x: 205, y: 52.000023}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1747923117
@@ -11779,11 +11787,13 @@ MonoBehaviour:
   - 1.33
   primaryGearRatio: 2.111
   finalDriveRatio: 4.67
-  idleRPM: 0
+  idleRPM: 1500
   maxRPM: 14000
   auxillaryLoss: 0.15
   maxEngineBrakingTorque: 5
   totalDrivetrainInertia: 17
+  TBR: 2.9
+  diffPreLoadTorque: 10
   COM_Finder: {fileID: 719475414}
   frontNaturalLength: 0.4
   frontSpringTravel: 0.1
@@ -11799,12 +11809,12 @@ MonoBehaviour:
   wheelRadius: 0.22
   wheelMass: 5
   brakeBias: 0.6
-  tyreEfficiency: 0.7
+  tyreEfficiency: 1
   parallelSteerAngle: 20
   steerSpeed: 1
   enableAntiAckermann: 1
-  innerSteerAngle: 40
-  outerSteerAngle: 45
+  innerSteerAngle: 19
+  outerSteerAngle: 23
   wheelBase: 1.55
   rearTrack: 1.085
   maxRackTravel: 40

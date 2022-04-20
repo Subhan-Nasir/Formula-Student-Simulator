@@ -74,6 +74,7 @@ public class Wheel{
     public float tyreEfficiency;
     
     public float feedbackTorque;
+    public float diffLongForceLimit = 1000000;
 
 
     public Wheel(float id, GameObject wheelObject, GameObject wheelMesh, Rigidbody rb, float wheelRadius, float wheelMass, float brakeBias, float totalDrivetrainInertia, float engineIdleRPM, float engineMaxRPM, float tyreEfficiency, Dictionary<string, float> longitudinalConstants, Dictionary<string, float> lateralConstants){
@@ -313,6 +314,11 @@ public class Wheel{
             lateralForce = 0;
         }
 
+        if(id == 2| id == 3){
+            longitudinalForce = Mathf.Clamp(longitudinalForce, -Mathf.Abs(diffLongForceLimit), Mathf.Abs(diffLongForceLimit));
+        }
+        
+
         forceVector = longitudinalForce * wheelObject.transform.forward + lateralForce * wheelObject.transform.right;
         
        
@@ -322,9 +328,7 @@ public class Wheel{
         // Debug.Log($"Wheel id = {id}, Longitudinal Velocity = {longitudinalVelocity}, Lateral Velocity = {lateralVelocity}, slip ratio = {slipRatio}, slip angle = {slipAngle}");
 
 
-        if(id == 2 | id == 3){
-            Debug.Log($"ID = {id}, Rolling resistance = {rollingResistance}, Pacejka Torque = {-longitudinalForce*wheelRadius}, slip ratio = {slipRatio}");
-        }
+        
 
 
         return forceVector;
