@@ -21,7 +21,8 @@ public class Wheel{
     public float wheelRadius;
     public float wheelMass;
     public float momentOfInertia;
-    public float totalDrivetrainInertia;  
+    public float drivetrainInertia;  
+    
     public float rrCoefficient = 0.0003f;
 
     // public static Wheel wc;
@@ -74,10 +75,13 @@ public class Wheel{
     public float tyreEfficiency;
     
     public float feedbackTorque;
-    public float diffLongForceLimit = 1000000;
+    // public float diffLongForceLimit = 1000000;
+
+    // public bool lockedDiff = false;
+    // public float diffControlledOmega;
 
 
-    public Wheel(float id, GameObject wheelObject, GameObject wheelMesh, Rigidbody rb, float wheelRadius, float wheelMass, float brakeBias, float totalDrivetrainInertia, float engineIdleRPM, float engineMaxRPM, float tyreEfficiency, Dictionary<string, float> longitudinalConstants, Dictionary<string, float> lateralConstants){
+    public Wheel(float id, GameObject wheelObject, GameObject wheelMesh, Rigidbody rb, float wheelRadius, float wheelMass, float brakeBias, float drivetrainInertia, float engineIdleRPM, float engineMaxRPM, float tyreEfficiency, Dictionary<string, float> longitudinalConstants, Dictionary<string, float> lateralConstants){
         this.id = id;
         this.wheelObject = wheelObject;
         this.wheelMesh = wheelMesh;
@@ -86,7 +90,7 @@ public class Wheel{
         this.wheelMass = wheelMass;
         this.momentOfInertia = 0.5f * wheelMass * Mathf.Pow(wheelRadius, 2);
         this.brakeBias = brakeBias;
-        this.totalDrivetrainInertia = totalDrivetrainInertia;
+        this.drivetrainInertia = drivetrainInertia;
         this.engineIdleRPM = engineIdleRPM;
         this.engineMaxRPM = engineMaxRPM;
         this.tyreEfficiency = tyreEfficiency;
@@ -106,6 +110,11 @@ public class Wheel{
         this.E_lat = lateralConstants["E"];
         this.c_lat = lateralConstants["c"];
         this.m_lat = lateralConstants["m"];
+
+        // if(id == 2| id == 3){
+        //     lockedDiff = true;
+        // }
+        
               
 
     }
@@ -197,15 +206,6 @@ public class Wheel{
         fLongDynamicLimit = dynamicPeakLongitudinal(lateralForce, fLongLimit, fLatLimit);
         fLatDynamicLimit = dynamicPeakLateral(longitudinalForce, fLongLimit, fLatLimit);
 
-        // if((id == 2 | id == 3) & userInput >=0){
-        //     engineTorque = 100 * userInput;
-            
-        // }
-        // else{
-        //     engineTorque = 0;
-        // }
-
-
         if(userInput <0){
             if(Mathf.Abs(longitudinalVelocity) > 1){
                 if(id == 2 | id == 3){
@@ -235,17 +235,11 @@ public class Wheel{
         }
      
         rollingResistance = -getRollingResistance(verticalLoad, omega, wheelRadius, rrCoefficient);
-
-        // torque = engineTorque -getRollingResistance(verticalLoad, omega, wheelRadius, rrCoefficient) + brakingTorque - longitudinalForce*wheelRadius;
-        
         feedbackTorque = rollingResistance + brakingTorque - longitudinalForce*wheelRadius;
         torque = wheelTorque + feedbackTorque;
-        // Debug.Log($" Wheel ID: {id}, Torque = {torque}, wheelTorque = {wheelTorque}, rolling reisistance = {rollingResistance}, braking torque = {brakingTorque}, long force * wheel radius = {longitudinalForce*wheelRadius}");
-
-        
-        
+                
         if(id == 2| id == 3){
-            alpha = torque / totalDrivetrainInertia;
+            alpha = torque /(drivetrainInertia + momentOfInertia);
         }
         else{
             alpha = torque/momentOfInertia;
@@ -253,26 +247,13 @@ public class Wheel{
          
 
         omega += alpha * timeDelta;
-
-        // if(userInput < 0){
-            
-        //     if(longitudinalVelocity > 0){
-                
-        //         omega = Mathf.Clamp(omega, (1/9.5493f) * 1650/(currentGearRatio * finalDriveRatio * primaryGearRatio), (1/9.5493f) * 14000/(currentGearRatio * finalDriveRatio * primaryGearRatio));
-                
-                
-        //     }
-        //     else if (longitudinalVelocity < 0){
-        //         omega = Mathf.Clamp(omega, -10000000, 0);
-        //     }          
-            
-
-        // }
-        // else{
-        //     omega = Mathf.Clamp(omega, 0, (1/9.5493f) * 14000/(currentGearRatio * finalDriveRatio * primaryGearRatio));
-        // }   
-
         
+
+        // if(lockedDiff == true){
+        //     omega = diffControlledOmega;
+        // }
+        
+
         if(userInput >=0){
             if(id == 2 | id == 3){
                 omega = Mathf.Clamp(omega, (1/9.5493f) * engineIdleRPM/(currentGearRatio * finalDriveRatio * primaryGearRatio), (1/9.5493f) * engineMaxRPM/(currentGearRatio * finalDriveRatio * primaryGearRatio));
@@ -285,18 +266,12 @@ public class Wheel{
         else{
             omega = Mathf.Clamp(omega, 0,10000000000f);
         }
-            
-            
-                
-                
+
         
-        
-           
-            
-             
+          
+
 
         wheelMesh.transform.Rotate(Mathf.Rad2Deg * omega * timeDelta, 0, 0, Space.Self); 
-
         
         slipRatio = calculateSlipRatio(longitudinalVelocity, omega, wheelRadius);        
         longitudinalForce = complexTyreEquation(slipRatio, fLongDynamicLimit, C_long, B_long, E_long);        
@@ -304,9 +279,6 @@ public class Wheel{
         slipAngle = calculateSlipAngle(longitudinalVelocity, lateralVelocity, threshold: 0.1f);     
         lateralForce = complexTyreEquation(slipAngle, fLatDynamicLimit, C_lat, B_lat, E_lat);
         
-
-        
-
         if(float.IsNaN(longitudinalForce)){
             longitudinalForce = 0;
         }
@@ -314,9 +286,9 @@ public class Wheel{
             lateralForce = 0;
         }
 
-        if(id == 2| id == 3){
-            longitudinalForce = Mathf.Clamp(longitudinalForce, -Mathf.Abs(diffLongForceLimit), Mathf.Abs(diffLongForceLimit));
-        }
+        // if(id == 2| id == 3){
+        //     longitudinalForce = Mathf.Clamp(longitudinalForce, -Mathf.Abs(diffLongForceLimit), Mathf.Abs(diffLongForceLimit));
+        // }
         
 
         forceVector = longitudinalForce * wheelObject.transform.forward + lateralForce * wheelObject.transform.right;

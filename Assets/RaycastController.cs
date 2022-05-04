@@ -36,7 +36,7 @@ public class RaycastController : MonoBehaviour{
     public float maxRPM = 14000;
     public float auxillaryLoss = 0.15f;
     public float maxEngineBrakingTorque = 5;
-    public float totalDrivetrainInertia = 1.5f;
+    public float drivetrainInertia = 1.5f;
 
 
     private int currentGear = 1;
@@ -292,6 +292,8 @@ public class RaycastController : MonoBehaviour{
     private bool gearDelayOn = false;
     private float gearDelayTimer = 0;
 
+    private bool lockedDiff;
+    
     void OnValidate(){
         keys = new NewControls();
         rb.centerOfMass = COM_Finder.transform.localPosition;
@@ -302,7 +304,7 @@ public class RaycastController : MonoBehaviour{
         for (int i = 0; i < 4; i++){
             
             // suspensions[i] = new Suspension(i, naturalLength, springTravel, springStiffness, dampingCoefficient, bumpStiffness, bumpTravel, wheelRadius);                     
-            wheels[i] = new Wheel(i, wheelObjects[i], meshes[i], rb, wheelRadius, wheelMass, brakeBias, totalDrivetrainInertia,idleRPM, maxRPM, tyreEfficiency, longitudinalConstants, lateralConstants);
+            wheels[i] = new Wheel(i, wheelObjects[i], meshes[i], rb, wheelRadius, wheelMass, brakeBias, drivetrainInertia,idleRPM, maxRPM, tyreEfficiency, longitudinalConstants, lateralConstants);
             
             if(i == 0| i == 1){
                 suspensions[i] = new Suspension(i, frontNaturalLength, frontSpringTravel, frontSpringStiffness, frontDampingCoefficient, bumpStiffness, bumpTravel, wheelRadius);
@@ -364,9 +366,13 @@ public class RaycastController : MonoBehaviour{
        
         // cc=this;
         // rb.inertiaTensor = new Vector3(123.1586f,61.15857f,112f);
-        rb.inertiaTensor = new Vector3(250,250,75);
-        // rb.inertiaTensorRotation = Quaternion.Euler(33.5407f,0,0);
-        rb.inertiaTensorRotation = Quaternion.Euler(0,0,0);
+        // rb.inertiaTensor = new Vector3(250,250,75);
+        // // // rb.inertiaTensorRotation = Quaternion.Euler(33.5407f,0,0);
+        // rb.inertiaTensorRotation = Quaternion.Euler(0,0,0);
+        // x, y, z >>> right, up, forward
+        // x, z, y,
+        rb.inertiaTensor = new Vector3(276.4f, 346.2f, 76.94f);
+        rb.inertiaTensorRotation = Quaternion.Euler(219.8f, 289.6f, 216.7f);
 
         COM_height = COM_Finder.transform.position.y - transform.position.y;
 
@@ -509,9 +515,11 @@ public class RaycastController : MonoBehaviour{
         updateRollcentreHeights();
         updateCOMaccleerations();
         updateVerticalLoad();
-        calculateDiffTorques();
+        // calculateDiffTorques();
 
-       
+        wheels[2].wheelTorque = 0.5f*(engineTorque - engineBraking) * gearRatios[currentGear + 1] *primaryGearRatio * finalDriveRatio;
+        wheels[3].wheelTorque = 0.5f*(engineTorque - engineBraking) * gearRatios[currentGear + 1] *primaryGearRatio * finalDriveRatio;       
+            
         
         
         for(int i = 0; i<springs.Count; i++){   
@@ -521,10 +529,7 @@ public class RaycastController : MonoBehaviour{
 
             if(contact){            
                 
-                if(i == 2 | i == 3){
-                    wheels[i].wheelTorque = (engineTorque - engineBraking) * gearRatios[currentGear + 1] *primaryGearRatio * finalDriveRatio;
-                }
-
+                
                 // Force vectors from suspension, wheel and anti rollbars.
                 Vector3 suspensionForceVector = suspensions[i].getUpdatedForce(hit, Time.fixedDeltaTime, contact);          
                 Vector3 wheelForceVector = wheels[i].getUpdatedForce(userInput, gearRatios[currentGear + 1], finalDriveRatio, primaryGearRatio, hit, Time.fixedDeltaTime, wheelVerticalLoad[i]);            
@@ -841,53 +846,101 @@ public class RaycastController : MonoBehaviour{
         rollStiffnessRear =  Mathf.Pow(trackRear,2) *  0.5f*(wheelRateRL + wheelRateRR)/(360/Mathf.PI);
     }
 
-    void calculateDiffTorques(){
-        diffHousingTorque = wheels[2].feedbackTorque + wheels[3].feedbackTorque;
-        differentialTorque = wheels[2].feedbackTorque - wheels[3].feedbackTorque;
-        lockingCoefficient = (TBR - 1)/(TBR+1);
-        criticalHousingTorque = diffPreLoadTorque/lockingCoefficient;
-
-        float feedbackRL= wheels[2].feedbackTorque;
-        float feedbackRR = wheels[3].feedbackTorque;
-
-        if(Mathf.Abs(diffHousingTorque) <= criticalHousingTorque){
-            // Regime 1
-            Debug.Log("REGIME 1");
-            if( Mathf.Abs(feedbackRL) <= Mathf.Abs(feedbackRR)){
-                wheels[3].diffLongForceLimit = (feedbackRL + Mathf.Sign(feedbackRL)*diffPreLoadTorque - wheels[3].rollingResistance - wheels[3].brakingTorque)/-wheelRadius;
-
-            }
-            else{
-
-                wheels[2].diffLongForceLimit = (feedbackRR + Mathf.Sign(feedbackRR)*diffPreLoadTorque - wheels[2].rollingResistance - wheels[2].brakingTorque)/-wheelRadius;
-
-            }
-
-        }
-        else{
-            // Regime 2
-            Debug.Log("REGIME 2");
-            if( Mathf.Abs(feedbackRL) <=  Mathf.Abs(feedbackRR)){
-                wheels[3].diffLongForceLimit = (feedbackRL *  TBR - wheels[3].rollingResistance - wheels[3].brakingTorque)/-wheelRadius;
-                wheels[2].diffLongForceLimit = 1000000;
-
-            }
-            else{
-                wheels[2].diffLongForceLimit = (feedbackRR *  TBR - wheels[2].rollingResistance - wheels[2].brakingTorque)/-wheelRadius;
-                wheels[3].diffLongForceLimit = 1000000;
-
-            }
+    // void calculateDiffTorques(){
 
 
+    //     diffHousingTorque = wheels[2].feedbackTorque + wheels[3].feedbackTorque;
+    //     differentialTorque = wheels[2].feedbackTorque - wheels[3].feedbackTorque;
+    //     lockingCoefficient = (TBR - 1)/(TBR+1);
+    //     criticalHousingTorque = diffPreLoadTorque/lockingCoefficient;
 
-        }
+    //     float feedbackRL= wheels[2].feedbackTorque;
+    //     float feedbackRR = wheels[3].feedbackTorque;
 
-        Debug.Log($"Differential torque = {differentialTorque}, L/R = {feedbackRL/feedbackRR}, R/L = {feedbackRR/feedbackRL}");
+    //     if(Mathf.Abs(diffHousingTorque) <= criticalHousingTorque){
+    //         // Regime 1
+    //         // Debug.Log("REGIME 1");
+    //         if( Mathf.Abs(feedbackRL) <= Mathf.Abs(feedbackRR)){
+    //             wheels[3].diffLongForceLimit = (feedbackRL + Mathf.Sign(feedbackRL)*diffPreLoadTorque - wheels[3].rollingResistance - wheels[3].brakingTorque)/-wheelRadius;
+    //             wheels[2].diffLongForceLimit = 10000000;
+    //         }
+    //         else{
+    //             wheels[2].diffLongForceLimit = (feedbackRR + Mathf.Sign(feedbackRR)*diffPreLoadTorque - wheels[2].rollingResistance - wheels[2].brakingTorque)/-wheelRadius;
+    //             wheels[3].diffLongForceLimit = 100000000;
+    //         }
+
+    //         // if(differentialTorque >= 0.9*diffPreLoadTorque){
+    //         //     lockedDiff = false;       
+    //         // }
+    //         // else{
+    //         //     lockedDiff = true;
+
+    //         // }
+
+    //         lockedDiff = Mathf.Abs(differentialTorque) <= 0.5*diffPreLoadTorque;
+    //         // Debug.Log($"Differential torque = {differentialTorque}");
+    //     }
+    //     else{
+    //         // Regime 2
+    //         // Debug.Log("REGIME 2");
+    //         if( Mathf.Abs(feedbackRL) <=  Mathf.Abs(feedbackRR)){
+    //             wheels[3].diffLongForceLimit = (feedbackRL *  TBR - wheels[3].rollingResistance - wheels[3].brakingTorque)/-wheelRadius;
+    //             wheels[2].diffLongForceLimit = 1000000;
+    //         }
+    //         else{
+    //             wheels[2].diffLongForceLimit = (feedbackRR *  TBR - wheels[2].rollingResistance - wheels[2].brakingTorque)/-wheelRadius;
+    //             wheels[3].diffLongForceLimit = 1000000;
+    //         }
+
+    //         // if( Mathf.Max(feedbackRL/feedbackRR, feedbackRR/feedbackRL) >= 0.9*TBR){
+    //         //    lockedDiff = false;
+    //         // }
+    //         // else{
+    //         //     lockedDiff = true;
+    //         // }
+
+    //         lockedDiff = Mathf.Max(Mathf.Abs(feedbackRL/feedbackRR), Mathf.Abs(feedbackRR/feedbackRL)) <= 0.5*TBR;
+    //         // Debug.Log($"Max ratio = {Mathf.Max(Mathf.Abs(feedbackRL/feedbackRR), Mathf.Abs(feedbackRR/feedbackRL))}");
+
+    //     }
+
+    //     if(lockedDiff == false){
+    //         wheels[2].wheelTorque = 0.5f*(engineTorque - engineBraking) * gearRatios[currentGear + 1] *primaryGearRatio * finalDriveRatio;
+    //         wheels[3].wheelTorque = 0.5f*(engineTorque - engineBraking) * gearRatios[currentGear + 1] *primaryGearRatio * finalDriveRatio;       
+            
+    //         wheels[2].lockedDiff = false;
+    //         wheels[3].lockedDiff = false; 
+
+    //     }
+    //     else{
+
+    //         float previousOmega = 0.5f*(wheels[2].omega + wheels[3].omega);
+    //         float lockedAxleTorque = (engineTorque - engineBraking) * gearRatios[currentGear + 1] *primaryGearRatio * finalDriveRatio + feedbackRL + feedbackRR;
+    //         float lockedAxleInertia = drivetrainInertia + wheels[2].momentOfInertia + wheels[3].momentOfInertia;
+    //         float lockedAxleAlpha =  lockedAxleTorque / lockedAxleInertia;
+    //         float lockedAxleOmega = previousOmega + lockedAxleAlpha*Time.fixedDeltaTime;
+
+
+    //         wheels[2].lockedDiff = true;
+    //         wheels[3].lockedDiff = true;
+
+    //         wheels[2].diffControlledOmega = lockedAxleOmega;
+    //         wheels[3].diffControlledOmega = lockedAxleOmega;
+
+            
+
+    //     }
+
+
+    //     Debug.Log($"Diff housing torque = {Mathf.Abs(diffHousingTorque)}, critical = {criticalHousingTorque}");
+
+    //     // Debug.Log($"Locked diff = {lockedDiff}, differential torque = {differentialTorque}, Max Ratio = {Mathf.Max(Mathf.Abs(feedbackRL/feedbackRR), Mathf.Abs(feedbackRR/feedbackRL))}");
+
 
     
 
 
-    }
+    // }
 
 
     void showTimer(){
@@ -919,23 +972,23 @@ public class RaycastController : MonoBehaviour{
         for(int i = 0; i < springs.Count; i++){
         
                         
-            Gizmos.color = Color.blue;
-            Ray ray = new Ray(springs[i].transform.position, -transform.up);           
-            Gizmos.DrawLine(ray.origin, -suspensions[i].springLength * transform.up + springs[i].transform.position);
+            // Gizmos.color = Color.blue;
+            // Ray ray = new Ray(springs[i].transform.position, -transform.up);           
+            // Gizmos.DrawLine(ray.origin, -suspensions[i].springLength * transform.up + springs[i].transform.position);
 
             
-            Gizmos.color = Color.yellow;
-            Gizmos.DrawLine(-suspensions[i].springLength * transform.up + springs[i].transform.position, -suspensions[i].springLength * transform.up + springs[i].transform.position + transform.up * -wheelRadius);
+            // Gizmos.color = Color.yellow;
+            // Gizmos.DrawLine(-suspensions[i].springLength * transform.up + springs[i].transform.position, -suspensions[i].springLength * transform.up + springs[i].transform.position + transform.up * -wheelRadius);
             
-            Gizmos.color = Color.white;
-            Gizmos.DrawWireCube(springs[i].transform.position - new Vector3(0, suspensions[i].springLength + wheelRadius, 0), new Vector3(0.1f, 0, 0.1f));
+            // Gizmos.color = Color.white;
+            // Gizmos.DrawWireCube(springs[i].transform.position - new Vector3(0, suspensions[i].springLength + wheelRadius, 0), new Vector3(0.1f, 0, 0.1f));
         
             // Gizmos.color = Color.yellow;
             // Gizmos.DrawRay(wheels[i].wheelObject.transform.position, wheels[i].longitudinalVelocity * wheels[i].wheelObject.transform.forward);
             // Gizmos.DrawRay(wheels[i].wheelObject.transform.position, -wheels[i].lateralVelocity * wheels[i].wheelObject.transform.right);
 
-            // Gizmos.DrawRay(wheels[i].wheelObject.transform.position, wheels[i].wheelObject.transform.right * (wheels[i].lateralForce/1000));
-            // Gizmos.DrawRay(wheels[i].wheelObject.transform.position, wheels[i].wheelObject.transform.forward * (wheels[i].longitudinalForce/1000));
+            Gizmos.DrawRay(wheels[i].wheelObject.transform.position, wheels[i].wheelObject.transform.right * (wheels[i].lateralForce/1000));
+            Gizmos.DrawRay(wheels[i].wheelObject.transform.position, wheels[i].wheelObject.transform.forward * (wheels[i].longitudinalForce/1000));
             // Gizmos.DrawRay(wheels[i].wheelObject.transform.position, wheels[i].wheelObject.transform.up * wheels[i].verticalLoad/1000);
             // Gizmos.DrawRay(COM_Finder.transform.position, -drag * transform.forward /1000);
           
@@ -948,9 +1001,9 @@ public class RaycastController : MonoBehaviour{
             
         }
 
-        Gizmos.color = Color.white;
-        Gizmos.DrawRay(COM_Finder.transform.position, COMlongitudinalVelocity * transform.forward);
-        Gizmos.DrawRay(COM_Finder.transform.position, COMLateralVelocity* transform.right);
+        // Gizmos.color = Color.white;
+        // Gizmos.DrawRay(COM_Finder.transform.position, COMlongitudinalVelocity * transform.forward);
+        // Gizmos.DrawRay(COM_Finder.transform.position, COMLateralVelocity* transform.right);
 
       
         
