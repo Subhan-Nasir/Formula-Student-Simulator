@@ -11,6 +11,9 @@ public class CheckpointsManager : MonoBehaviour
     private double timer;
     private double previousLaptime;
     private bool startCrossed;
+    public NotificationTriggerEvent notificationManager;
+    // public GameObject ui;
+
     void Awake(){
         Transform checkpointsTransform = transform.Find("Checkpoints");
         checkpointList = new List<CheckpointSingle>();
@@ -20,7 +23,10 @@ public class CheckpointsManager : MonoBehaviour
             checkpointList.Add(checkpoint);
         }
         nextCheckpointIndex = 0;      
-        startCrossed = false;  
+        startCrossed = false; 
+        notificationManager = GameObject.Find("NotificationPanel").GetComponent<NotificationTriggerEvent>(); 
+        // notificationManager = ui.GetComponent<NotificationTriggerEvent>();
+
     }
     // Start is called before the first frame update
     void Start(){
@@ -50,6 +56,7 @@ public class CheckpointsManager : MonoBehaviour
                 if(startCrossed == true){
                     Debug.Log($"LAP TIME = {timer}");
                     previousLaptime = timer;
+                    notificationManager.showNotification("New Laptime: " + TimeSpan.FromSeconds(timer).ToString(@"mm\:ss\:fff"));
                 }
                 else{
                     startCrossed = true;
@@ -59,6 +66,7 @@ public class CheckpointsManager : MonoBehaviour
         }
         else{
             Debug.Log("Wrong checkpoint");
+            notificationManager.showNotification("Wrong Checkpoint");
         }
 
 

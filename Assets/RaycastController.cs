@@ -293,6 +293,8 @@ public class RaycastController : MonoBehaviour{
     private float gearDelayTimer = 0;
 
     private bool lockedDiff;
+
+    private NotificationTriggerEvent notification;
     
     void OnValidate(){
         keys = new NewControls();
@@ -392,7 +394,7 @@ public class RaycastController : MonoBehaviour{
         FLHistory.AddEntry(FLHub.transform.localPosition);
         FRHistory.AddEntry(FRHub.transform.localPosition);
 
-        
+        notification = GameObject.Find("NotificationPanel").GetComponent<NotificationTriggerEvent>(); 
     }
 
     void Update(){
@@ -406,6 +408,9 @@ public class RaycastController : MonoBehaviour{
             steerInput = Mathf.Clamp(steerInput, -1,1);
             throttle = Mathf.Clamp(throttle, 0,1);
             brake = Mathf.Clamp(brake, 0,1);
+
+            brakeBiasUp = keys.Track.BrakeBiasUp.ReadValue<float>();
+            brakeBiasDown = keys.Track.BrakeBiasDown.ReadValue<float>();
         }
         else{
 
@@ -450,6 +455,7 @@ public class RaycastController : MonoBehaviour{
             gearTimer = 0;
             gearDelayOn = true;
             
+            
                        
         }
         else{
@@ -459,11 +465,15 @@ public class RaycastController : MonoBehaviour{
         if(brakeBiasUp > 0 & brakeBiasTimer > 0.2f){
             brakeBias += 0.1f;
             brakeBiasTimer = 0;
-            // Debug.Log("brake bias increased");
+            brakeBias = Mathf.Clamp(brakeBias, 0,1);
+            notification.showNotification("Brake bias changed to " + brakeBias.ToString("0.00"));            
+            
         }
         else if(brakeBiasDown > 0 & brakeBiasTimer > 0.2f){
             brakeBias -= 0.1f;
             brakeBiasTimer = 0;
+            brakeBias = Mathf.Clamp(brakeBias, 0,1);            
+            notification.showNotification("Brake bias changed to " + brakeBias.ToString("0.00"));
         }
       
         

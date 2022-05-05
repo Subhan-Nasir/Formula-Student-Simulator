@@ -64,7 +64,7 @@ public class @NewControls : IInputActionCollection, IDisposable
                     ""id"": ""6949abdc-b272-44ad-b8ed-ba5162a02666"",
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
-                    ""interactions"": ""Press(behavior=1)""
+                    ""interactions"": ""Press""
                 },
                 {
                     ""name"": ""BrakeBiasDown"",
@@ -72,7 +72,7 @@ public class @NewControls : IInputActionCollection, IDisposable
                     ""id"": ""9fc6041a-c222-4ae1-a4b5-55ac2dd875a2"",
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
-                    ""interactions"": ""Press(behavior=1)""
+                    ""interactions"": ""Press""
                 }
             ],
             ""bindings"": [
@@ -276,8 +276,30 @@ public class @NewControls : IInputActionCollection, IDisposable
                 },
                 {
                     ""name"": """",
+                    ""id"": ""fcd8bedc-1850-448e-9055-e4aa61978f3d"",
+                    ""path"": ""<Keyboard>/r"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""BrakeBiasUp"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
                     ""id"": ""b3b209aa-ef7f-4175-9839-7253d6b86905"",
                     ""path"": ""<HID::Precision Sim Engineering SWD>/button17"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""BrakeBiasDown"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""9e2bedea-0474-4888-91a1-a184e35afde6"",
+                    ""path"": ""<Keyboard>/f"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
