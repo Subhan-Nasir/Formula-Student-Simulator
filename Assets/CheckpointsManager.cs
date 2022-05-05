@@ -8,7 +8,8 @@ public class CheckpointsManager : MonoBehaviour
 
     private List<CheckpointSingle> checkpointList;
     private int nextCheckpointIndex;
-    private decimal timer;
+    private double timer;
+    private double previousLaptime;
     private bool startCrossed;
     void Awake(){
         Transform checkpointsTransform = transform.Find("Checkpoints");
@@ -29,7 +30,7 @@ public class CheckpointsManager : MonoBehaviour
     // Update is called once per frame
     void Update(){
         if(startCrossed){
-            timer += (decimal) Time.deltaTime;            
+            timer += (double) Time.deltaTime;            
         }
 
         // Debug.Log(Math.Round(timer, 2));
@@ -48,6 +49,7 @@ public class CheckpointsManager : MonoBehaviour
             if(nextCheckpointIndex == 1){
                 if(startCrossed == true){
                     Debug.Log($"LAP TIME = {timer}");
+                    previousLaptime = timer;
                 }
                 else{
                     startCrossed = true;
@@ -61,5 +63,8 @@ public class CheckpointsManager : MonoBehaviour
 
 
     }
+
+    public double getTimer(){ return timer;}
+    public double getPreviousLaptime(){return previousLaptime;}
 
 }
