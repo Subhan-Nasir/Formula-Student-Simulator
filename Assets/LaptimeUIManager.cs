@@ -7,6 +7,7 @@ using System;
 public class LaptimeUIManager : MonoBehaviour{
 
     public TMP_Text laptimeText;
+    public TMP_Text lapNumberText;
     private string laptimeString;
     private double laptime;
     private double previousLaptime;
@@ -33,10 +34,11 @@ public class LaptimeUIManager : MonoBehaviour{
         }
         else{
             laptimeString += "\nPrevious:\n" + "--:--:--";
-        }
-
-        
+        }       
          
-        laptimeText.text = laptimeString;        
+        laptimeText.text = laptimeString; 
+
+        lapNumberText.text = "Lap: " + checkpointsManager.getLapNumber();
+
     }
 }
