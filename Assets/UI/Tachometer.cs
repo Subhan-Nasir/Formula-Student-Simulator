@@ -41,7 +41,7 @@ public class Tachometer : MonoBehaviour
         speed=target.velocity.magnitude*2.237f;
 
         if (speedLabel != null)
-            speedLabel.text = Math.Round(speed,1).ToString();
+            speedLabel.text = Math.Round(speed,1).ToString() + "\nmph";
         if (arrow != null)
             arrow.localEulerAngles =
                 new Vector3(0, 0, Mathf.Lerp(minRPMArrowAngle, maxRPMArrowAngle, rpm / maxRPM));
