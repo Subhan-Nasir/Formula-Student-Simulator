@@ -24,7 +24,8 @@ public class CheckpointsManager : MonoBehaviour
 
    
     void Awake(){
-        Transform checkpointsTransform = transform.Find("Checkpoints");
+        // Transform checkpointsTransform = transform.Find("Checkpoints");
+        Transform checkpointsTransform = gameObject.transform;
         checkpointList = new List<CheckpointSingle>();
         foreach(Transform t in checkpointsTransform){
             CheckpointSingle checkpoint = t.GetComponent<CheckpointSingle>();

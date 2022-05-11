@@ -12,11 +12,15 @@ public class LaptimeUIManager : MonoBehaviour{
     private double laptime;
     private double previousLaptime;
     private CheckpointsManager checkpointsManager;
+    public GameObject checkpointsObject;
+
+
 
     // Start is called before the first frame update
     void Start(){
         
-        checkpointsManager = GameObject.Find("Ground").GetComponent<CheckpointsManager>();
+        // checkpointsManager = GameObject.Find("Ground").GetComponent<CheckpointsManager>();
+        checkpointsManager = checkpointsObject.GetComponent<CheckpointsManager>();
         laptimeString = "Laptime: ---" + "\nPrevious: ---";
         
         laptimeText.text = laptimeString;
