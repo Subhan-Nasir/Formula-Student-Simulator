@@ -369,13 +369,17 @@ public class RaycastController : MonoBehaviour{
         // cc=this;
         // rb.inertiaTensor = new Vector3(123.1586f,61.15857f,112f);
         // rb.inertiaTensor = new Vector3(250,250,75);
+
+
         // // // rb.inertiaTensorRotation = Quaternion.Euler(33.5407f,0,0);
         // rb.inertiaTensorRotation = Quaternion.Euler(0,0,0);
         // x, y, z >>> right, up, forward
         // x, z, y,
-        rb.inertiaTensor = new Vector3(276.4f, 346.2f, 76.94f);
-        rb.inertiaTensorRotation = Quaternion.Euler(219.8f, 289.6f, 216.7f);
+        // rb.inertiaTensor = new Vector3(276.4f, 346.2f, 76.94f);
+        // rb.inertiaTensorRotation = Quaternion.Euler(219.8f, 289.6f, 216.7f);
 
+        rb.inertiaTensor = new Vector3 (350, 350, 100);
+        rb.inertiaTensorRotation =  Quaternion.Euler(350,350,350);
         COM_height = COM_Finder.transform.position.y - transform.position.y;
 
 
@@ -463,14 +467,14 @@ public class RaycastController : MonoBehaviour{
         }
 
         if(brakeBiasUp > 0 & brakeBiasTimer > 0.2f){
-            brakeBias += 0.1f;
+            brakeBias += 0.05f;
             brakeBiasTimer = 0;
             brakeBias = Mathf.Clamp(brakeBias, 0,1);
             notification.showNotification("Brake bias changed to " + brakeBias.ToString("0.00"));            
             
         }
         else if(brakeBiasDown > 0 & brakeBiasTimer > 0.2f){
-            brakeBias -= 0.1f;
+            brakeBias -= 0.05f;
             brakeBiasTimer = 0;
             brakeBias = Mathf.Clamp(brakeBias, 0,1);            
             notification.showNotification("Brake bias changed to " + brakeBias.ToString("0.00"));
