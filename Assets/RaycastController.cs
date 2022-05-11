@@ -378,8 +378,24 @@ public class RaycastController : MonoBehaviour{
         // rb.inertiaTensor = new Vector3(276.4f, 346.2f, 76.94f);
         // rb.inertiaTensorRotation = Quaternion.Euler(219.8f, 289.6f, 216.7f);
 
-        rb.inertiaTensor = new Vector3 (350, 350, 100);
-        rb.inertiaTensorRotation =  Quaternion.Euler(350,350,350);
+        // rb.inertiaTensor = new Vector3 (350, 350, 100);
+        // rb.inertiaTensorRotation =  Quaternion.Euler(350,350,350);
+
+        // INERTIA TENSOR:
+        // Fusion:        left,      backwards,   up         (X, Y, Z)
+        // XX, YY, ZZ  =  1.606e2,   3.168e1,     1.752e2
+        // XY, XZ, YZ  =  1.262,     2.116e-1,    3.529
+        
+        // Unity:                       right,      up,         forwards (x,y,z)                            
+        // tensor -->    XX, ZZ, YY  =  1.606e2,    1.752e2,    3.168e1
+        // rotation -->  XZ, XY, YZ  =  2.116e-1,   1.262,      3.529
+
+        rb.inertiaTensor = new Vector3(1.606E2f, 1.752E2f, 3.168E1f);
+        rb.inertiaTensorRotation = Quaternion.Euler(2.116E-1f, 1.262f, 3.529f);
+
+
+
+
         COM_height = COM_Finder.transform.position.y - transform.position.y;
 
 
