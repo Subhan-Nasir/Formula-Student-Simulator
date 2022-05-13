@@ -8,6 +8,8 @@ public class CheckpointsManager : MonoBehaviour
 {
 
     public TMP_Text checkpointMissedWarning;
+    public AudioSource audioSource;
+
     private List<CheckpointSingle> checkpointList;
     private int nextCheckpointIndex;
     private double timer;
@@ -90,6 +92,7 @@ public class CheckpointsManager : MonoBehaviour
         }
         else{ // Wrong checkpoint
             
+            audioSource.Play();
             if(wrongCheckpointPassed == false){
                 notificationManager.showNotification("Wrong Checkpoint.\nRestart the lap or find correct checkpoint.");
                 checkpointMissedWarning.text = "CHECKPOINT MISSED";
