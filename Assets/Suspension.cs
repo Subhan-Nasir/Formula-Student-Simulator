@@ -19,6 +19,7 @@ public class Suspension{
     public float springLength;
     public float previousLength;
     public float springVelocity;
+    public float displacement;
 
     public float springForce;
     public float damperForce;
@@ -54,20 +55,21 @@ public class Suspension{
         springLength = hit.distance - wheelRadius;
         springLength = Mathf.Clamp(springLength, minLength - bumpTravel, maxLength);
         springVelocity = (springLength - previousLength)/timeDelta;
-
+        displacement = naturalLength - springLength;
         if(springLength < minLength){
-            springForce = springStiffness * (naturalLength - springLength) + bumpStiffness * (minLength - springLength);
+            springForce = springStiffness * displacement + bumpStiffness * (minLength - springLength);
             // Debug.Log($"Bumpstop activated for suspension {id}");
                        
         }
         else{
-            springForce = springStiffness * (naturalLength - springLength);
+            springForce = springStiffness * displacement;
         }
 
         // springForce = springStiffness * (naturalLength - springLength);  
         
         
         damperForce = dampingCoefficient * springVelocity;
+        damperForce = Mathf.Clamp(damperForce, -30000, 30000);
         force = springForce - damperForce;
         forceVector = (springForce - damperForce) * hit.normal;
 

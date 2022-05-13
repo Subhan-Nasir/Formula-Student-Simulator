@@ -18,7 +18,8 @@ public class CheckpointsManager : MonoBehaviour
     // public GameObject ui;
     private bool wrongCheckpointPassed = false;
     private bool restartingLap; // allows player to restart lap if they pass the wrong checkpoint;
-    private bool correctCheckpointPassed; 
+    private bool correctCheckpointPassed;
+    private Rigidbody car; 
     
 
 
@@ -37,6 +38,7 @@ public class CheckpointsManager : MonoBehaviour
         notificationManager = GameObject.Find("NotificationPanel").GetComponent<NotificationTriggerEvent>(); 
         lapNumber = 1;
         checkpointMissedWarning.text = "";
+        car = GameObject.FindGameObjectWithTag("Player").GetComponent<Rigidbody>();
 
       
 
@@ -60,6 +62,8 @@ public class CheckpointsManager : MonoBehaviour
     public void PlayerThroughCheckpoint(CheckpointSingle c){          
         int checkpointIndex = checkpointList.IndexOf(c);
         if(checkpointIndex == nextCheckpointIndex){ // Correct checkpoint
+            Debug.Log($"Checkpoint {checkpointIndex} passed at: " + TimeSpan.FromSeconds(timer).ToString(@"mm\:ss\:fff") + " with speed: " + car.velocity.magnitude +" m/s");   
+
                      
             // Increments for each checkpoint and resets to 0 once all checkpoints 
             // are cleared.

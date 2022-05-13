@@ -9,8 +9,14 @@ public class RaycastController : MonoBehaviour{
     [Header("Controls Selection")]
     public bool usingKeyboard;
 
-    [Header("0 to 60 Timer")]
+
+    [Tooltip("Times how long it takes to get to a given speed (in m/s)")]
+    [Header("Speed Timer")]    
     public bool enableTimer;
+    public float targetSpeed;
+    public enum SpeedUnits{MetersPerSecond,KilometersPerHour,MilesPerHour};
+    public SpeedUnits targetSpeedUnits; 
+
     
     [Header("Tokyo Drift Mode")]
     public bool tokyoDriftMode=false;
@@ -295,7 +301,9 @@ public class RaycastController : MonoBehaviour{
     private bool lockedDiff;
 
     private NotificationTriggerEvent notification;
-    
+
+    private float maxDamperForce;
+    private float maxSpringForce;
     void OnValidate(){
         keys = new NewControls();
         rb.centerOfMass = COM_Finder.transform.localPosition;
@@ -559,7 +567,6 @@ public class RaycastController : MonoBehaviour{
 
             if(contact){            
                 
-                
                 // Force vectors from suspension, wheel and anti rollbars.
                 Vector3 suspensionForceVector = suspensions[i].getUpdatedForce(hit, Time.fixedDeltaTime, contact);          
                 Vector3 wheelForceVector = wheels[i].getUpdatedForce(userInput, gearRatios[currentGear + 1], finalDriveRatio, primaryGearRatio, hit, Time.fixedDeltaTime, wheelVerticalLoad[i]);            
@@ -574,13 +581,21 @@ public class RaycastController : MonoBehaviour{
 
                 engineRPM = Mathf.Clamp(engineRPM, idleRPM, 14000);
 
-
                 // Debug.Log($"Engine RPM = {engineRPM}, Engine Torque = {engineTorque}, Current Gear = {currentGear}, User Input = {userInput}");
                                 
             }
             else{
                 suspensions[i].contact = false;
             }
+
+            if(suspensions[i].damperForce > maxDamperForce){
+                maxDamperForce = suspensions[i].damperForce;
+            }
+            if(suspensions[i].springForce > maxSpringForce){
+                maxSpringForce = suspensions[i].springForce;
+            }
+
+            Debug.Log($"ID: {i}, max spring force = {maxSpringForce}, max damper force = {maxDamperForce}");
         }
 
         showTimer();
@@ -975,6 +990,19 @@ public class RaycastController : MonoBehaviour{
 
     void showTimer(){
         float carSpeed = rb.velocity.z;
+        float speedThreshold; // targetSpeed converted to m/s
+
+        if(targetSpeedUnits == SpeedUnits.MetersPerSecond){ 
+            speedThreshold = targetSpeed; //no conversion needed
+        }
+        else if(targetSpeedUnits == SpeedUnits.KilometersPerHour){
+            speedThreshold = 0.277778f*targetSpeed; // KMH to m/s
+        }
+        else{
+            speedThreshold = 0.44704f*targetSpeed; // MPH to m/s
+        }
+
+
         if(carSpeed > 0 & speedReached == false){
             timerOn = true;
         }
@@ -982,14 +1010,19 @@ public class RaycastController : MonoBehaviour{
         if(timerOn == true){
             theTime += Time.fixedDeltaTime;
             
-            if(carSpeed >= 26.8f){
+            if(carSpeed >= speedThreshold){
                 speedReached = true;
                 timerOn = false;
+
+                if(enableTimer == true){
+                    Debug.Log($"SPEED REACHED: {carSpeed} m/s,  {carSpeed*2.23694f} mph, TIMER: {theTime}");
+                }
+                
             }
         }
 
         if(enableTimer == true){
-            Debug.Log($"Timer = {theTime}");
+            Debug.Log($"Timer = {theTime}, speed = {carSpeed} m/s, {carSpeed*2.23694f} mph");
         }
     }
 
