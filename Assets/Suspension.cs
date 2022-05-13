@@ -69,9 +69,11 @@ public class Suspension{
         
         
         damperForce = dampingCoefficient * springVelocity;
-        damperForce = Mathf.Clamp(damperForce, -30000, 30000);
+        damperForce = Mathf.Clamp(damperForce, -50000, 50000);
         force = springForce - damperForce;
+        
         forceVector = (springForce - damperForce) * hit.normal;
+        
 
         
         

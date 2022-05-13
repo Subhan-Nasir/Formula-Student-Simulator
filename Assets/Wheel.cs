@@ -290,7 +290,8 @@ public class Wheel{
         //     longitudinalForce = Mathf.Clamp(longitudinalForce, -Mathf.Abs(diffLongForceLimit), Mathf.Abs(diffLongForceLimit));
         // }
         
-
+        longitudinalForce = Mathf.Clamp(longitudinalForce, -50000, 50000);
+        lateralForce = Mathf.Clamp(lateralForce, -50000,50000);
         forceVector = longitudinalForce * wheelObject.transform.forward + lateralForce * wheelObject.transform.right;
         
        

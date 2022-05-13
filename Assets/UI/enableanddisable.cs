@@ -18,10 +18,16 @@ public class enableanddisable : MonoBehaviour
     }
 
     public void whenButtonClick(){
-        if (UIElement.activeInHierarchy == true)
+        if (UIElement.activeInHierarchy == true){
             UIElement.SetActive(false);
-        else
-            UIElement.SetActive(true);
+
+        }
+        else{
+             UIElement.SetActive(true);
+        }
+            
+        
+           
 
     }
 }

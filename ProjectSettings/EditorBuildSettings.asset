@@ -4,6 +4,12 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/Silverstone.unity
+    guid: 1ce8ce5044d20fb4c81cf1e04edede74
+  - enabled: 1
+    path: Assets/Scenes/NorthWeald.unity
+    guid: 9fc0d4010bbf28b4594072e72b8655ab
   m_configObjects:
     com.unity.input.settings: {fileID: 11400000, guid: 83f528e4a521a9d4b8fdb52d6a28ba07, type: 2}

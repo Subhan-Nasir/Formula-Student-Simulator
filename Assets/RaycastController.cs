@@ -572,7 +572,7 @@ public class RaycastController : MonoBehaviour{
                 Vector3 wheelForceVector = wheels[i].getUpdatedForce(userInput, gearRatios[currentGear + 1], finalDriveRatio, primaryGearRatio, hit, Time.fixedDeltaTime, wheelVerticalLoad[i]);            
                 Vector3 antiRollForceVector = getAntiRollForce(suspensions[2], suspensions[3], antiRollStiffness, i) * hit.normal;
 
-                rb.AddForceAtPosition(wheelForceVector +suspensionForceVector, hit.point + new Vector3 (0,0.1f,0)); 
+                rb.AddForceAtPosition(wheelForceVector +suspensionForceVector, hit.point + new Vector3 (0,0.44f,0)); 
                 
                 float averageRearRPM = (9.5493f)*(wheels[2].omega + wheels[3].omega)/2;
                 if(currentGear != 0){
@@ -1035,23 +1035,28 @@ public class RaycastController : MonoBehaviour{
         for(int i = 0; i < springs.Count; i++){
         
                         
-            // Gizmos.color = Color.blue;
-            // Ray ray = new Ray(springs[i].transform.position, -transform.up);           
-            // Gizmos.DrawLine(ray.origin, -suspensions[i].springLength * transform.up + springs[i].transform.position);
+            Gizmos.color = Color.blue;
+            Ray ray = new Ray(springs[i].transform.position, -transform.up);           
+            Gizmos.DrawLine(ray.origin, -suspensions[i].springLength * transform.up + springs[i].transform.position);
+
+            Gizmos.color = Color.white;
+            Ray ray2 = new Ray(springs[i].transform.position, -transform.up);           
+            Gizmos.DrawLine(ray2.origin, -suspensions[i].minLength * transform.up + springs[i].transform.position);
+            
 
             
-            // Gizmos.color = Color.yellow;
-            // Gizmos.DrawLine(-suspensions[i].springLength * transform.up + springs[i].transform.position, -suspensions[i].springLength * transform.up + springs[i].transform.position + transform.up * -wheelRadius);
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawLine(-suspensions[i].springLength * transform.up + springs[i].transform.position, -suspensions[i].springLength * transform.up + springs[i].transform.position + transform.up * -wheelRadius);
             
-            // Gizmos.color = Color.white;
-            // Gizmos.DrawWireCube(springs[i].transform.position - new Vector3(0, suspensions[i].springLength + wheelRadius, 0), new Vector3(0.1f, 0, 0.1f));
+            Gizmos.color = Color.white;
+            Gizmos.DrawWireCube(springs[i].transform.position - new Vector3(0, suspensions[i].springLength + wheelRadius, 0), new Vector3(0.1f, 0, 0.1f));
         
             // Gizmos.color = Color.yellow;
             // Gizmos.DrawRay(wheels[i].wheelObject.transform.position, wheels[i].longitudinalVelocity * wheels[i].wheelObject.transform.forward);
             // Gizmos.DrawRay(wheels[i].wheelObject.transform.position, -wheels[i].lateralVelocity * wheels[i].wheelObject.transform.right);
 
-            Gizmos.DrawRay(wheels[i].wheelObject.transform.position, wheels[i].wheelObject.transform.right * (wheels[i].lateralForce/1000));
-            Gizmos.DrawRay(wheels[i].wheelObject.transform.position, wheels[i].wheelObject.transform.forward * (wheels[i].longitudinalForce/1000));
+            // Gizmos.DrawRay(wheels[i].wheelObject.transform.position, wheels[i].wheelObject.transform.right * (wheels[i].lateralForce/1000));
+            // Gizmos.DrawRay(wheels[i].wheelObject.transform.position, wheels[i].wheelObject.transform.forward * (wheels[i].longitudinalForce/1000));
             // Gizmos.DrawRay(wheels[i].wheelObject.transform.position, wheels[i].wheelObject.transform.up * wheels[i].verticalLoad/1000);
             // Gizmos.DrawRay(COM_Finder.transform.position, -drag * transform.forward /1000);
           
