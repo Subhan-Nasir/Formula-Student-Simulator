@@ -73,6 +73,14 @@ public class @NewControls : IInputActionCollection, IDisposable
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": ""Press""
+                },
+                {
+                    ""name"": ""MainMenuKey"",
+                    ""type"": ""Button"",
+                    ""id"": ""4a24bf00-5c11-4ad4-a400-dd6691a7f7f1"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": ""Press""
                 }
             ],
             ""bindings"": [
@@ -306,6 +314,17 @@ public class @NewControls : IInputActionCollection, IDisposable
                     ""action"": ""BrakeBiasDown"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""ac00d8d6-6ca1-4769-b6c8-b2db2c1fcdf1"",
+                    ""path"": ""<Keyboard>/escape"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MainMenuKey"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -321,6 +340,7 @@ public class @NewControls : IInputActionCollection, IDisposable
         m_Track_ShiftDown = m_Track.FindAction("ShiftDown", throwIfNotFound: true);
         m_Track_BrakeBiasUp = m_Track.FindAction("BrakeBiasUp", throwIfNotFound: true);
         m_Track_BrakeBiasDown = m_Track.FindAction("BrakeBiasDown", throwIfNotFound: true);
+        m_Track_MainMenuKey = m_Track.FindAction("MainMenuKey", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -377,6 +397,7 @@ public class @NewControls : IInputActionCollection, IDisposable
     private readonly InputAction m_Track_ShiftDown;
     private readonly InputAction m_Track_BrakeBiasUp;
     private readonly InputAction m_Track_BrakeBiasDown;
+    private readonly InputAction m_Track_MainMenuKey;
     public struct TrackActions
     {
         private @NewControls m_Wrapper;
@@ -388,6 +409,7 @@ public class @NewControls : IInputActionCollection, IDisposable
         public InputAction @ShiftDown => m_Wrapper.m_Track_ShiftDown;
         public InputAction @BrakeBiasUp => m_Wrapper.m_Track_BrakeBiasUp;
         public InputAction @BrakeBiasDown => m_Wrapper.m_Track_BrakeBiasDown;
+        public InputAction @MainMenuKey => m_Wrapper.m_Track_MainMenuKey;
         public InputActionMap Get() { return m_Wrapper.m_Track; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -418,6 +440,9 @@ public class @NewControls : IInputActionCollection, IDisposable
                 @BrakeBiasDown.started -= m_Wrapper.m_TrackActionsCallbackInterface.OnBrakeBiasDown;
                 @BrakeBiasDown.performed -= m_Wrapper.m_TrackActionsCallbackInterface.OnBrakeBiasDown;
                 @BrakeBiasDown.canceled -= m_Wrapper.m_TrackActionsCallbackInterface.OnBrakeBiasDown;
+                @MainMenuKey.started -= m_Wrapper.m_TrackActionsCallbackInterface.OnMainMenuKey;
+                @MainMenuKey.performed -= m_Wrapper.m_TrackActionsCallbackInterface.OnMainMenuKey;
+                @MainMenuKey.canceled -= m_Wrapper.m_TrackActionsCallbackInterface.OnMainMenuKey;
             }
             m_Wrapper.m_TrackActionsCallbackInterface = instance;
             if (instance != null)
@@ -443,6 +468,9 @@ public class @NewControls : IInputActionCollection, IDisposable
                 @BrakeBiasDown.started += instance.OnBrakeBiasDown;
                 @BrakeBiasDown.performed += instance.OnBrakeBiasDown;
                 @BrakeBiasDown.canceled += instance.OnBrakeBiasDown;
+                @MainMenuKey.started += instance.OnMainMenuKey;
+                @MainMenuKey.performed += instance.OnMainMenuKey;
+                @MainMenuKey.canceled += instance.OnMainMenuKey;
             }
         }
     }
@@ -456,5 +484,6 @@ public class @NewControls : IInputActionCollection, IDisposable
         void OnShiftDown(InputAction.CallbackContext context);
         void OnBrakeBiasUp(InputAction.CallbackContext context);
         void OnBrakeBiasDown(InputAction.CallbackContext context);
+        void OnMainMenuKey(InputAction.CallbackContext context);
     }
 }

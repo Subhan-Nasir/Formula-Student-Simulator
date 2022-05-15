@@ -60,6 +60,14 @@
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "Press"
+                },
+                {
+                    "name": "MainMenuKey",
+                    "type": "Button",
+                    "id": "4a24bf00-5c11-4ad4-a400-dd6691a7f7f1",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "Press"
                 }
             ],
             "bindings": [
@@ -291,6 +299,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "BrakeBiasDown",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "ac00d8d6-6ca1-4769-b6c8-b2db2c1fcdf1",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MainMenuKey",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

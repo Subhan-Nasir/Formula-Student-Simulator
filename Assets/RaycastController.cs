@@ -595,7 +595,7 @@ public class RaycastController : MonoBehaviour{
                 maxSpringForce = suspensions[i].springForce;
             }
 
-            Debug.Log($"ID: {i}, max spring force = {maxSpringForce}, max damper force = {maxDamperForce}");
+            // Debug.Log($"ID: {i}, max spring force = {maxSpringForce}, max damper force = {maxDamperForce}");
         }
 
         showTimer();

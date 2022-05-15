@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+// Code adapted from: https://github.com/TheMrFeliX/Meshes-Deformation-Script-Unity/blob/master/MeshesDeformation.cs 
 public class MeshesDeformation : MonoBehaviour
 {
     [SerializeField] private MeshFilter[] meshFilters = default;
