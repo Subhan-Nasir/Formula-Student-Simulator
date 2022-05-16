@@ -605,7 +605,7 @@ public class RaycastController : MonoBehaviour{
 
         if(speed >= previousSpeed){isAcclerating = true;}
 
-        drag = (5f * 1.225f * Mathf.Pow(speed,2) * 0.947f)/2;
+        drag = (0.39f * 1.225f * Mathf.Pow(speed,2) * 0.947f)/2;
         lift = (0.17f * 1.225f * Mathf.Pow(speed,2) * 0.947f)/2;
         // Debug.Log($" Drag = {drag}, Lift = {lift}");
 
