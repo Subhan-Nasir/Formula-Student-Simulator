@@ -128,6 +128,13 @@ public class Wheel{
 
         float force = fLimit * Mathf.Sin( C * Mathf.Atan(B * slip - E * ( (B*slip) - Mathf.Atan(B*slip))));
         return force;
+       
+
+    }
+
+    public float complexTyreEquationNew(float slip, float fDynamicLimit, float fStaticLimit, float B, float C, float D, float E, float c, float m){
+        float force = (fDynamicLimit/fStaticLimit)*((c*verticalLoad - m*Mathf.Pow(verticalLoad, 2))*D)* Mathf.Sin( C * Mathf.Atan(B * slip - E * ( (B*slip) - Mathf.Atan(B*slip))));
+        return force;
 
     }
 
@@ -274,10 +281,12 @@ public class Wheel{
         wheelMesh.transform.Rotate(Mathf.Rad2Deg * omega * timeDelta, 0, 0, Space.Self); 
         
         slipRatio = calculateSlipRatio(longitudinalVelocity, omega, wheelRadius);        
-        longitudinalForce = complexTyreEquation(slipRatio, fLongDynamicLimit, C_long, B_long, E_long);        
+        // longitudinalForce = complexTyreEquation(slipRatio, fLongDynamicLimit, C_long, B_long, E_long); 
+        longitudinalForce = complexTyreEquationNew(slipRatio, fLongDynamicLimit, fLongLimit, B_long, C_long, D_long, E_long, c_long, m_long);       
 
         slipAngle = calculateSlipAngle(longitudinalVelocity, lateralVelocity, threshold: 0.1f);     
-        lateralForce = complexTyreEquation(slipAngle, fLatDynamicLimit, C_lat, B_lat, E_lat);
+        // lateralForce = complexTyreEquation(slipAngle, fLatDynamicLimit, C_lat, B_lat, E_lat);
+        lateralForce = complexTyreEquationNew(slipAngle, fLatDynamicLimit, fLatLimit, B_long, C_long, D_long, E_long, c_long, m_long);
         
         if(float.IsNaN(longitudinalForce)){
             longitudinalForce = 0;

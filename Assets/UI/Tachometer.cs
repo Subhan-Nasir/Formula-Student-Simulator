@@ -8,6 +8,8 @@ public class Tachometer : MonoBehaviour
 {
     // Code for radial dial adapted from: https://www.youtube.com/watch?v=5xWDKJj1UGY 
     public Rigidbody target;
+    public bool enableRadialIndicator;
+    public bool enableNeedle;
     public Image radialIndicator;
     public float minRPM = 0.0f;
     public float maxRPM = 0.0f; 
@@ -35,7 +37,13 @@ public class Tachometer : MonoBehaviour
     private void Awake() {
         RPMLabelTemplateTransform= transform.Find("RPMLabelTemplate");
         RPMLabelTemplateTransform.gameObject.SetActive(false);
-        maxFillAmount = (Mathf.Abs(minRPMArrowAngle) + Mathf.Abs(maxRPMArrowAngle))/360; 
+        maxFillAmount = (Mathf.Abs(minRPMArrowAngle) + Mathf.Abs(maxRPMArrowAngle))/360;
+        if(enableRadialIndicator == false){
+            radialIndicator.gameObject.SetActive(false);
+        } 
+        if(enableNeedle == false){
+            GameObject.Find("Needle").SetActive(false);
+        }
         
                
 
