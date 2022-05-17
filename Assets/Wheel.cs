@@ -75,13 +75,14 @@ public class Wheel{
     public float tyreEfficiency;
     
     public float feedbackTorque;
+    public float maxBrakingTorque;
     // public float diffLongForceLimit = 1000000;
 
     // public bool lockedDiff = false;
     // public float diffControlledOmega;
 
 
-    public Wheel(float id, GameObject wheelObject, GameObject wheelMesh, Rigidbody rb, float wheelRadius, float wheelMass, float brakeBias, float drivetrainInertia, float engineIdleRPM, float engineMaxRPM, float tyreEfficiency, Dictionary<string, float> longitudinalConstants, Dictionary<string, float> lateralConstants){
+    public Wheel(float id, GameObject wheelObject, GameObject wheelMesh, Rigidbody rb, float wheelRadius, float wheelMass, float brakeBias, float drivetrainInertia, float engineIdleRPM, float engineMaxRPM, float tyreEfficiency, float maxBrakingTorque, Dictionary<string, float> longitudinalConstants, Dictionary<string, float> lateralConstants){
         this.id = id;
         this.wheelObject = wheelObject;
         this.wheelMesh = wheelMesh;
@@ -94,6 +95,7 @@ public class Wheel{
         this.engineIdleRPM = engineIdleRPM;
         this.engineMaxRPM = engineMaxRPM;
         this.tyreEfficiency = tyreEfficiency;
+        this.maxBrakingTorque = maxBrakingTorque;
 
 
         this.B_long = longitudinalConstants["B"];
@@ -216,22 +218,22 @@ public class Wheel{
         if(userInput <0){
             if(Mathf.Abs(longitudinalVelocity) > 1){
                 if(id == 2 | id == 3){
-                    brakingTorque = 4000* userInput * (1 - brakeBias);
+                    brakingTorque = maxBrakingTorque* userInput * (1 - brakeBias);
                 }
                 else{
-                    brakingTorque = 4000 * userInput * brakeBias;
+                    brakingTorque = maxBrakingTorque * userInput * brakeBias;
                 }
 
                 
             }
             else if (Mathf.Abs(longitudinalVelocity) <= 1){
-                brakingTorque = 4000 * userInput ;
+                brakingTorque = maxBrakingTorque * userInput ;
 
                 if(id == 2 | id == 3){
-                    brakingTorque = 4000* userInput * longitudinalVelocity * (1 - brakeBias);
+                    brakingTorque = maxBrakingTorque* userInput * longitudinalVelocity * (1 - brakeBias);
                 }
                 else{
-                    brakingTorque = 4000 * userInput * longitudinalVelocity * brakeBias;
+                    brakingTorque = maxBrakingTorque * userInput * longitudinalVelocity * brakeBias;
                 }
             }
             

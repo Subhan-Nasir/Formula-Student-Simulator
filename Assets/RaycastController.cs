@@ -108,6 +108,7 @@ public class RaycastController : MonoBehaviour{
     public float wheelRadius = 0.23f;
     public float wheelMass = 5;
     public float brakeBias;
+    public float maxBrakingTorque = 1000;
     public float tyreEfficiency = 0.7f;  
        
     
@@ -314,7 +315,7 @@ public class RaycastController : MonoBehaviour{
         for (int i = 0; i < 4; i++){
             
             // suspensions[i] = new Suspension(i, naturalLength, springTravel, springStiffness, dampingCoefficient, bumpStiffness, bumpTravel, wheelRadius);                     
-            wheels[i] = new Wheel(i, wheelObjects[i], meshes[i], rb, wheelRadius, wheelMass, brakeBias, drivetrainInertia,idleRPM, maxRPM, tyreEfficiency, longitudinalConstants, lateralConstants);
+            wheels[i] = new Wheel(i, wheelObjects[i], meshes[i], rb, wheelRadius, wheelMass, brakeBias, drivetrainInertia,idleRPM, maxRPM, tyreEfficiency, maxBrakingTorque, longitudinalConstants, lateralConstants);
             
             if(i == 0| i == 1){
                 suspensions[i] = new Suspension(i, frontNaturalLength, frontSpringTravel, frontSpringStiffness, frontDampingCoefficient, bumpStiffness, bumpTravel, wheelRadius);
