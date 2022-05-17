@@ -17,6 +17,7 @@ public class Tachometer : MonoBehaviour
     public float maxRPMArrowAngle;
     public Color32 defaultDialColour;
     public Color32 redlineDialColour;
+    public Color32 gearLabelColour;
     
 
     private Transform RPMLabelTemplateTransform;
@@ -64,9 +65,11 @@ public class Tachometer : MonoBehaviour
         radialIndicator.fillAmount = maxFillAmount * ((rpm-minRPM)/(maxRPM-minRPM));
         if(rpm >= maxRPM - 2){
             radialIndicator.color = redlineDialColour;
+            gearLabel.color = new Color32( 254 , 24 , 0,255);
         }
         else{
             radialIndicator.color = defaultDialColour;
+            gearLabel.color = gearLabelColour;
         }        
 
         //rpm = GameObject.Find("Raycast Reworked").GetComponent<RaycastController>().engineRPM/1000;
@@ -80,6 +83,7 @@ public class Tachometer : MonoBehaviour
                 new Vector3(0, 0, Mathf.Lerp(minRPMArrowAngle, maxRPMArrowAngle, rpm / maxRPM));
         if (gearLabel!=null)
             gearLabel.text=gear.ToString();
+            
     }
 
     private void CreateRPMLabels(){
