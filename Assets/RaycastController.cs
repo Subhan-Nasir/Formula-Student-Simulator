@@ -110,6 +110,8 @@ public class RaycastController : MonoBehaviour{
     public float brakeBias;
     public float maxBrakingTorque = 1000;
     public float tyreEfficiency = 0.7f;  
+    public float toeAngleFront = 1f;
+    public float toeAngleRear = -1f;
        
     
     private Dictionary<string, float> lateralConstants = new Dictionary<string,float>(){
@@ -1135,13 +1137,25 @@ public class RaycastController : MonoBehaviour{
 
         wheelObjects[0].transform.localRotation = Quaternion.Euler(
             wheelObjects[0].transform.localRotation.x, 
-            wheelObjects[0].transform.localRotation.y + wheelAngleLeft,
+            wheelObjects[0].transform.localRotation.y - toeAngleFront + wheelAngleLeft,
             wheelObjects[0].transform.localRotation.z );
         
         wheelObjects[1].transform.localRotation = Quaternion.Euler(
             wheelObjects[1].transform.localRotation.x, 
-            wheelObjects[1].transform.localRotation.y + wheelAngleRight,
+            wheelObjects[1].transform.localRotation.y + toeAngleFront + wheelAngleRight,
             wheelObjects[1].transform.localRotation.z );
+
+        wheelObjects[2].transform.localRotation = Quaternion.Euler(
+            wheelObjects[2].transform.localRotation.x, 
+            wheelObjects[2].transform.localRotation.y - toeAngleRear,
+            wheelObjects[2].transform.localRotation.z );
+        
+        wheelObjects[3].transform.localRotation = Quaternion.Euler(
+            wheelObjects[3].transform.localRotation.x, 
+            wheelObjects[3].transform.localRotation.y + toeAngleRear,
+            wheelObjects[3].transform.localRotation.z );
+
+
 
     }
 
