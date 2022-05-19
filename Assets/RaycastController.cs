@@ -38,7 +38,7 @@ public class RaycastController : MonoBehaviour{
     public List<float> gearRatios;
     public float primaryGearRatio;
     public float finalDriveRatio;
-    public float idleRPM = 1500;
+    public float idleRPM = 1650;
     public float maxRPM = 14000;
     public float auxillaryLoss = 0.15f;
     public float maxEngineBrakingTorque = 5;
