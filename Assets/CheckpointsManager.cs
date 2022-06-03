@@ -36,8 +36,11 @@ public class CheckpointsManager : MonoBehaviour
             checkpointList.Add(checkpoint);
         }
         nextCheckpointIndex = 0;      
-        startCrossed = false; 
+        startCrossed = false;
+        
         notificationManager = GameObject.Find("NotificationPanel").GetComponent<NotificationTriggerEvent>(); 
+        
+        
         lapNumber = 1;
         checkpointMissedWarning.text = "";
         car = GameObject.FindGameObjectWithTag("Player").GetComponent<Rigidbody>();
