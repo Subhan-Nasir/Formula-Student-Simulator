@@ -20,6 +20,7 @@ public class Wheel{
     public Rigidbody rb;
     public float wheelRadius;
     public float wheelMass;
+    public int tyrePressure;
     public float momentOfInertia;
     public float drivetrainInertia;  
     
@@ -52,15 +53,18 @@ public class Wheel{
     public float C_long;
     public float B_long;
     public float E_long;
-    public float c_long;
-    public float m_long;
+    public float a_1_long;
+    public float a_2_long;
+    public float a_3_long;
 
     public float D_lat;
     public float C_lat;
     public float B_lat;
     public float E_lat;
-    public float c_lat;
-    public float m_lat;
+    public float a_1_lat;
+    public float a_2_lat;
+    public float a_3_lat;
+    public float a_4_lat;
 
     public float fLongLimit;
     public float fLatLimit;
@@ -76,13 +80,15 @@ public class Wheel{
     
     public float feedbackTorque;
     public float maxBrakingTorque;
+
+    public float camberAngle;
     // public float diffLongForceLimit = 1000000;
 
     // public bool lockedDiff = false;
     // public float diffControlledOmega;
 
 
-    public Wheel(float id, GameObject wheelObject, GameObject wheelMesh, Rigidbody rb, float wheelRadius, float wheelMass, float brakeBias, float drivetrainInertia, float engineIdleRPM, float engineMaxRPM, float tyreEfficiency, float maxBrakingTorque, Dictionary<string, float> longitudinalConstants, Dictionary<string, float> lateralConstants){
+    public Wheel(float id, GameObject wheelObject, GameObject wheelMesh, Rigidbody rb, float wheelRadius, float wheelMass, float brakeBias, float drivetrainInertia, float engineIdleRPM, float engineMaxRPM, int tyrePressure, float tyreEfficiency, float maxBrakingTorque, Dictionary<int, Dictionary<string, float>> longitudinalConstants, Dictionary<int, Dictionary<string, float>> lateralConstants){
         this.id = id;
         this.wheelObject = wheelObject;
         this.wheelMesh = wheelMesh;
@@ -94,24 +100,33 @@ public class Wheel{
         this.drivetrainInertia = drivetrainInertia;
         this.engineIdleRPM = engineIdleRPM;
         this.engineMaxRPM = engineMaxRPM;
+        this.tyrePressure = tyrePressure;
         this.tyreEfficiency = tyreEfficiency;
         this.maxBrakingTorque = maxBrakingTorque;
 
 
-        this.B_long = longitudinalConstants["B"];
-        this.C_long = longitudinalConstants["C"];
-        this.D_long = longitudinalConstants["D"];      
-        this.E_long = longitudinalConstants["E"];
-        this.c_long = longitudinalConstants["c"];
-        this.m_long = longitudinalConstants["m"];
+        this.B_long = longitudinalConstants[tyrePressure]["B"];
+        this.C_long = longitudinalConstants[tyrePressure]["C"];
+        this.D_long = longitudinalConstants[tyrePressure]["D"];      
+        this.E_long = longitudinalConstants[tyrePressure]["E"];
+        this.a_1_long = longitudinalConstants[tyrePressure]["a_1"];
+        this.a_2_long = longitudinalConstants[tyrePressure]["a_2"];
+        this.a_3_long = longitudinalConstants[tyrePressure]["a_3"];
 
 
-        this.B_lat = lateralConstants["B"];
-        this.C_lat = lateralConstants["C"];
-        this.D_lat = lateralConstants["D"];
-        this.E_lat = lateralConstants["E"];
-        this.c_lat = lateralConstants["c"];
-        this.m_lat = lateralConstants["m"];
+
+        this.B_lat = lateralConstants[tyrePressure]["B"];
+        this.C_lat = lateralConstants[tyrePressure]["C"];
+        this.D_lat = lateralConstants[tyrePressure]["D"];
+        this.E_lat = lateralConstants[tyrePressure]["E"];
+        this.a_1_lat = lateralConstants[tyrePressure]["a_1"];
+        this.a_2_lat = lateralConstants[tyrePressure]["a_2"];
+        this.a_3_lat = lateralConstants[tyrePressure]["a_3"];
+        this.a_4_lat = lateralConstants[tyrePressure]["a_4"];
+
+        
+
+        
 
         // if(id == 2| id == 3){
         //     lockedDiff = true;
@@ -121,29 +136,39 @@ public class Wheel{
 
     }
 
-    public float tyreEquation(float slip, float B, float C, float D, float E){
-        float force = D * Mathf.Sin( C * Mathf.Atan(B * slip - E * ( (B*slip) - Mathf.Atan(B*slip))));
-        return force;  
-    }
 
-    public float complexTyreEquation(float slip, float fLimit, float C, float B, float E){
-
-        float force = fLimit * Mathf.Sin( C * Mathf.Atan(B * slip - E * ( (B*slip) - Mathf.Atan(B*slip))));
+    public float tyreEquationLongitudinal(float slip, float fDynamicLimit, float fStaticLimit, float verticalLoad, float B_long, float C_long, float D_long, float E_long, float a_1_long, float a_2_long, float a_3_long){        
+        float force = (fDynamicLimit/fStaticLimit)*((a_1_long*verticalLoad - a_2_long*Mathf.Pow(verticalLoad, 2))*D_long)* Mathf.Sin( C_long * Mathf.Atan(B_long*Mathf.Pow(verticalLoad, a_3_long) * slip - E_long * ( (B_long*Mathf.Pow(verticalLoad, a_3_long)*slip) - Mathf.Atan(B_long*Mathf.Pow(verticalLoad, a_3_long)*slip))));
+        
         return force;
-       
-
     }
 
-    public float complexTyreEquationNew(float slip, float fDynamicLimit, float fStaticLimit, float B, float C, float D, float E, float c, float m){
-        float force = (fDynamicLimit/fStaticLimit)*((c*verticalLoad - m*Mathf.Pow(verticalLoad, 2))*D)* Mathf.Sin( C * Mathf.Atan(B * slip - E * ( (B*slip) - Mathf.Atan(B*slip))));
+    public float tyreEquationLateral(float slip, float fDynamicLimit, float fStaticLimit, float verticalLoad, float camberAngle, float B_lat, float C_lat, float D_lat, float E_lat, float a_1_lat, float a_2_lat, float a_3_lat, float a_4_lat){
+
+        float force = (fDynamicLimit/fStaticLimit)*((a_1_lat*verticalLoad - a_2_lat*Mathf.Pow(verticalLoad, 2))*D_lat*(1-a_4_lat*Mathf.Pow(camberAngle,2)))* Mathf.Sin( C_lat * Mathf.Atan(B_lat*Mathf.Pow(verticalLoad, a_3_lat) * slip - E_lat * ( (B_lat*Mathf.Pow(verticalLoad, a_3_lat)*slip) - Mathf.Atan(B_lat*Mathf.Pow(verticalLoad, a_3_lat)*slip))));
         return force;
-
     }
 
 
+    // public float complexTyreEquationNew(float slip, float fDynamicLimit, float fStaticLimit, float B, float C, float D, float E, float a_1, float a_2){
+    //     float force = (fDynamicLimit/fStaticLimit)*((a_1*verticalLoad - a_2*Mathf.Pow(verticalLoad, 2))*D)* Mathf.Sin( C * Mathf.Atan(B * slip - E * ( (B*slip) - Mathf.Atan(B*slip))));
+    //     return force;
 
-    public float tyreCurvePeak(float c, float m, float D, float verticalLoad){
-        return (c*verticalLoad - m*Mathf.Pow(verticalLoad, 2))*D;
+    // }
+
+    // public float tyreCurvePeak(float a_1, float a_2, float D, float verticalLoad){
+    //     return (a_1*verticalLoad - a_2*Mathf.Pow(verticalLoad, 2))*D;
+    // }
+
+    public float tyreCurvePeakLateral(float a_1_lat, float a_2_lat, float a_4_lat, float verticalLoad, float camberAngle, float D_lat){
+
+        return ((a_1_lat*verticalLoad - a_2_lat*Mathf.Pow(verticalLoad, 2))*D_lat*(1-a_4_lat*Mathf.Pow(camberAngle,2)));
+
+    }
+
+    public float tyreCurvePeakLongitudinal(float a_1_long, float a_2_long, float D_long, float verticalLoad){
+        
+        return (a_1_long*verticalLoad - a_2_long*Mathf.Pow(verticalLoad, 2))*D_long;
     }
 
     public float dynamicPeakLongitudinal(float fLat, float fLongLimit, float fLatLimit){
@@ -182,15 +207,26 @@ public class Wheel{
             slipAngle = -Mathf.Atan(vLat / Mathf.Abs(vLong));
             
         }
+
+
         return slipAngle;
     }
 
-    public float getRollingResistance(float verticalLoad, float omega, float radius, float coefficient){
-        return (verticalLoad * omega * radius * coefficient);
-    }
+    // public float getRollingResistance(float verticalLoad, float omega, float radius, float coefficient){
+    //     return (verticalLoad * omega * radius * coefficient);
+    // }
     
+    public float getRollingResistance(float longitudinalVelocity, float lateralVelocity, float verticalLoad, float radius, int tyrePressure){
+        float speed = Mathf.Pow(Mathf.Pow(longitudinalVelocity, 2) + Mathf.Pow(lateralVelocity,2), 0.5f);        
+        float rrCoefficient = 0.005f + ((1/(0.06895f*tyrePressure))*(0.01f + 0.0095f * Mathf.Pow(0.036f*speed,2))); 
+        float rrForce = -(rrCoefficient) * verticalLoad;
+        return radius * rrForce;
 
-    public Vector3 getUpdatedForce(float userInput, float currentGearRatio, float finalDriveRatio, float primaryGearRatio, RaycastHit hit, float timeDelta, float verticalLoad){
+    }
+
+    public Vector3 getUpdatedForce(float userInput, float currentGearRatio, float finalDriveRatio, float primaryGearRatio, RaycastHit hit, float timeDelta, float verticalLoad, float camberAngle){
+        
+
         
         // Debug.Log(userInput);
         if(verticalLoad < 0){
@@ -198,6 +234,7 @@ public class Wheel{
         }
         
         this.verticalLoad = verticalLoad;
+        this.camberAngle = camberAngle;
         
        
         
@@ -209,8 +246,13 @@ public class Wheel{
         
        
 
-        fLongLimit = tyreEfficiency * tyreCurvePeak(c_long, m_long, D_long, verticalLoad);
-        fLatLimit = tyreEfficiency * tyreCurvePeak(c_lat, m_lat, D_lat, verticalLoad);
+        // fLongLimit = tyreEfficiency * tyreCurvePeak(a_1_long, a_2_long, D_long, verticalLoad);
+        // fLatLimit = tyreEfficiency * tyreCurvePeak(a_1_lat, a_2_lat, D_lat, verticalLoad);
+
+        fLongLimit = tyreCurvePeakLongitudinal(a_1_long, a_2_long, D_long, verticalLoad);
+        fLatLimit = tyreCurvePeakLateral(a_1_lat, a_2_lat, a_4_lat, verticalLoad, camberAngle, D_lat);
+
+        
         
         fLongDynamicLimit = dynamicPeakLongitudinal(lateralForce, fLongLimit, fLatLimit);
         fLatDynamicLimit = dynamicPeakLateral(longitudinalForce, fLongLimit, fLatLimit);
@@ -243,7 +285,9 @@ public class Wheel{
             brakingTorque = 0;
         }
      
-        rollingResistance = -getRollingResistance(verticalLoad, omega, wheelRadius, rrCoefficient);
+        rollingResistance = getRollingResistance(longitudinalVelocity, lateralVelocity, verticalLoad, wheelRadius, tyrePressure);
+     
+
         feedbackTorque = rollingResistance + brakingTorque - longitudinalForce*wheelRadius;
         torque = wheelTorque + feedbackTorque;
                 
@@ -284,12 +328,19 @@ public class Wheel{
         
         slipRatio = calculateSlipRatio(longitudinalVelocity, omega, wheelRadius);        
         // longitudinalForce = complexTyreEquation(slipRatio, fLongDynamicLimit, C_long, B_long, E_long); 
-        longitudinalForce = complexTyreEquationNew(slipRatio, fLongDynamicLimit, fLongLimit, B_long, C_long, D_long, E_long, c_long, m_long);       
+        // longitudinalForce = complexTyreEquationNew(slipRatio, fLongDynamicLimit, fLongLimit, B_long, C_long, D_long, E_long, a_1_long, a_2_long);       
+        longitudinalForce = tyreEquationLongitudinal(slipRatio, fLongDynamicLimit, fLongLimit, verticalLoad, B_long, C_long, D_long, E_long, a_1_long, a_2_long, a_3_long);
+
 
         slipAngle = calculateSlipAngle(longitudinalVelocity, lateralVelocity, threshold: 0.1f);     
         // lateralForce = complexTyreEquation(slipAngle, fLatDynamicLimit, C_lat, B_lat, E_lat);
-        lateralForce = complexTyreEquationNew(slipAngle, fLatDynamicLimit, fLatLimit, B_long, C_long, D_long, E_long, c_long, m_long);
+        // lateralForce = complexTyreEquationNew(slipAngle, fLatDynamicLimit, fLatLimit, B_long, C_long, D_long, E_long, a_1_long, a_2_long);
         
+        
+        lateralForce = tyreEquationLateral(slipAngle, fLatDynamicLimit, fLatLimit, verticalLoad, camberAngle, B_lat, C_lat, D_lat, E_lat, a_1_lat, a_2_lat, a_3_lat, a_4_lat);
+
+
+
         if(float.IsNaN(longitudinalForce)){
             longitudinalForce = 0;
         }
@@ -301,8 +352,14 @@ public class Wheel{
         //     longitudinalForce = Mathf.Clamp(longitudinalForce, -Mathf.Abs(diffLongForceLimit), Mathf.Abs(diffLongForceLimit));
         // }
         
+
+        
         longitudinalForce = Mathf.Clamp(longitudinalForce, -50000, 50000);
         lateralForce = Mathf.Clamp(lateralForce, -50000,50000);
+
+        // Debug.Log($"Wheel {id}: Slip Ratio = {slipRatio}, Slip Angle = {slipAngle}, Flong = {longitudinalForce}, Flat = {lateralForce}");
+        // Debug.Log($"Wheel {id}: Camber = {camberAngle}");
+
         forceVector = longitudinalForce * wheelObject.transform.forward + lateralForce * wheelObject.transform.right;
         
        

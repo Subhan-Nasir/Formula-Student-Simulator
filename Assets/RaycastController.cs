@@ -107,32 +107,242 @@ public class RaycastController : MonoBehaviour{
     [Header("Wheel")]
     public float wheelRadius = 0.23f;
     public float wheelMass = 5;
-    public float brakeBias;
+    public float brakeBias = 0.55f;
+    public int tyrePressure = 12;
+    public float staticCamberAngleFront = -3.15f;
+    public float staticCamberAngleRear = -1.755f;
     public float maxBrakingTorque = 1000;
     public float tyreEfficiency = 0.7f;  
     public float toeAngleFront = 1f;
     public float toeAngleRear = -1f;
        
     
-    private Dictionary<string, float> lateralConstants = new Dictionary<string,float>(){
-        {"B", 11.45f},
-        {"C", 1.551f},
-        {"D", 1790},
-        {"E", 0.1859f},
-        {"c", 0.00151f},
-        {"m", 2.533E-7f}
-    };
+    // private Dictionary<string, float> lateralConstants = new Dictionary<string,float>(){
+    //     {"B", 11.45f},
+    //     {"C", 1.551f},
+    //     {"D", 1790},
+    //     {"E", 0.1859f},
+    //     {"a_1_lat", 0.00151f},
+    //     {"a_2_lat", 2.533E-7f}
+    // };
 
         
-    private Dictionary<string, float> longitudinalConstants = new Dictionary<string, float>(){
-        {"B", 11.93f},
-        {"C", 1.716f},
-        {"D", 1711},
-        {"E", 0.3398f},
-        {"c", 0.00179f},
-        {"m", 3.62E-7f}     
-    };
+    // private Dictionary<string, float> longitudinalConstants = new Dictionary<string, float>(){
+    //     {"B", 11.93f},
+    //     {"C", 1.716f},
+    //     {"D", 1711},
+    //     {"E", 0.3398f},
+    //     {"a_1_long", 0.00179f},
+    //     {"a_2_long", 3.62E-7f}     
+    // };
     
+
+    // private Dictionary<int, Dictionary<string, float>> lateralConstants = new Dictionary<int, Dictionary<string, float>>(){
+    //     {8, new Dictionary<string, float>(){ 
+    //         {"B", 45.79f},
+    //         {"C", 0.04851f},
+    //         {"D", 5010},
+    //         {"E", 1.231f},
+    //         {"a_1", 0.01512f}, 
+    //         {"a_2", 2.348E-6f},
+    //         {"a_3", -0.1836f},
+    //         {"a_4", 0}
+    //     }},
+
+    //     {10, new Dictionary<string, float>(){
+    //         {"B", 45.79f},
+    //         {"C", 0.04851f},
+    //         {"D", 5010},
+    //         {"E", 1.231f},
+    //         {"a_1", 0.01512f}, 
+    //         {"a_2", 2.348E-6f},
+    //         {"a_3", -0.1836f},
+    //         {"a_4", 0}         
+    //     }},
+
+
+    //     {12, new Dictionary<string, float>(){
+    //         {"B", 45.79f},
+    //         {"C", 0.04851f},
+    //         {"D", 5010},
+    //         {"E", 1.231f},
+    //         {"a_1", 0.01512f}, 
+    //         {"a_2", 2.348E-6f},
+    //         {"a_3", -0.1836f},
+    //         {"a_4", 0}           
+    //     }},
+
+
+        // {14, new Dictionary<string, float>(){
+        //     {"B", 45.79f},
+        //     {"C", 0.04851f},
+        //     {"D", 5010},
+        //     {"E", 1.231f},
+        //     {"a_1", 0.01512f}, 
+        //     {"a_2", 2.348E-6f},
+        //     {"a_3", -0.1836f},
+        //     {"a_4", 0}          
+        // }}
+
+
+    // };
+
+    // private Dictionary<int, Dictionary<string, float>> longitudinalConstants = new Dictionary<int, Dictionary<string, float>>(){
+    //     {8, new Dictionary<string, float>(){ 
+    //         {"B", 15f},
+    //         {"C", 1.5f},
+    //         {"D", 5510},
+    //         {"E", 0.5002f},
+    //         {"a_1", 0.0005491f},
+    //         {"a_2", 1.126E-7f},
+    //         {"a_3", -4.656E-5f}
+    //     }},
+
+    //     {10, new Dictionary<string, float>(){
+    //         {"B", 15f},
+    //         {"C", 1.5f},
+    //         {"D", 5510},
+    //         {"E", 0.5002f},
+    //         {"a_1", 0.0005491f},
+    //         {"a_2", 1.126E-7f},
+    //         {"a_3", -4.656E-5f}           
+    //     }},
+
+
+    //     {12, new Dictionary<string, float>(){
+    //         {"B", 15f},
+    //         {"C", 1.5f},
+    //         {"D", 5510},
+    //         {"E", 0.5002f},
+    //         {"a_1", 0.0005491f},
+    //         {"a_2", 1.126E-7f},
+    //         {"a_3", -4.656E-5f}            
+    //     }},
+
+
+    //     {14, new Dictionary<string, float>(){
+    //         {"B", 15f},
+    //         {"C", 1.5f},
+    //         {"D", 5510},
+    //         {"E", 0.5002f},
+    //         {"a_1", 0.0005491f},
+    //         {"a_2", 1.126E-7f},
+    //         {"a_3", -4.656E-5f}            
+    //     }}
+
+
+    // };
+
+
+    private Dictionary<int, Dictionary<string, float>> lateralConstants = new Dictionary<int, Dictionary<string, float>>(){
+        {8, new Dictionary<string, float>(){ 
+            {"B", 45.79f},
+            {"C", 0.04851f},
+            {"D", 5010},
+            {"E", 1.231f},
+            {"a_1", 0.01512f}, 
+            {"a_2", 2.348E-6f},
+            {"a_3", -0.1836f},
+            {"a_4", 0}
+        }},
+
+        {10, new Dictionary<string, float>(){
+            {"B", 45.79f},
+            {"C", 0.04851f},
+            {"D", 5010},
+            {"E", 1.231f},
+            {"a_1", 0.01512f}, 
+            {"a_2", 2.348E-6f},
+            {"a_3", -0.1836f},
+            {"a_4", 0}         
+        }},
+
+// Non flat ends
+// [ 3.92783054e+01 -1.52206480e+00 -3.18503689e+00  3.53035961e-01
+//  7.94091253e-01  6.09478124e-05 -1.98853693e-01  4.95423749e-03]
+
+// Flat ends
+// [ 1.19630268e+02  5.42424666e-04  1.00591972e+03 -1.59561936e+00
+//   3.14288755e+00  1.56814872e-04 -2.60828013e-01  4.95307656e-03]
+
+// Non flat ends version 3 - spinning boogaloo
+// [ 3.93293878e+01  1.52163961e+00  1.36857062e+00  3.52479236e-01
+//   1.84800021e+00  1.41761371e-04 -1.99001968e-01  4.95424590e-03]
+
+        {12, new Dictionary<string, float>(){
+            {"B", 3.93293878e+01f},
+            {"C", 1.52163961e+00f},
+            {"D", 1.36857062e+00f},
+            {"E",  3.52479236e-01f},
+            {"a_1", 1.84800021e+00f}, 
+            {"a_2", 1.41761371e-04f},
+            {"a_3", 1.99001968e-01f},
+            {"a_4", 4.95424590e-03f}         
+        }},
+
+
+        {14, new Dictionary<string, float>(){
+            {"B", 45.79f},
+            {"C", 0.04851f},
+            {"D", 5010},
+            {"E", 1.231f},
+            {"a_1", 0.01512f}, 
+            {"a_2", 2.348E-6f},
+            {"a_3", -0.1836f},
+            {"a_4", 0}          
+        }}
+
+
+    };
+
+    private Dictionary<int, Dictionary<string, float>> longitudinalConstants = new Dictionary<int, Dictionary<string, float>>(){
+        {8, new Dictionary<string, float>(){ 
+            {"B", 15f},
+            {"C", 1.5f},
+            {"D", 5510},
+            {"E", 0.5002f},
+            {"a_1", 0.0005491f},
+            {"a_2", 1.126E-7f},
+            {"a_3", -4.656E-5f}
+        }},
+
+        {10, new Dictionary<string, float>(){
+            {"B", 15f},
+            {"C", 1.5f},
+            {"D", 5510},
+            {"E", 0.5002f},
+            {"a_1", 0.0005491f},
+            {"a_2", 1.126E-7f},
+            {"a_3", -4.656E-5f}           
+        }},
+
+
+        {12, new Dictionary<string, float>(){
+            {"B", 15f},
+            {"C", 1.5f},
+            {"D", 5510},
+            {"E", 0.5002f},
+            {"a_1", 0.0005491f},
+            {"a_2", 1.126E-7f},
+            {"a_3", -4.656E-5f}     
+        }},
+
+
+        {14, new Dictionary<string, float>(){
+            {"B", 15f},
+            {"C", 1.5f},
+            {"D", 5510},
+            {"E", 0.5002f},
+            {"a_1", 0.0005491f},
+            {"a_2", 1.126E-7f},
+            {"a_3", -4.656E-5f}            
+        }}
+
+
+    };
+
+    
+
     private Wheel[] wheels = new Wheel[4];
 
     [Header("Steering")]
@@ -307,6 +517,9 @@ public class RaycastController : MonoBehaviour{
 
     private float maxDamperForce;
     private float maxSpringForce;
+
+    private float[] camberAngles = new float[4];
+
     void OnValidate(){
         keys = new NewControls();
         rb.centerOfMass = COM_Finder.transform.localPosition;
@@ -317,7 +530,7 @@ public class RaycastController : MonoBehaviour{
         for (int i = 0; i < 4; i++){
             
             // suspensions[i] = new Suspension(i, naturalLength, springTravel, springStiffness, dampingCoefficient, bumpStiffness, bumpTravel, wheelRadius);                     
-            wheels[i] = new Wheel(i, wheelObjects[i], meshes[i], rb, wheelRadius, wheelMass, brakeBias, drivetrainInertia,idleRPM, maxRPM, tyreEfficiency, maxBrakingTorque, longitudinalConstants, lateralConstants);
+            wheels[i] = new Wheel(i, wheelObjects[i], meshes[i], rb, wheelRadius, wheelMass, brakeBias, drivetrainInertia,idleRPM, maxRPM, tyrePressure, tyreEfficiency, maxBrakingTorque, longitudinalConstants, lateralConstants);
             
             if(i == 0| i == 1){
                 suspensions[i] = new Suspension(i, frontNaturalLength, frontSpringTravel, frontSpringStiffness, frontDampingCoefficient, bumpStiffness, bumpTravel, wheelRadius);
@@ -393,16 +606,21 @@ public class RaycastController : MonoBehaviour{
         // rb.inertiaTensorRotation =  Quaternion.Euler(350,350,350);
 
         // INERTIA TENSOR:
-        // Fusion:        left,      backwards,   up         (X, Y, Z)
-        // XX, YY, ZZ  =  1.606e2,   3.168e1,     1.752e2
-        // XY, XZ, YZ  =  1.262,     2.116e-1,    3.529
+        // Fusion's axis system:    left(X),      backwards(Y),   up(Z)        
+        // XX, YY, ZZ  =            1.606e2,      3.168e1,        1.752e2
+        // XY, XZ, YZ  =            1.262,        2.116e-1,       3.529
         
-        // Unity:                       right,      up,         forwards (x,y,z)                            
-        // tensor -->    XX, ZZ, YY  =  1.606e2,    1.752e2,    3.168e1
-        // rotation -->  XZ, XY, YZ  =  2.116e-1,   1.262,      3.529
+        // Unity's axis system:         right(X),       up(Y),      forwards(Z)                            
+        // tensor -->    XX, ZZ, YY  =  1.606e2,        1.752e2,    3.168e1
+        // rotation -->  XZ, XY, YZ  =  2.116e-1,       1.262,      3.529
 
-        rb.inertiaTensor = new Vector3(1.606E2f, 1.752E2f, 3.168E1f);
-        rb.inertiaTensorRotation = Quaternion.Euler(2.116E-1f, 1.262f, 3.529f);
+        // Old values
+        // rb.inertiaTensor = new Vector3(1.606E2f, 1.752E2f, 3.168E1f);
+        // rb.inertiaTensorRotation = Quaternion.Euler(2.116E-1f, 1.262f, 3.529f);
+        
+        // New values from report
+        rb.inertiaTensor = new Vector3(138.5f, 151.5f, 26.96f);
+        rb.inertiaTensorRotation = Quaternion.Euler(0.2698f, 1.09f, 3.62f);
 
 
 
@@ -556,6 +774,7 @@ public class RaycastController : MonoBehaviour{
         updateRollcentreHeights();
         updateCOMaccleerations();
         updateVerticalLoad();
+        updateCamberAngles();
         // calculateDiffTorques();
 
         wheels[2].wheelTorque = 0.5f*(engineTorque - engineBraking) * gearRatios[currentGear + 1] *primaryGearRatio * finalDriveRatio;
@@ -572,7 +791,7 @@ public class RaycastController : MonoBehaviour{
                 
                 // Force vectors from suspension, wheel and anti rollbars.
                 Vector3 suspensionForceVector = suspensions[i].getUpdatedForce(hit, Time.fixedDeltaTime, contact);          
-                Vector3 wheelForceVector = wheels[i].getUpdatedForce(userInput, gearRatios[currentGear + 1], finalDriveRatio, primaryGearRatio, hit, Time.fixedDeltaTime, wheelVerticalLoad[i]);            
+                Vector3 wheelForceVector = wheels[i].getUpdatedForce(userInput, gearRatios[currentGear + 1], finalDriveRatio, primaryGearRatio, hit, Time.fixedDeltaTime, wheelVerticalLoad[i], camberAngles[i]);            
                 Vector3 antiRollForceVector = getAntiRollForce(suspensions[2], suspensions[3], antiRollStiffness, i) * hit.normal;
 
                 rb.AddForceAtPosition(wheelForceVector +suspensionForceVector, hit.point + new Vector3 (0,0.44f,0)); 
@@ -617,7 +836,11 @@ public class RaycastController : MonoBehaviour{
         FL_LateralForce = wheels[0].lateralForce;
         RL_LateralForce = wheels[3].lateralForce;
         
-       
+       float totalVerticalLoad = 0;
+       for(int i = 0; i<4; i++){
+           totalVerticalLoad += wheels[i].verticalLoad;
+       }
+       Debug.Log($"Total vertical load = {totalVerticalLoad}");
         
 
 
@@ -894,6 +1117,29 @@ public class RaycastController : MonoBehaviour{
         rollStiffnessRear =  Mathf.Pow(trackRear,2) *  0.5f*(wheelRateRL + wheelRateRR)/(360/Mathf.PI);
     }
 
+    void updateCamberAngles(){
+
+        camberAngles[0] = staticCamberAngleFront + calculateCamberChangeFront(wheelTravels[0], rackTravel) + rollAngleFront;
+        camberAngles[1] = staticCamberAngleFront + calculateCamberChangeFront(wheelTravels[1], rackTravel) - rollAngleRear;
+
+        camberAngles[2] = staticCamberAngleRear + calculateCamberChangeRear(wheelTravels[2]) + rollAngleFront;
+        camberAngles[3] = staticCamberAngleRear + calculateCamberChangeRear(wheelTravels[3]) - rollAngleRear;
+
+
+    }
+
+    float calculateCamberChangeFront(float wheelTravel, float rackTravel){
+        return -3.191f - 0.02382f*wheelTravel + 0.04161f*rackTravel - 0.0004034f*Mathf.Pow(wheelTravel,2) - 6.873E-5f*wheelTravel*rackTravel + 0.0004845f*Mathf.Pow(rackTravel, 2) + 3.172f;
+    }
+
+    float calculateCamberChangeRear(float wheelTravel){
+        return -0.0004f * Mathf.Pow(wheelTravel,2) + 0.0016f*wheelTravel - 1.8333f + 1.824f;
+    }
+
+    
+
+    
+
     // void calculateDiffTorques(){
 
 
@@ -1038,28 +1284,29 @@ public class RaycastController : MonoBehaviour{
         for(int i = 0; i < springs.Count; i++){
         
                         
-            Gizmos.color = Color.blue;
-            Ray ray = new Ray(springs[i].transform.position, -transform.up);           
-            Gizmos.DrawLine(ray.origin, -suspensions[i].springLength * transform.up + springs[i].transform.position);
+            // Gizmos.color = Color.blue;
+            // Ray ray = new Ray(springs[i].transform.position, -transform.up);           
+            // Gizmos.DrawLine(ray.origin, -suspensions[i].springLength * transform.up + springs[i].transform.position);
 
-            Gizmos.color = Color.white;
-            Ray ray2 = new Ray(springs[i].transform.position, -transform.up);           
-            Gizmos.DrawLine(ray2.origin, -suspensions[i].minLength * transform.up + springs[i].transform.position);
+            // Gizmos.color = Color.white;
+            // Ray ray2 = new Ray(springs[i].transform.position, -transform.up);           
+            // Gizmos.DrawLine(ray2.origin, -suspensions[i].minLength * transform.up + springs[i].transform.position);
             
 
             
-            Gizmos.color = Color.yellow;
-            Gizmos.DrawLine(-suspensions[i].springLength * transform.up + springs[i].transform.position, -suspensions[i].springLength * transform.up + springs[i].transform.position + transform.up * -wheelRadius);
+            // Gizmos.color = Color.yellow;
+            // Gizmos.DrawLine(-suspensions[i].springLength * transform.up + springs[i].transform.position, -suspensions[i].springLength * transform.up + springs[i].transform.position + transform.up * -wheelRadius);
             
-            Gizmos.color = Color.white;
-            Gizmos.DrawWireCube(springs[i].transform.position - new Vector3(0, suspensions[i].springLength + wheelRadius, 0), new Vector3(0.1f, 0, 0.1f));
+            // Gizmos.color = Color.white;
+            // Gizmos.DrawWireCube(springs[i].transform.position - new Vector3(0, suspensions[i].springLength + wheelRadius, 0), new Vector3(0.1f, 0, 0.1f));
         
             // Gizmos.color = Color.yellow;
             // Gizmos.DrawRay(wheels[i].wheelObject.transform.position, wheels[i].longitudinalVelocity * wheels[i].wheelObject.transform.forward);
             // Gizmos.DrawRay(wheels[i].wheelObject.transform.position, -wheels[i].lateralVelocity * wheels[i].wheelObject.transform.right);
 
-            // Gizmos.DrawRay(wheels[i].wheelObject.transform.position, wheels[i].wheelObject.transform.right * (wheels[i].lateralForce/1000));
-            // Gizmos.DrawRay(wheels[i].wheelObject.transform.position, wheels[i].wheelObject.transform.forward * (wheels[i].longitudinalForce/1000));
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawRay(wheels[i].wheelObject.transform.position, wheels[i].wheelObject.transform.right * (wheels[i].lateralForce/1000));
+            Gizmos.DrawRay(wheels[i].wheelObject.transform.position, wheels[i].wheelObject.transform.forward * (wheels[i].longitudinalForce/1000));
             // Gizmos.DrawRay(wheels[i].wheelObject.transform.position, wheels[i].wheelObject.transform.up * wheels[i].verticalLoad/1000);
             // Gizmos.DrawRay(COM_Finder.transform.position, -drag * transform.forward /1000);
           

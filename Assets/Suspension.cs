@@ -124,37 +124,39 @@ public class Suspension{
         return WLongitudinal;
     }
 
-    public float calculateCamberFront(float x){
-        float y;
-        y = (4.3895E-9f) * Mathf.Pow(x,4) +  1.7466E-7f * Mathf.Pow(x,3) + (4.5144E-4f) * Mathf.Pow(x,2) + (2.6678E-2f) * x + 3.1363f;
-        return y;
-    }
+    // public float calculateCamberFront(float x){
+    //     float y;
+    //     y = (4.3895E-9f) * Mathf.Pow(x,4) +  1.7466E-7f * Mathf.Pow(x,3) + (4.5144E-4f) * Mathf.Pow(x,2) + (2.6678E-2f) * x + 3.1363f;
+    //     return y;
+    // }
 
-    public float calculateCamberRear(float x){
-        float y;
-        y = (1.0222E-8f) * Mathf.Pow(x,4) - (7.5916E-7f) * Mathf.Pow(x,3) + (4.4086E-4f) * Mathf.Pow(x,2) - (2.7342E-3f) * x + (1.7161f);
-        return y;
-    }
+    // public float calculateCamberRear(float x){
+    //     float y;
+    //     y = (1.0222E-8f) * Mathf.Pow(x,4) - (7.5916E-7f) * Mathf.Pow(x,3) + (4.4086E-4f) * Mathf.Pow(x,2) - (2.7342E-3f) * x + (1.7161f);
+    //     return y;
+    // }
 
-    public float calculateSpringDisplacementFront(float x){
-        float y;
-        y = (-1.6983E-7f) * Mathf.Pow(x,4) - (4.2658E-5f) * Mathf.Pow(x,3) + (1.7252E-3f) * Mathf.Pow(x,2) + (9.7968E-1f) * x - (7.2350E-3f);
-        return y;
-    }
+    // public float calculateSpringDisplacementFront(float x){
+    //     float y;
+    //     y = (-1.6983E-7f) * Mathf.Pow(x,4) - (4.2658E-5f) * Mathf.Pow(x,3) + (1.7252E-3f) * Mathf.Pow(x,2) + (9.7968E-1f) * x - (7.2350E-3f);
+    //     return y;
+    // }
 
-    public float calculateSpringDisplacementRear(float x){
-        float y;
-        y = -(1.7066E-7f) * Mathf.Pow(x,4) - (4.0199E-5f) * Mathf.Pow(x,3) + (1.5618E-3f) * Mathf.Pow(x,2) + (9.8534E-1f) * x - (1.8784E-1f);
-        return y;
-    }
+    // public float calculateSpringDisplacementRear(float x){
+    //     float y;
+    //     y = -(1.7066E-7f) * Mathf.Pow(x,4) - (4.0199E-5f) * Mathf.Pow(x,3) + (1.5618E-3f) * Mathf.Pow(x,2) + (9.8534E-1f) * x - (1.8784E-1f);
+    //     return y;
+    // }
 
-    public float calculateToeFront(float x){
+    // public float calculateToeFront(float x){
 
-        float y;
-        y = (7.4904E-9f) * Mathf.Pow(x,4) + (8.6268E-8f) * Mathf.Pow(x,3) + (1.0578E-3f) * Mathf.Pow(x,2) + (3.4286E-2f) * x + (3.2588f);
-        return y;
+    //     float y;
+    //     y = (7.4904E-9f) * Mathf.Pow(x,4) + (8.6268E-8f) * Mathf.Pow(x,3) + (1.0578E-3f) * Mathf.Pow(x,2) + (3.4286E-2f) * x + (3.2588f);
+    //     return y;
 
-    }
+    // }
+
+    
 
 
 
