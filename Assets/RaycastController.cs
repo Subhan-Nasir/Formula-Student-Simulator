@@ -1071,8 +1071,8 @@ public class RaycastController : MonoBehaviour{
         longitudnialLoadTransfer = Suspension.LongitudinalLoadTransfer(rb.mass, COMlongitudinalAcceleration, COM_height, wheelBase);
         // longitudnialLoadTransfer = Mathf.Lerp(previousLongitudinalLoadTransfer, longitudnialLoadTransfer, 0.002f);
 
-        lateralLoadTransferFront = ( elasticLoadTransferFront + geometricLoadTransferFront);
-        lateralLoadTransferRear = ( elasticLoadTransferRear + geometricLoadTransferRear);
+        lateralLoadTransferFront = -( elasticLoadTransferFront + geometricLoadTransferFront);
+        lateralLoadTransferRear = -( elasticLoadTransferRear + geometricLoadTransferRear);
 
         totalLateralLoadTransferMeasured = lateralLoadTransferFront + lateralLoadTransferRear;
         totalLateralLoadTransferTheoretical = (rb.mass * COMLateralAcceleration * COM_height)/(0.5f*(trackFront + trackRear));
