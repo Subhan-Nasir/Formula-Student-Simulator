@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using MotionSystems;
 // Code adapted from: https://www.youtube.com/watch?v=x0LUiE0dxP0 
 
 public class RaycastController : MonoBehaviour{
@@ -520,6 +521,19 @@ public class RaycastController : MonoBehaviour{
 
     private float[] camberAngles = new float[4];
 
+    // Vehicle body object
+    private Rigidbody m_Rigidbody;
+
+    // ForceSeatMI API
+    private ForceSeatMI_Unity m_Api;
+    private ForceSeatMI_Vehicle m_vehicle;
+    private ForceSeatMI_Unity.ExtraParameters m_extraParameters;
+
+    private float pitchAngle;
+    private float rollAngleAvg;
+    // private ForceSeatMI_Unity.ExtraParameters m_extraParameters;
+
+
     void OnValidate(){
         keys = new NewControls();
         rb.centerOfMass = COM_Finder.transform.localPosition;
@@ -585,9 +599,33 @@ public class RaycastController : MonoBehaviour{
         keys.Disable();
     }
 
-    
+    private void OnDestroy()
+    {
+        // ForceSeatMI - BEGIN
+        m_Api.End();
+        // ForceSeatMI - END
+    }
+
 
     void Start(){
+
+
+        m_Rigidbody = GetComponent<Rigidbody>();
+
+        // ForceSeatMI - BEGIN
+        m_Api             = new ForceSeatMI_Unity();
+        m_vehicle         = new ForceSeatMI_Vehicle(m_Rigidbody);
+        m_extraParameters = new ForceSeatMI_Unity.ExtraParameters();
+
+        m_vehicle.SetGearNumber(currentGear);
+
+        // m_Api.SetAppID(""); // If you have dedicated app id, remove ActivateProfile calls from your code
+        m_Api.ActivateProfile("SDK - Vehicle Telemetry ACE");
+        m_Api.SetTelemetryObject(m_vehicle);
+        m_Api.Pause(false);
+        m_Api.Begin();
+
+
         //
        
         // cc=this;
@@ -760,8 +798,38 @@ public class RaycastController : MonoBehaviour{
         ApplySteering();     
     }
 
+    private void Move(float steering, float accel, float footbrake, float handbrake)
+    {
+       
+        
+        
+
+        // ForceSeatMI - BEGIN
+        if (m_vehicle != null && m_Api != null)
+        {
+            m_vehicle.SetGearNumber(currentGear);
+
+            // Use extra parameters to generate custom effects, for exmp. vibrations. They will NOT be
+            // // filtered, smoothed or processed in any way.
+            // m_extraParameters.yaw     = 0;
+            // m_extraParameters.pitch   = pitchAngle;
+            // m_extraParameters.roll    = rollAngleAvg
+            // ;
+            // m_extraParameters.right   = 0;
+            // m_extraParameters.up      = 0;
+            // m_extraParameters.forward = 0;
+
+            // m_Api.AddExtra(m_extraParameters);
+            m_Api.Update(Time.fixedDeltaTime);
+        }
+        // ForceSeatMI - END
+    }
+
+
     void FixedUpdate(){
 
+        
+        Move(steerInput, throttle, brake, 0);
         Vector3 FLposition = FLHub.transform.localPosition;
         Vector3 FRposition = FRHub.transform.localPosition;
 
@@ -770,6 +838,7 @@ public class RaycastController : MonoBehaviour{
         updateWheelRates();
         updateRollStiffnesses();
         updateRollAngles();
+        updatePitch();
         updateLoadTransfers();
         updateRollcentreHeights();
         updateCOMaccleerations();
@@ -1034,6 +1103,12 @@ public class RaycastController : MonoBehaviour{
     void updateRollAngles(){
         rollAngleFront = -Mathf.Rad2Deg * Mathf.Atan((wheelTravels[0] - wheelTravels[1])/1000*trackFront);
         rollAngleRear =  -Mathf.Rad2Deg * Mathf.Atan((wheelTravels[2] - wheelTravels[3])/1000*trackRear);
+        rollAngleAvg = 0.5f*(rollAngleFront + rollAngleRear);
+    }
+
+    void updatePitch(){
+        pitchAngle = Mathf.Rad2Deg * Mathf.Atan((wheelTravels[0] + wheelTravels[1])/wheelBase);
+
     }
 
     void updateLoadTransfers(){
@@ -1127,6 +1202,8 @@ public class RaycastController : MonoBehaviour{
 
 
     }
+
+
 
     float calculateCamberChangeFront(float wheelTravel, float rackTravel){
         return -3.191f - 0.02382f*wheelTravel + 0.04161f*rackTravel - 0.0004034f*Mathf.Pow(wheelTravel,2) - 6.873E-5f*wheelTravel*rackTravel + 0.0004845f*Mathf.Pow(rackTravel, 2) + 3.172f;

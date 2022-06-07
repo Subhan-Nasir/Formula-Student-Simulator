@@ -108,8 +108,8 @@ public class @NewControls : IInputActionCollection, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""e2187b6b-2aca-48a3-93e1-844c265a9fe5"",
-                    ""path"": ""<HID::Precision Sim Engineering SWD>/stick/left"",
+                    ""id"": ""2161306d-df88-40b7-9eea-b1d47ce7fc60"",
+                    ""path"": ""<HID::Logitech G29 Driving Force Racing Wheel>/stick/up"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -141,8 +141,8 @@ public class @NewControls : IInputActionCollection, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""4272e191-9a01-4e6c-8a35-e84f0cbf7bcd"",
-                    ""path"": ""<HID::Precision Sim Engineering SWD>/trigger"",
+                    ""id"": ""0d55b382-c907-4584-8767-bfb1a172c1a0"",
+                    ""path"": ""<HID::Logitech G29 Driving Force Racing Wheel>/stick/down"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",

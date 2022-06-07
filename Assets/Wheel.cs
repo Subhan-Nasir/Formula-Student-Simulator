@@ -360,6 +360,10 @@ public class Wheel{
         // Debug.Log($"Wheel {id}: Slip Ratio = {slipRatio}, Slip Angle = {slipAngle}, Flong = {longitudinalForce}, Flat = {lateralForce}");
         // Debug.Log($"Wheel {id}: Camber = {camberAngle}");
 
+        if(id == 0 | id == 1){
+            longitudinalForce = 1.25f*longitudinalForce;
+            lateralForce = 1.25f*lateralForce;
+        }
         forceVector = longitudinalForce * wheelObject.transform.forward + lateralForce * wheelObject.transform.right;
         
        
