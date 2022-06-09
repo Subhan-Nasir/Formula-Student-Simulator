@@ -19,8 +19,8 @@ public class RaycastController : MonoBehaviour{
     public SpeedUnits targetSpeedUnits; 
 
     
-    [Header("Tokyo Drift Mode")]
-    public bool tokyoDriftMode=false;
+    // [Header("Tokyo Drift Mode")]
+    // public bool tokyoDriftMode=false;
 
     [Header("Car Components ")]
     public Rigidbody rb;    
@@ -266,7 +266,7 @@ public class RaycastController : MonoBehaviour{
 // [ 1.19630268e+02  5.42424666e-04  1.00591972e+03 -1.59561936e+00
 //   3.14288755e+00  1.56814872e-04 -2.60828013e-01  4.95307656e-03]
 
-// Non flat ends version 3 - spinning boogaloo
+// Non flat ends version 3 
 // [ 3.93293878e+01  1.52163961e+00  1.36857062e+00  3.52479236e-01
 //   1.84800021e+00  1.41761371e-04 -1.99001968e-01  4.95424590e-03]
 
@@ -527,7 +527,7 @@ public class RaycastController : MonoBehaviour{
     // ForceSeatMI API
     private ForceSeatMI_Unity m_Api;
     private ForceSeatMI_Vehicle m_vehicle;
-    private ForceSeatMI_Unity.ExtraParameters m_extraParameters;
+    // private ForceSeatMI_Unity.ExtraParameters m_extraParameters;
 
     private float pitchAngle;
     private float rollAngleAvg;
@@ -615,7 +615,7 @@ public class RaycastController : MonoBehaviour{
         // ForceSeatMI - BEGIN
         m_Api             = new ForceSeatMI_Unity();
         m_vehicle         = new ForceSeatMI_Vehicle(m_Rigidbody);
-        m_extraParameters = new ForceSeatMI_Unity.ExtraParameters();
+        // m_extraParameters = new ForceSeatMI_Unity.ExtraParameters();
 
         m_vehicle.SetGearNumber(currentGear);
 
@@ -909,7 +909,7 @@ public class RaycastController : MonoBehaviour{
        for(int i = 0; i<4; i++){
            totalVerticalLoad += wheels[i].verticalLoad;
        }
-       Debug.Log($"Total vertical load = {totalVerticalLoad}");
+    //    Debug.Log($"Total vertical load = {totalVerticalLoad}");
         
 
 
