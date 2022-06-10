@@ -31,9 +31,11 @@ public class RaycastController : MonoBehaviour{
     public List<GameObject> wheelObjects;
     public List<GameObject> meshes;
 
-    public GameObject FLHub;
-    public GameObject FRHub;
-    // public static RaycastController cc;
+    // Was used for the demo of the UPyPlot tool to show live graphs.
+    // FLHub and FRHub are just copies of the FL and FR wheels respectively.
+    // public GameObject FLHub;
+    // public GameObject FRHub;
+    
     
     [Header("Engine")]
     public AnimationCurve engineCurve;
@@ -745,8 +747,8 @@ public class RaycastController : MonoBehaviour{
         baseLoadRear = massRear * 9.81f/2;
 
         // This is how you add a new value to the queue for the "History" class.
-        FLHistory.AddEntry(FLHub.transform.localPosition);
-        FRHistory.AddEntry(FRHub.transform.localPosition);
+        // FLHistory.AddEntry(FLHub.transform.localPosition);
+        // FRHistory.AddEntry(FRHub.transform.localPosition);
 
         // Finds the game object called "NotificationPanel" and assigns it to a variable.
         notification = GameObject.Find("NotificationPanel").GetComponent<NotificationTriggerEvent>(); 
@@ -951,8 +953,8 @@ public class RaycastController : MonoBehaviour{
         Move(steerInput, throttle, brake, 0);
 
         // For the demonstration of the live graph plotting tool. 
-        Vector3 FLposition = FLHub.transform.localPosition;
-        Vector3 FRposition = FRHub.transform.localPosition;
+        // Vector3 FLposition = FLHub.transform.localPosition;
+        // Vector3 FRposition = FRHub.transform.localPosition;
 
         
         updateWheelTravels(); // Wheel travel is the vertical displacement of the wheel (from rest)
