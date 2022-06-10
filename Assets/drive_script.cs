@@ -1,6 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+
+// Old version of the car controller script, no longer needed. 
+
 //Toby
 
 //Sandeep

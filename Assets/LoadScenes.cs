@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+// Used to load different tracks and main menu.
 public class LoadScenes : MonoBehaviour{  
 
-    public GameObject UI;
-    public GameObject MainMenu;
+    public GameObject UI; // UI element that has the Telemetry, speedmeter etc.
+    public GameObject MainMenu; // UI element that has the main menu.
 
     [HideInInspector]
     public static bool gameIsPaused;

@@ -4,9 +4,12 @@ using UnityEngine;
 using TMPro;
 using System;
 
+// Manages the UI element that shows the lap count, laptime, and previous lap time.
 public class LaptimeUIManager : MonoBehaviour{
 
+    // UI element that shows the laptime text, including previous laptime and checkpoint missed warning.
     public TMP_Text laptimeText;
+    // UI element that shows the lap number text.
     public TMP_Text lapNumberText;
     private string laptimeString;
     private double laptime;

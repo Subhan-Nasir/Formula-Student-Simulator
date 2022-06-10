@@ -3,12 +3,17 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+// Code adapted from:
+// https://www.youtube.com/watch?v=N6l0e7dDGl8 
+
 public class NotificationTriggerEvent : MonoBehaviour{
 
-    [Header("UI Content")]    
+    [Tooltip("UI element that displays the notification")]
+    [Header("UI Content")]            
     [SerializeField] private Text notificationTextUI;
     // [SerializeField] private Image characterIconUI;
 
+    [Tooltip("Original template had an option for an icon/image")]  
     [Header("Message Customisation")]    
     [SerializeField] private Sprite yourIcon;
     

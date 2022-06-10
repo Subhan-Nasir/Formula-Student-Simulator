@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 // Code adapted from: https://www.youtube.com/watch?v=czTCLRe4CD8 
-
+// One option to contorl the playback of the engine sounds. 
 public class engineAudio : MonoBehaviour{
 
     //eq

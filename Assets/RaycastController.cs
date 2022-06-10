@@ -3,7 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using MotionSystems;
-// Code adapted from: https://www.youtube.com/watch?v=x0LUiE0dxP0 
+
+// Code adapted from: https://www.youtube.com/watch?v=x0LUiE0dxP0&list=PLcbsEpz1iFyjjddSqLxnnGSJthfCcmsav 
+// The scipt will be very different because of the added physics models but this tutorial series should give you 
+// a good understanding of how raycast works for a car. 
 
 public class RaycastController : MonoBehaviour{
 
@@ -56,28 +59,19 @@ public class RaycastController : MonoBehaviour{
 
     [Header("Differential")]
     public float TBR = 2.9f; 
-    public float diffPreLoadTorque = 10;
-    
-
-    
-
+    public float diffPreLoadTorque = 10;     
     private float diffHousingTorque; 
     private float differentialTorque;
     private float lockingCoefficient;
     private float criticalHousingTorque;
 
 
-
-
+    [Tooltip("Use empty GameObject to define centre of mass")]
     [Header("Centre of mass")]    
     public GameObject COM_Finder;
 
-    [Header("Suspension Settings")]
-    // public float naturalLength;
-    // public float springTravel;
-    // public float springStiffness;    
-    // public float dampingCoefficient;
-
+    [Tooltip("Stiffness and damping will change dynamically due to double wishbone geometry")]
+    [Header("Suspension Settings")]    
     public float frontNaturalLength;
     public float frontSpringTravel;
     public float frontSpringStiffness;
@@ -90,11 +84,12 @@ public class RaycastController : MonoBehaviour{
     public float rearDampingCoefficient;
 
     
-
-    [Header("Bump stops")] 
+    [Tooltip("Activates higher stiffness when suspension is close to bottoming out")]
+    [Header("Bump stops")]     
     public float bumpStiffness;
     public float bumpTravel;
 
+    [Tooltip("Not currently used, was only for early versions. Kept it just in case")]
     [Header("Anti Roll bars")]
     public float antiRollStiffness;
     private float[] antiRollForces = new float[] {0,0};
@@ -105,19 +100,28 @@ public class RaycastController : MonoBehaviour{
     
     private Suspension[] suspensions = new Suspension[4];
     
+    
+    
+    
     [Header("Wheel")]
     public float wheelRadius = 0.23f;
     public float wheelMass = 5;
     public float brakeBias = 0.55f;
+    public enum TyrePressureEnum {_8_PSI = 4, _10_PSI = 10, _12_PSI = 12, _14_PSI = 14};
+    public TyrePressureEnum selectedTyrePressure;
+    [HideInInspector]
     public int tyrePressure = 12;
+
     public float staticCamberAngleFront = -3.15f;
     public float staticCamberAngleRear = -1.755f;
+    public float toeAngleFront = 0f;
+    public float toeAngleRear = 0f;
     public float maxBrakingTorque = 1000;
+    [Tooltip("Scales down tyre tyre forces. Real tyre forces are about 20%-30% lower than testing data")]
     public float tyreEfficiency = 0.7f;  
-    public float toeAngleFront = 1f;
-    public float toeAngleRear = -1f;
-       
     
+       
+    // Old tyre constants
     // private Dictionary<string, float> lateralConstants = new Dictionary<string,float>(){
     //     {"B", 11.45f},
     //     {"C", 1.551f},
@@ -174,16 +178,16 @@ public class RaycastController : MonoBehaviour{
     //     }},
 
 
-        // {14, new Dictionary<string, float>(){
-        //     {"B", 45.79f},
-        //     {"C", 0.04851f},
-        //     {"D", 5010},
-        //     {"E", 1.231f},
-        //     {"a_1", 0.01512f}, 
-        //     {"a_2", 2.348E-6f},
-        //     {"a_3", -0.1836f},
-        //     {"a_4", 0}          
-        // }}
+    //     {14, new Dictionary<string, float>(){
+    //         {"B", 45.79f},
+    //         {"C", 0.04851f},
+    //         {"D", 5010},
+    //         {"E", 1.231f},
+    //         {"a_1", 0.01512f}, 
+    //         {"a_2", 2.348E-6f},
+    //         {"a_3", -0.1836f},
+    //         {"a_4", 0}          
+    //     }}
 
 
     // };
@@ -234,8 +238,11 @@ public class RaycastController : MonoBehaviour{
 
     // };
 
-
+    // Define the tyre constants here, for each pressure value.
+    // Only pressures of 8, 10, 12 and 14 PSI can be selected.
     private Dictionary<int, Dictionary<string, float>> lateralConstants = new Dictionary<int, Dictionary<string, float>>(){
+        
+        // Lateral constants for 8 PSI.
         {8, new Dictionary<string, float>(){ 
             {"B", 45.79f},
             {"C", 0.04851f},
@@ -246,7 +253,7 @@ public class RaycastController : MonoBehaviour{
             {"a_3", -0.1836f},
             {"a_4", 0}
         }},
-
+        // Lateral constants for 10 PSI.
         {10, new Dictionary<string, float>(){
             {"B", 45.79f},
             {"C", 0.04851f},
@@ -258,18 +265,7 @@ public class RaycastController : MonoBehaviour{
             {"a_4", 0}         
         }},
 
-// Non flat ends
-// [ 3.92783054e+01 -1.52206480e+00 -3.18503689e+00  3.53035961e-01
-//  7.94091253e-01  6.09478124e-05 -1.98853693e-01  4.95423749e-03]
-
-// Flat ends
-// [ 1.19630268e+02  5.42424666e-04  1.00591972e+03 -1.59561936e+00
-//   3.14288755e+00  1.56814872e-04 -2.60828013e-01  4.95307656e-03]
-
-// Non flat ends version 3 
-// [ 3.93293878e+01  1.52163961e+00  1.36857062e+00  3.52479236e-01
-//   1.84800021e+00  1.41761371e-04 -1.99001968e-01  4.95424590e-03]
-
+        // Lateral constants for 12 PSI.
         {12, new Dictionary<string, float>(){
             {"B", 3.93293878e+01f},
             {"C", 1.52163961e+00f},
@@ -281,7 +277,7 @@ public class RaycastController : MonoBehaviour{
             {"a_4", 4.95424590e-03f}         
         }},
 
-
+        // Lateral constants for 14 PSI.
         {14, new Dictionary<string, float>(){
             {"B", 45.79f},
             {"C", 0.04851f},
@@ -297,6 +293,7 @@ public class RaycastController : MonoBehaviour{
     };
 
     private Dictionary<int, Dictionary<string, float>> longitudinalConstants = new Dictionary<int, Dictionary<string, float>>(){
+        // Longitudinal constants for 8 PSI
         {8, new Dictionary<string, float>(){ 
             {"B", 15f},
             {"C", 1.5f},
@@ -306,7 +303,7 @@ public class RaycastController : MonoBehaviour{
             {"a_2", 1.126E-7f},
             {"a_3", -4.656E-5f}
         }},
-
+        // Longitudinal constants for 10 PSI
         {10, new Dictionary<string, float>(){
             {"B", 15f},
             {"C", 1.5f},
@@ -317,7 +314,7 @@ public class RaycastController : MonoBehaviour{
             {"a_3", -4.656E-5f}           
         }},
 
-
+        // Longitudinal constants for 12 PSI
         {12, new Dictionary<string, float>(){
             {"B", 15f},
             {"C", 1.5f},
@@ -328,7 +325,7 @@ public class RaycastController : MonoBehaviour{
             {"a_3", -4.656E-5f}     
         }},
 
-
+        // Longitudinal constants for 14 PSI
         {14, new Dictionary<string, float>(){
             {"B", 15f},
             {"C", 1.5f},
@@ -346,8 +343,10 @@ public class RaycastController : MonoBehaviour{
 
     private Wheel[] wheels = new Wheel[4];
 
+    [Tooltip("Used when anti-Ackermann is disabled.")]
     [Header("Steering")]
-    public float parallelSteerAngle = 20f;
+    public float parallelSteerAngle = 20f; 
+    [Tooltip("steerSpeed isn't used anymore, it was orignally used to smoothly steer the wheels but introduced a delay.")]
     public float steerSpeed = 10f;
 
     private float wheel_x;
@@ -375,52 +374,77 @@ public class RaycastController : MonoBehaviour{
     public float maxRackTravel = 40;
     private float rackTravel;
 
-
     private Vector3 steeringForce;
 
+    // Reads and stores user inputs
     private NewControls keys;
     private float throttle;
     private float brake;
     private float userInput;
 
+    // For measuring 0-60, 0-100 times etc.
     private float theTime = 0f;
     private bool timerOn = false;
     private bool speedReached = false;
 
+    // Demo for the live plotting feature.
+    // Any variable with the tag [UPyPlot.UPyPlotController.UPyProbe] wil be plotted.
+    // Open one of two python scripts before starting:
+    //      1) Plots a separate graph for each variable
+    //      2) Plots all variables in the same graph
+    // It cannot plot multiple variables in multiple plots.
+    // Use GitHub link to find out how to use it: https://github.com/guiglass/UPyPlot 
     [UPyPlot.UPyPlotController.UPyProbe]
     private float RL_LateralForce;
 
     [UPyPlot.UPyPlotController.UPyProbe]
     private float FL_LateralForce;
 
+    // Records time since previous gear shift.
     private float gearTimer;
 
     private float speed;
     private float drag;
     private float lift;
-
+    
+    // 1 if input to increase brake bias was received, 0 otherwise 
     private float brakeBiasUp;
+    // 1 if input to decrease brake bias was received, 0 otherwise 
     private float brakeBiasDown;
+    // Time since the most recent brake bias change.
     private float brakeBiasTimer;
     
     // needed for engine sound
     private float previousSpeed;
     private bool isAcclerating;
     
+    // To store Centre of mass height
     private float COM_height;
+    // To store Roll centre heights
     private float frontRCheight;
     private float rearRCheight;
+    
+    // To store velocities at centre of mass
     private float COMLateralVelocity;
     private float COMLateralVelocityPrevious;
     private float COMLateralAcceleration;
-    private float massFront;
+
+    private float COMlongitudinalVelocity;
+    private float COMlongitudinalVelocityPrevious;
+    private float COMlongitudinalAcceleration;
+
+
+    // To store mass distribution between front and rear 
+    private float massFront; 
     private float massRear;
 
+    // To store load transfer variables
     private float elasticLoadTransferFront; 
     private float elasticLoadTransferRear;
 
     private float geometricLoadTransferFront;
     private float geometricLoadTransferRear;
+
     private float longitudnialLoadTransfer;
 
     private float lateralLoadTransferFront;
@@ -438,29 +462,32 @@ public class RaycastController : MonoBehaviour{
     private float loadFront;
     private float loadRear;
 
-    private float baseLoadFront;
-    private float baseLoadRear;
+    private float baseLoadFront; // m*g/2 if evenly distrubted weight, m*g if all weight is in front and none in rear
+    private float baseLoadRear;  // m*g/2 if evenly distrubted weight, m*g if all weight is in rear and none in front
 
     private float[] wheelVerticalLoad = new float[4];
 
-    private float COMlongitudinalVelocity;
-    private float COMlongitudinalVelocityPrevious;
-    private float COMlongitudinalAcceleration;
-
+    
+    // To store wheel rates. 
+    // Wheel rates are effective/equivalent stiffnesses of the double wishbone when converted to vertical springs.
+    // They are dynamic values and change with wheel travel, camber, load transfer etc.
     private float wheelRateFL;
     private float wheelRateFR;
     private float wheelRateRL;
     private float wheelRateRR;
 
     private float[] wheelTravels = new float[4];
+       
+    // Not used anymore but it might be useful later.
+    // The "History" is used to track previous values of variables.
+    // It uses a queue structure. The last item in queue is the most recent value.
+    // Wheen adding an item to a full queue, the first item in the queue gets removed (pop-ed)
+    // and the new item is added at the end, similar to a real queue.
 
-    // private float velocitySum = 0;
-
-    // front: 1.055
-    // rear: 1.101
-    
-
-    private History<Vector3> FLHistory = new History<Vector3>(3);
+    // Useses a queue of "Vector3"s to track values. 
+    // The "(3)" means the queue is up to 3 items long. 
+    // If it was 5 inside the round brakets, the queue would be up to 5 items long. 
+    private History<Vector3> FLHistory = new History<Vector3>(3); 
     private History<Vector3> FRHistory = new History<Vector3>(3);
 
     private float totalLateralLoadTransferMeasured;
@@ -469,6 +496,7 @@ public class RaycastController : MonoBehaviour{
     private float rollAngleFront;
     private float rollAngleRear;
 
+    
     private Vector3[] currentPosition = new Vector3[4];
     private Vector3[] previousPosition = new Vector3[4];
     private Vector3[] globalVelocity = new Vector3[4];
@@ -509,11 +537,18 @@ public class RaycastController : MonoBehaviour{
 
     private float previousLongitudinalLoadTransfer;
 
+    // Tied to gearDelayTimer, which measures time since previous gear change. 
+    // When gearDelayOn is true, the car won't change gears.
+    // This stops user from spamming gear change input.
+    // Allows for minimum time between gear changes.
+    // When gearDelayTimer is high enough. gearDelayOn is set to false.
     private bool gearDelayOn = false;
     private float gearDelayTimer = 0;
 
     private bool lockedDiff;
 
+    // UI element that shows notifications
+    // This instance is used to show when brake bias is being changed.
     private NotificationTriggerEvent notification;
 
     private float maxDamperForce;
@@ -521,6 +556,8 @@ public class RaycastController : MonoBehaviour{
 
     private float[] camberAngles = new float[4];
 
+
+    // For the motion platform
     // Vehicle body object
     private Rigidbody m_Rigidbody;
 
@@ -535,12 +572,29 @@ public class RaycastController : MonoBehaviour{
 
 
     void OnValidate(){
-        keys = new NewControls();
-        rb.centerOfMass = COM_Finder.transform.localPosition;
         
-             
+        keys = new NewControls(); // Initalises inptu system.
+        rb.centerOfMass = COM_Finder.transform.localPosition; // Finds coordinates of GameObject used to locate COM.
+        
+        // Finds value of tyrePressure based on dropdown in the inspector.
+        if(selectedTyrePressure == TyrePressureEnum._8_PSI){
+            tyrePressure = (int)TyrePressureEnum._8_PSI;
+        }
+        else if(selectedTyrePressure == TyrePressureEnum._10_PSI){
+            tyrePressure = (int)TyrePressureEnum._10_PSI;
+        }
+        else if(selectedTyrePressure == TyrePressureEnum._12_PSI){
+            tyrePressure = (int)TyrePressureEnum._12_PSI;
+        }
+        else if(selectedTyrePressure == TyrePressureEnum._12_PSI){
+            tyrePressure = (int)TyrePressureEnum._12_PSI;
+        }
+        else{
+            tyrePressure = 12;
+        }
+                     
                            
-        
+        // Initalises all 4 wheels and suspensions.
         for (int i = 0; i < 4; i++){
             
             // suspensions[i] = new Suspension(i, naturalLength, springTravel, springStiffness, dampingCoefficient, bumpStiffness, bumpTravel, wheelRadius);                     
@@ -564,8 +618,16 @@ public class RaycastController : MonoBehaviour{
 
     void OnEnable(){
         
-        keys.Enable();
+        keys.Enable(); 
 
+        // Adds all the points of the engine curve.
+        // If you want to modifiy engine curve, replace the points here.
+        // First number is RPM and second number is engine torque.
+        // E.g., at 3000 RPM, the engine torque is 38.216 Nm.
+        // Interpolation is carreid out automatically.
+        // E.g., use:
+        // x =  engineCurve.Evaluate(3100)
+        // to find engine torque at 3100 RPM via interpolation and store it in the variable x. 
         engineCurve.keys = new Keyframe[1];
         engineCurve.AddKey(3000,38.216f);
         engineCurve.AddKey(3500,39.063f);
@@ -609,7 +671,9 @@ public class RaycastController : MonoBehaviour{
 
     void Start(){
 
-
+        // For motion platform.
+        // Their website has a ~50-Page pdf explaining how to set it up in Unity, Unreal Engine etc.
+        // Read it to find out how to add extra paramters, change Settings or view diagnostics.
         m_Rigidbody = GetComponent<Rigidbody>();
 
         // ForceSeatMI - BEGIN
@@ -619,38 +683,37 @@ public class RaycastController : MonoBehaviour{
 
         m_vehicle.SetGearNumber(currentGear);
 
-        // m_Api.SetAppID(""); // If you have dedicated app id, remove ActivateProfile calls from your code
+        // Dont need to enable this line, its there just in case
+        // m_Api.SetAppID(""); // "If you have dedicated app id, remove ActivateProfile calls from your code" - Motion platform company
         m_Api.ActivateProfile("SDK - Vehicle Telemetry ACE");
         m_Api.SetTelemetryObject(m_vehicle);
         m_Api.Pause(false);
         m_Api.Begin();
 
 
-        //
-       
-        // cc=this;
-        // rb.inertiaTensor = new Vector3(123.1586f,61.15857f,112f);
-        // rb.inertiaTensor = new Vector3(250,250,75);
-
-
-        // // // rb.inertiaTensorRotation = Quaternion.Euler(33.5407f,0,0);
-        // rb.inertiaTensorRotation = Quaternion.Euler(0,0,0);
-        // x, y, z >>> right, up, forward
-        // x, z, y,
-        // rb.inertiaTensor = new Vector3(276.4f, 346.2f, 76.94f);
-        // rb.inertiaTensorRotation = Quaternion.Euler(219.8f, 289.6f, 216.7f);
-
-        // rb.inertiaTensor = new Vector3 (350, 350, 100);
-        // rb.inertiaTensorRotation =  Quaternion.Euler(350,350,350);
-
+        
         // INERTIA TENSOR:
+        // User can manually define rotational insertia of a Rigidbody in Unity.
+        // This has two Components "inertiaTensor" and "inertiaTensor".
+        // Despite the name, "intertiaTensor" is just a 3D vector.
+        // It just takes the diagonal terms of the real 3x3 intertia tensor.
+        // "inertiaTensorRotation" is also a 3D vector.
+        // It takes in the upper off-diagonal terms of the 3x3 inertia tensor.
+        // Lower off-diagional is not needed as the 3x3 tensor is symmetrical.
+        // Fusion and Unity use different axis ssytems to a conversion is needed. 
+
         // Fusion's axis system:    left(X),      backwards(Y),   up(Z)        
         // XX, YY, ZZ  =            1.606e2,      3.168e1,        1.752e2
         // XY, XZ, YZ  =            1.262,        2.116e-1,       3.529
+        // Values above were taken from fusion CAD files, in fusion's axis system.
         
         // Unity's axis system:         right(X),       up(Y),      forwards(Z)                            
         // tensor -->    XX, ZZ, YY  =  1.606e2,        1.752e2,    3.168e1
         // rotation -->  XZ, XY, YZ  =  2.116e-1,       1.262,      3.529
+        // Values above are same as fusion CAD but rearraged for Unity's axis system.
+
+        // For "inertiaTensor", input XX, ZZ, YY (fusion axis) in that order 
+        // For "inertiaTensorRotation" input XZ, XY, YZ (fusion axis) in that order.
 
         // Old values
         // rb.inertiaTensor = new Vector3(1.606E2f, 1.752E2f, 3.168E1f);
@@ -662,55 +725,80 @@ public class RaycastController : MonoBehaviour{
 
 
 
-
+        // Fins height of com using the empty GameObject and the car's y coordinates.
         COM_height = COM_Finder.transform.position.y - transform.position.y;
 
-
+        // Calculates the mass at the front and rear, based on COM location.
         massFront = rb.mass *  Mathf.Abs((COM_Finder.transform.position.z - springs[2].transform.position.z)/(springs[0].transform.position.z - springs[2].transform.position.z));
         massRear = rb.mass *  Mathf.Abs((COM_Finder.transform.position.z - springs[0].transform.position.z)/(springs[0].transform.position.z - springs[2].transform.position.z));
 
+        // calcualtes front and rear track based on wheel locaitons.
         trackFront = Mathf.Abs(wheelObjects[1].transform.position.x - wheelObjects[0].transform.position.x);
         trackRear = Mathf.Abs(wheelObjects[3].transform.position.x - wheelObjects[2].transform.position.x);
 
+        // Roll stiffnesses
         rollStiffnessFront = Mathf.Pow(trackFront,2) * (frontSpringStiffness)/(360/Mathf.PI);
         rollStiffnessRear =  Mathf.Pow(trackRear,2) * (rearSpringStiffness)/(360/Mathf.PI);
 
+        // Similar to massFront and massRear but for loads in Newtons.
         baseLoadFront = massFront * 9.81f/2;
         baseLoadRear = massRear * 9.81f/2;
 
+        // This is how you add a new value to the queue for the "History" class.
         FLHistory.AddEntry(FLHub.transform.localPosition);
         FRHistory.AddEntry(FRHub.transform.localPosition);
 
+        // Finds the game object called "NotificationPanel" and assigns it to a variable.
         notification = GameObject.Find("NotificationPanel").GetComponent<NotificationTriggerEvent>(); 
     }
 
     void Update(){
-
+        // Update gets called once per frame, which means inconsistent timesteps.
+        // DON'T USE "Update()" FOR ANY PHYSICS CALCULATIONS. Use "FixedUpdate()" as it has a fixed tiemstep.
+        // "Update()" is for non-Physics calculations such as reading inputs.
+ 
+        // Enable usingKeyboard when testing on keyboard
+        // The wheel and pedals readings have different values so they are calibrated and normalized differently.
+        // After normalizing:
+            // steerInput should be a value between -1 and 1 (full left turn to full right turn). 
+            // throttle should be a value between 0 and 1 ( no throttle to full pressed throttle)
+            // brake should be a value between 0 and 1 (no brake to fully pressed brake)
         if(usingKeyboard){
 
+            // Reads user input values from keyboard
             steerInput = keys.Track.Steering.ReadValue<float>();
             throttle = keys.Track.Throttle.ReadValue<float>();
             brake = keys.Track.Brake.ReadValue<float>();
 
+            // Clamps user input values.
+            // For keyboard the values aleady within the correct range etc so no need for normalizing.
+            // Clamps there to prevent any bugs/glithces.
             steerInput = Mathf.Clamp(steerInput, -1,1);
             throttle = Mathf.Clamp(throttle, 0,1);
             brake = Mathf.Clamp(brake, 0,1);
 
+            // If the R key (brake bias up button) it is 1, otherwise 0.             
             brakeBiasUp = keys.Track.BrakeBiasUp.ReadValue<float>();
+            // If the F key (brake bias down button) is pushed, it is 1, otherwise 0.             
             brakeBiasDown = keys.Track.BrakeBiasDown.ReadValue<float>();
+            // Note: The bindings for brake bias up and down can be changed.
+
         }
         else{
 
+            // Reads user input values from pedals and steering wheel.
             throttle = keys.Track.Throttle.ReadValue<float>();
             brake = keys.Track.Brake.ReadValue<float>();
             brakeBiasUp = keys.Track.BrakeBiasUp.ReadValue<float>();
             brakeBiasDown = keys.Track.BrakeBiasDown.ReadValue<float>();
 
-            // Clamp values 
+            // Clamp values close to their maximum and minimum before normalizing.
+            // This is used for calibrating.
+            // Different steering wheels and pedals will have different ranges of values.
             throttle = Mathf.Clamp(throttle, -0.336f,0.0895f); 
             brake = Mathf.Clamp(brake, -0.4513f,-0.0761f);
             
-            // Normalise Values
+            // Normalise Values to the correct range and sign.
             throttle = (throttle - -0.336f)/(0.0895f - -0.336f);
             brake = -(brake- - 0.4513f)/(-0.4513f - -0.0761f);
 
@@ -718,10 +806,13 @@ public class RaycastController : MonoBehaviour{
             steerInput = Mathf.Clamp(steerInput, -1,1);
         }
         
-      
+        // On keyboard, E key for shift up and Q key for shift down.
+        // On steering wheel pedal shifters, right pedal for gear up and left pedal for gear down
+        // These bindings can be changed.
         shiftUp = keys.Track.ShiftUp.ReadValue<float>();
         shiftDown = keys.Track.ShiftDown.ReadValue<float>();
         
+        // The brake input gets ignored if it is smaller than the throttle input. 
         if(throttle > Mathf.Abs(brake)){
             userInput = throttle;
         }
@@ -729,7 +820,9 @@ public class RaycastController : MonoBehaviour{
             userInput = -brake;
         }
 
-
+        // If shift up or down key is pressed and it has been 0.2s since the last gear change,
+        // the car will go up or down into the next gear,
+        // otherwise that input gets ignored to ensure at least 0.2s between gear shifts.
         if(shiftUp == 1 & gearTimer > 0.2f){
             currentGear += 1;
             gearTimer = 0;
@@ -749,6 +842,8 @@ public class RaycastController : MonoBehaviour{
             currentGear += 0;
         }
 
+        // Similar logic to the gear changes and their timeout but for brake bias.
+        // Also a notification will show up for 2s when you change brake bias, showing the new value to 2 decimal places.
         if(brakeBiasUp > 0 & brakeBiasTimer > 0.2f){
             brakeBias += 0.05f;
             brakeBiasTimer = 0;
@@ -771,46 +866,66 @@ public class RaycastController : MonoBehaviour{
         }
 
         // Debug.Log($" Brake bias = {wheels[0].brakeBias}, brakeBiasUp = {brakeBiasUp}, brakeBiasDown = {brakeBiasDown}, timer = {brakeBiasTimer}");
-        gearTimer += Time.deltaTime;
+        // Updates the timers for gear and brake bias changes.
+        gearTimer += Time.deltaTime; 
         brakeBiasTimer += Time.deltaTime;
 
         if(gearDelayOn == true){
+            // If there was a gear change recently (last 0.2s)
             gearDelayTimer += Time.deltaTime;
             userInput = -brake; // allows brake but no throttle
         }
 
         if(gearDelayTimer >= 0.2f){
+            // If theere wasn't a gear change in the past 0.2s,
+            // the timeout ends and user can now change gears,
+            // the timer also resets to 0.
             gearDelayOn = false;
             gearDelayTimer = 0;
         }
 
-
+        // No neutral gear or clutch due to conflict with tyre model.
+        // Real car doesn't have a reverse gear so it was excluded.
+        // Reverse can be easily added via a negative gear ratio but 
+        // neutral will need a clucth model that is compatiable with tyre model. 
         currentGear = Mathf.Clamp(currentGear, 1,5);
-
-
         
+        // Clamps engine rpm between idle and max value before using power curve.
+        // If clutch was successfully implemented, you could clamp between 0 and max.
         engineRPM = Mathf.Clamp(engineRPM, idleRPM, maxRPM);
 
+        // Calculates engine torque from power curve and subtracts auxillary losses.
         engineTorque = (1-auxillaryLoss) * (engineCurve.Evaluate(engineRPM) * userInput);
-        engineBraking = maxEngineBrakingTorque * (1 - userInput);      
-       
 
+        // Calculates engine braking toqrue from user input.
+        // Engine braking is highest when throttle isn't pressed 
+        // and 0 when throttle is fully pressed.
+        engineBraking = maxEngineBrakingTorque * (1 - userInput); 
+       
+        // Calculates steering angles and applies them to the wheels.
+        // Anti-Ackermann is used if selected, otherwise parallel steering is used.
         ApplySteering();     
     }
 
+
+    // For the motion platform. Takes in steering, throttle, brake and handbrake.
+    // Car has no handbrake so its valeu is always 0.
+    // Also uses currentGear to move/shake seat on gear changes.
     private void Move(float steering, float accel, float footbrake, float handbrake)
     {
-       
-        
-        
-
+         
         // ForceSeatMI - BEGIN
         if (m_vehicle != null && m_Api != null)
         {
             m_vehicle.SetGearNumber(currentGear);
 
-            // Use extra parameters to generate custom effects, for exmp. vibrations. They will NOT be
-            // // filtered, smoothed or processed in any way.
+            // Motion platform allows for these extra parameters but we didn't really need them.
+            // Side to side movement and pushing the seat back and forth was enough.
+            // Roll might be useful for getting a feel for load transfer but 
+            // this needs to be tuned/calibrated properly with the motion platform software. 
+
+            // "Use extra parameters to generate custom effects, for exmp. vibrations. They will NOT be
+            // filtered, smoothed or processed in any way." - Motion platform company.
             // m_extraParameters.yaw     = 0;
             // m_extraParameters.pitch   = pitchAngle;
             // m_extraParameters.roll    = rollAngleAvg
@@ -827,16 +942,23 @@ public class RaycastController : MonoBehaviour{
 
 
     void FixedUpdate(){
+        // Exclusively used for physics based calcualtes which need a small, fixed tiemstep.
+        // DON'T use this if it's not physics related, use "Update()" instead. 
+        // Timestep can be selected from the Unity window: Edit > Project Settings > Time > Fixed Timestep
+       
 
-        
+        // For motion platform.
         Move(steerInput, throttle, brake, 0);
+
+        // For the demonstration of the live graph plotting tool. 
         Vector3 FLposition = FLHub.transform.localPosition;
         Vector3 FRposition = FRHub.transform.localPosition;
 
-        updateWheelTravels();
-        updateRackTravel();
-        updateWheelRates();
-        updateRollStiffnesses();
+        
+        updateWheelTravels(); // Wheel travel is the vertical displacement of the wheel (from rest)
+        updateRackTravel(); // Rack travel is the displacement of the steering rack.
+        updateWheelRates(); // Wheel rate is the vertical spring equivalent stiffness of a double wishbone setup.
+        updateRollStiffnesses(); 
         updateRollAngles();
         updatePitch();
         updateLoadTransfers();
@@ -846,25 +968,35 @@ public class RaycastController : MonoBehaviour{
         updateCamberAngles();
         // calculateDiffTorques();
 
+        // Sets the torque value of that drives the rear wheels.
         wheels[2].wheelTorque = 0.5f*(engineTorque - engineBraking) * gearRatios[currentGear + 1] *primaryGearRatio * finalDriveRatio;
         wheels[3].wheelTorque = 0.5f*(engineTorque - engineBraking) * gearRatios[currentGear + 1] *primaryGearRatio * finalDriveRatio;       
             
         
-        
+        // For each wheel/suspension. 
         for(int i = 0; i<springs.Count; i++){   
 
+            // Darws a raycast from suspension, downwards, up to certain length.
+            // contact is true if raycast hits anything, flase otherwise
+            // "hit" variable contains position, velocity, normal, etc of the hit point. 
+            // used for calculating wheel tarvel, local wheel velocities etc.            
             bool contact = Physics.Raycast(springs[i].transform.position, -transform.up, out RaycastHit hit, suspensions[i].naturalLength + suspensions[i].springTravel + wheelRadius);
-            // Debug.Log($" wheel id {i}: vertical load = {wheelVerticalLoad}, lateral acceleration = {COMLateralAcceleration}");
-
+            
             if(contact){            
                 
                 // Force vectors from suspension, wheel and anti rollbars.
+                // Anti-rollbars are currently not being used so they will return 0.
+                // They were orignally used becuase we didn't have dynamic and accurate wheel rates.
                 Vector3 suspensionForceVector = suspensions[i].getUpdatedForce(hit, Time.fixedDeltaTime, contact);          
                 Vector3 wheelForceVector = wheels[i].getUpdatedForce(userInput, gearRatios[currentGear + 1], finalDriveRatio, primaryGearRatio, hit, Time.fixedDeltaTime, wheelVerticalLoad[i], camberAngles[i]);            
                 Vector3 antiRollForceVector = getAntiRollForce(suspensions[2], suspensions[3], antiRollStiffness, i) * hit.normal;
 
+                // Applies the wheel and suspension forces to the car, at the hit point + some offset.
+                // Small offset was applied due to an instability glitch/issue. 
+                // Offset of 0.44 is 2x the wheel radius. 
                 rb.AddForceAtPosition(wheelForceVector +suspensionForceVector, hit.point + new Vector3 (0,0.44f,0)); 
                 
+                // Calculates average angular velocity of rear wheels and converts from rad/s to RPM.
                 float averageRearRPM = (9.5493f)*(wheels[2].omega + wheels[3].omega)/2;
                 if(currentGear != 0){
                     engineRPM = averageRearRPM * (gearRatios[currentGear + 1] * primaryGearRatio * finalDriveRatio);
@@ -872,13 +1004,14 @@ public class RaycastController : MonoBehaviour{
 
                 engineRPM = Mathf.Clamp(engineRPM, idleRPM, 14000);
 
-                // Debug.Log($"Engine RPM = {engineRPM}, Engine Torque = {engineTorque}, Current Gear = {currentGear}, User Input = {userInput}");
+                
                                 
             }
             else{
                 suspensions[i].contact = false;
             }
 
+            // Was used for recording maximum spring and damper forces during runs, not needed anymore.
             if(suspensions[i].damperForce > maxDamperForce){
                 maxDamperForce = suspensions[i].damperForce;
             }
@@ -886,10 +1019,12 @@ public class RaycastController : MonoBehaviour{
                 maxSpringForce = suspensions[i].springForce;
             }
 
-            // Debug.Log($"ID: {i}, max spring force = {maxSpringForce}, max damper force = {maxDamperForce}");
+            
         }
 
-        showTimer();
+        showTimer(); // Shows a timer if the 0-60, 0-100 etc timer is enabled.
+        // When the timer stop increasing, the car has reached the target speed.
+        // Timer starts when the car starts moving so move the car to a clear spot before starting. 
         
         previousSpeed = speed;
         speed = rb.velocity.magnitude;
@@ -909,8 +1044,8 @@ public class RaycastController : MonoBehaviour{
        for(int i = 0; i<4; i++){
            totalVerticalLoad += wheels[i].verticalLoad;
        }
-    //    Debug.Log($"Total vertical load = {totalVerticalLoad}");
-        
+        //Debug.Log($"Total vertical load = {totalVerticalLoad}");
+
 
 
     }
@@ -923,7 +1058,7 @@ public class RaycastController : MonoBehaviour{
     }
 
     void updateRollcentreHeights(){
-        
+        // calcualtes roll centre heights based on equation from Lola software.
 
         float rollcentreFL = 29.05f - 0.03924f*(wheelTravels[0]) + 0.003029f*rackTravel - 0.0006878f*Mathf.Pow(wheelTravels[0],2) + 0.000353f*wheelTravels[0]*rackTravel - 0.0000917f*Mathf.Pow(rackTravel,2) + 8.601E-6f*Mathf.Pow(wheelTravels[0],3) + 1.04E-6f*(Mathf.Pow(wheelTravels[0],2))*rackTravel + 6.995E-6f*(wheelTravels[0]*Mathf.Pow(rackTravel,2)); 
         float rollcentreFR =  29.05f - 0.03924f*(wheelTravels[1]) + 0.003029f*rackTravel - 0.0006878f*Mathf.Pow(wheelTravels[1],2) + 0.000353f*wheelTravels[1]*rackTravel - 0.0000917f*Mathf.Pow(rackTravel,2) + 8.601E-6f*Mathf.Pow(wheelTravels[1],3) + 1.04E-6f*(Mathf.Pow(wheelTravels[1],2))*rackTravel + 6.995E-6f*(wheelTravels[1]*Mathf.Pow(rackTravel,2));
@@ -936,12 +1071,17 @@ public class RaycastController : MonoBehaviour{
     }
 
     void updateWheelRates(){
-        
+        // Calculates wheel rates based on equations from Lola software
+
         wheelRateFL = 1000*(47.15f + 0.02513f*wheelTravels[0] + 0.003504f*rackTravel + 0.0008393f*Mathf.Pow(wheelTravels[0],2) + 0.0002012f*wheelTravels[0]*rackTravel + 0.0001072f*Mathf.Pow(rackTravel,2) - 4.053E-5f*Mathf.Pow(wheelTravels[0],3) - 5.693E-6f*Mathf.Pow(wheelTravels[0],2)*rackTravel + 5.118E-6f*wheelTravels[0]*Mathf.Pow(rackTravel,2)); 
         wheelRateFR = 1000*(47.15f + 0.02513f*wheelTravels[1] + 0.003504f*rackTravel + 0.0008393f*Mathf.Pow(wheelTravels[1],2) + 0.0002012f*wheelTravels[1]*rackTravel + 0.0001072f*Mathf.Pow(rackTravel,2) - 4.053E-5f*Mathf.Pow(wheelTravels[1],3) - 5.693E-6f*Mathf.Pow(wheelTravels[1],2)*rackTravel + 5.118E-6f*wheelTravels[1]*Mathf.Pow(rackTravel,2)); 
         wheelRateRL = 1000*(-4E-5f*Mathf.Pow(wheelTravels[2] ,3) + 0.0009f*Mathf.Pow(wheelTravels[2] ,2) - 0.029f*wheelTravels[2] + 41.945f);
         wheelRateRR = 1000*(-4E-5f*Mathf.Pow(wheelTravels[3] ,3) + 0.0009f*Mathf.Pow(wheelTravels[3] ,2) - 0.029f*wheelTravels[3] + 41.945f);
 
+        // Updates the suspension stiffesses to the new wheel rate values.
+        // dampingCoefficient of 10% of spring stiffness works quite well and is stable.
+        // This can be changed by just diving or miltiplying a different number for each wheel in the lines below. 
+        // If you want a static dampingCoefficient, select a value that will work across the entire range of wheel rate values.
         suspensions[0].springStiffness = wheelRateFL;
         suspensions[0].dampingCoefficient = wheelRateFL/10;
         
@@ -960,182 +1100,40 @@ public class RaycastController : MonoBehaviour{
     void updateCOMaccleerations(){       
 
 
-        // COM_height = 0.252f;
+       
         COM_height = COM_Finder.transform.position.y - transform.position.y;
 
-        // COMLateralVelocityPrevious = COMLateralVelocity;
-        // COMlongitudinalVelocityPrevious = COMlongitudinalVelocity;
-
-        // // COMLateralVelocity = COM_Finder.transform.InverseTransformDirection(rb.GetPointVelocity(COM_Finder.transform.position)).x;
-        // // COMLateralVelocity = Mathf.Sign(steerInput) * Vector3.Project(rb.velocity, COM_Finder.transform.right.normalized).magnitude;
-        // // COMLateralVelocity = transform.InverseTransformDirection(rb.velocity).x;         
-        // // COMLateralVelocity = -Vector3.Dot(rb.velocity, transform.right.normalized);
-
-        // // Vector3 temp = new Vector3(-rb.velocity.x, rb.velocity.y, rb.velocity.z);
-        // // Vector3 rotatedVelocity = Quaternion.LookRotation(transform.right) * temp;
-        // // COMLateralVelocity = rotatedVelocity.z;
-
-        // COMlongitudinalVelocity = transform.InverseTransformDirection(rb.GetPointVelocity(COM_Finder.transform.position)).z;
-
-        // // fLcurrentPosition = wheels[0].wheelObject.transform.position;
-        // // fLglobalVelocity = (fLcurrentPosition - fLpreviousPosition)/Time.fixedDeltaTime;
-        // // float fLlateralVelocity = Vector3.Dot(fLglobalVelocity, wheels[0].wheelObject.transform.right);
-        // // fLpreviousPosition = fLcurrentPosition;
-        // // // Debug.Log(fLlateralVelocity);
-
-        // // fRcurrentPosition = wheels[1].wheelObject.transform.position;
-        // // fRglobalVelocity = (fRcurrentPosition - fRpreviousPosition)/Time.fixedDeltaTime;
-        // // float fRlateralVelocity = Vector3.Dot(fRglobalVelocity, wheels[1].wheelObject.transform.right);
-        // // fRpreviousPosition = fRcurrentPosition;
-        // // // Debug.Log(fLlateralVelocity);
-
-        // // rLcurrentPosition = wheels[2].wheelObject.transform.position;
-        // // rLglobalVelocity = (rLcurrentPosition - rLpreviousPosition)/Time.fixedDeltaTime;
-        // // float rLlateralVelocity = Vector3.Dot(rLglobalVelocity, wheels[2].wheelObject.transform.right);
-        // // rLpreviousPosition = rLcurrentPosition;
-        // // // Debug.Log(fLlateralVelocityrR
-
-        // // rRcurrentPosition = wheels[3].wheelObject.transform.position;
-        // // rRglobalVelocity = (rRcurrentPosition - rRpreviousPosition)/Time.fixedDeltaTime;
-        // // float rRlateralVelocity = Vector3.Dot(rRglobalVelocity, wheels[3].wheelObject.transform.right);
-        // // rRpreviousPosition = rRcurrentPosition;
-        // // // Debug.Log(fLlateralVelocity);
-        // // ///...
-        // // COMLateralVelocity = -(fLlateralVelocity + fRlateralVelocity + rLlateralVelocity + rRlateralVelocity)/4;
-        // // lateralVelocityHisotry.AddEntry(COMLateralVelocity);
-        
-
-        // // for(int i = 0; i<4; i++){
-        // //     currentPosition[i] = wheels[i].wheelObject.transform.position;
-        // //     globalVelocity[i] = (currentPosition[i] - previousPosition[i])/Time.fixedDeltaTime;
-        // //     lateralVelocity[i] = Vector3.Dot(globalVelocity[i], wheels[3].wheelObject.transform.right);
-        // //     previousPosition[i] = currentPosition[i];
-        // // }
-        
-        // // float sum = 0;
-        // // for( var i = 0; i < 4; i++) {
-        // //     sum += lateralVelocity[i];
-        // // }
-        // // float average = sum / 4;
-
-        // // Debug.Log($"Average = {average}");
-        // // COMLateralVelocity = average;
-
-
-
-        // // Debug.Log($"lateral velocities = {lateralVelocity[0]}, {lateralVelocity[1]}, {lateralVelocity[2]}, {lateralVelocity[3]}, average = {average}");
-        // // Debug.Log($"position = {currentPosition}");
-
-        
-
-                
-       
-        // // COMLateralVelocity = rb.GetRelativePointVelocity(COM_Finder.transform.position).x;
-        // // COMlongitudinalVelocity = rb.GetRelativePointVelocity(COM_Finder.transform.position).z;
-
-        // // velocitySum = 0;
-        // // for(int i = 0; i<4; i++){
-        // //     velocitySum += wheels[i].lateralVelocity;
-
-        // // }
-
-        // // COMLateralVelocity = velocitySum/4;
-     
-        // // COMLateralVelocity = Vector3.Dot(rb.velocity, transform.right);
-        // // COMlongitudinalVelocity = Vector3.Dot(rb.velocity, transform.forward);
-
-        // // COMLateralAcceleration = (COMLateralVelocity - COMLateralVelocityPrevious)/Time.fixedDeltaTime;
-        // // COMLateralAcceleration = Mathf.Clamp(COMLateralAcceleration, -5,5);
-        // // float[] lateralVelocities = lateralVelocityHisotry.getArray();
-        // // // Debug.Log(lateralVelocities.Length);
-
-        // // if(Time.realtimeSinceStartup <= 1){
-        // //     COMLateralAcceleration = 0;
-        // // }
-        // // else{
-        // //     COMLateralAcceleration = (lateralVelocities[4] - lateralVelocities[0])/(4*Time.fixedDeltaTime);
-        // //     // COMLateralAcceleration = 0;
-        // // }
-
-        
-        
-        
-        
-        // COMlongitudinalAcceleration = (COMlongitudinalVelocity -COMlongitudinalVelocityPrevious)/Time.fixedDeltaTime;
-        // // Debug.Log($"Lateral velocity = {COMLateralVelocity}");
-        
-
-
-        // // Debug.Log($"acceleration = {COMLateralAcceleration}");
-        // // Debug.Log($"{lateralVelocities[0]}, {lateralVelocities[1]} ,{lateralVelocities[2]} ,{lateralVelocities[3]}, {lateralVelocities[4]}, ");
-
-        // // if(counter == 5){
-        // //     counter = 0;
-        // //     COMLateralAcceleration = (COMLateralVelocity - lateralV)/4*Time.fixedDeltaTime;
-        // //     lateralV = COMLateralVelocity;
-        // // }
-        // // else{
-        // //     counter += 1;            
-        // // }
-
-        // // Debug.Log($"lateral velocity = {COMLateralVelocity}, acceleration = {COMLateralAcceleration} ");
-
-
+        // Global vectors
         velocityVector = rb.GetPointVelocity(COM_Finder.transform.position);
         accelerationVector = (velocityVector - previousVelocityVector)/Time.fixedDeltaTime;        
 
-        // COMLateralVelocity = Vector3.Dot(velocityVector, transform.right.normalized);
-        // COMlongitudinalVelocity = Vector3.Dot(velocityVector, transform.right.normalized);
-        
+        // Local accel vectors
         COMLateralAcceleration = Vector3.Dot(accelerationVector, transform.right.normalized);
         COMlongitudinalAcceleration = Vector3.Dot(accelerationVector, transform.forward.normalized);
 
-
         previousVelocityVector = velocityVector;
-
-        // Debug.Log($"Longitudinal acceleration = {COMlongitudinalAcceleration}, lateral = {COMLateralAcceleration}");
-
-        // Debug.Log($"Acceleration vector = ({accelerationVector.x}, {accelerationVector.y}, {accelerationVector.z})");
-        
+       
 
     }
 
     void updateRollAngles(){
+        // Calculates roll angles based on wheel travels
         rollAngleFront = -Mathf.Rad2Deg * Mathf.Atan((wheelTravels[0] - wheelTravels[1])/1000*trackFront);
         rollAngleRear =  -Mathf.Rad2Deg * Mathf.Atan((wheelTravels[2] - wheelTravels[3])/1000*trackRear);
         rollAngleAvg = 0.5f*(rollAngleFront + rollAngleRear);
     }
 
     void updatePitch(){
-        pitchAngle = Mathf.Rad2Deg * Mathf.Atan((wheelTravels[0] + wheelTravels[1])/wheelBase);
+        // Calculates pitch based on wheel travels on the wheel travels
+        pitchAngle = Mathf.Rad2Deg * Mathf.Atan((wheelTravels[0] + wheelTravels[2])/wheelBase);
 
     }
 
     void updateLoadTransfers(){
 
-        // elasticLoadTransferFront = Suspension.elasticLoadTransferFront(
-        //     rollStiffnessFront,
-        //     rollStiffnessRear,
-        //     massFront,
-        //     massRear,
-        //     COM_height,
-        //     rollCentreHeightFront,             
-        //     rollCentreHeightRear,
-        //     COMLateralAcceleration, 
-        //     trackFront
-        // );
-
-        // elasticLoadTransferRear = Suspension.elasticLoadTransferRear(
-        //     rollStiffnessFront, 
-        //     rollStiffnessRear,
-        //     massFront, 
-        //     massRear, 
-        //     COM_height, 
-        //     rollCentreHeightFront, 
-        //     rollCentreHeightRear, 
-        //     COMLateralAcceleration, 
-        //     trackRear
-        // );
+        // Calculates load transfer for front and rear using static methods written in the suspension class.
+        // Note: A "satic" method or variable means it is the same across all object of that class.  
+        //       It is shared across all objects of that class and cannot be modified on a per instance/object basis.
 
         elasticLoadTransferFront = Suspension.transientElasticLoadTransfer(rollStiffnessFront, rollAngleFront, trackFront);
         elasticLoadTransferRear = Suspension.transientElasticLoadTransfer(rollStiffnessRear, rollAngleRear, trackRear);
@@ -1149,6 +1147,7 @@ public class RaycastController : MonoBehaviour{
         lateralLoadTransferFront = -( elasticLoadTransferFront + geometricLoadTransferFront);
         lateralLoadTransferRear = -( elasticLoadTransferRear + geometricLoadTransferRear);
 
+        // Total measured and thoetretical values are just there for sanity checks, not acutally used in physics models.
         totalLateralLoadTransferMeasured = lateralLoadTransferFront + lateralLoadTransferRear;
         totalLateralLoadTransferTheoretical = (rb.mass * COMLateralAcceleration * COM_height)/(0.5f*(trackFront + trackRear));
 
@@ -1159,9 +1158,16 @@ public class RaycastController : MonoBehaviour{
     }
 
     void updateVerticalLoad(){
+        // Updates the vertical loads for each wheel using the orignal 
+        // weight distribution (at rest) with lateral and longitudinal load transfers.
+        
+        // This vairable exists only inside this method and is a placeholder.
+        // It will be updated 4 times by the for loop and gets removed after the method is finished. 
         float verticalLoad;
+
         for(int i = 0; i<4; i++){
             if(Mathf.Abs(COMLateralAcceleration) >= 0f){
+                // Calculates vertical load of wheel i.
                 if(i == 0){
                     verticalLoad = baseLoadFront - lateralLoadTransferFront - longitudnialLoadTransfer;
                 }
@@ -1193,6 +1199,7 @@ public class RaycastController : MonoBehaviour{
     }
 
     void updateCamberAngles(){
+        // static camber angle is just the inital camber value.
 
         camberAngles[0] = staticCamberAngleFront + calculateCamberChangeFront(wheelTravels[0], rackTravel) + rollAngleFront;
         camberAngles[1] = staticCamberAngleFront + calculateCamberChangeFront(wheelTravels[1], rackTravel) - rollAngleRear;
@@ -1206,10 +1213,13 @@ public class RaycastController : MonoBehaviour{
 
 
     float calculateCamberChangeFront(float wheelTravel, float rackTravel){
+
+        // Equation form Lola software.
         return -3.191f - 0.02382f*wheelTravel + 0.04161f*rackTravel - 0.0004034f*Mathf.Pow(wheelTravel,2) - 6.873E-5f*wheelTravel*rackTravel + 0.0004845f*Mathf.Pow(rackTravel, 2) + 3.172f;
     }
 
     float calculateCamberChangeRear(float wheelTravel){
+        // Equation from lola software.
         return -0.0004f * Mathf.Pow(wheelTravel,2) + 0.0016f*wheelTravel - 1.8333f + 1.824f;
     }
 
@@ -1315,6 +1325,7 @@ public class RaycastController : MonoBehaviour{
 
 
     void showTimer(){
+        // Timer for 0-X speed tests in mph, m/s or km/h.
         float carSpeed = rb.velocity.z;
         float speedThreshold; // targetSpeed converted to m/s
 
@@ -1353,49 +1364,89 @@ public class RaycastController : MonoBehaviour{
     }
 
     void OnDrawGizmos(){
+        // Gizmos used for debugging purposes.
+        // Comment/uncomment certain sections of the code to hide/show certain gizmos.
 
+        // Shows a small sphere at the COM and the local origin of the car. 
         Gizmos.color = Color.white;
         Gizmos.DrawWireSphere( transform.TransformPoint(rb.centerOfMass),0.1f);
         Gizmos.DrawWireSphere( transform.position,0.1f);
         
         for(int i = 0; i < springs.Count; i++){
         
-                        
+            
+            // Shows the current length of the spring.   
+            // ----------------------------------------------------------         
             // Gizmos.color = Color.blue;
             // Ray ray = new Ray(springs[i].transform.position, -transform.up);           
             // Gizmos.DrawLine(ray.origin, -suspensions[i].springLength * transform.up + springs[i].transform.position);
+         
 
+            // Shows the minimum length of the spring.
+            // ----------------------------------------------------------
             // Gizmos.color = Color.white;
             // Ray ray2 = new Ray(springs[i].transform.position, -transform.up);           
             // Gizmos.DrawLine(ray2.origin, -suspensions[i].minLength * transform.up + springs[i].transform.position);
             
 
-            
+            // Shows the wheel radius and calcualted locaitons.
+            // You can add a similar line to show the actual wheel locations to look for discrepencies.
+            // --------------------------------------------------------
             // Gizmos.color = Color.yellow;
             // Gizmos.DrawLine(-suspensions[i].springLength * transform.up + springs[i].transform.position, -suspensions[i].springLength * transform.up + springs[i].transform.position + transform.up * -wheelRadius);
             
+
+            // Shows a small flat square at the hit point of the raycast.
+            // --------------------------------------------------------
             // Gizmos.color = Color.white;
             // Gizmos.DrawWireCube(springs[i].transform.position - new Vector3(0, suspensions[i].springLength + wheelRadius, 0), new Vector3(0.1f, 0, 0.1f));
         
+
+            // Shows the longitudinal and lateral velocities of the wheels as two lines, 
+            // one going longitudinally and one going laterally,
+            // the longer the lines, the larger the velocities.
+            // Going 1m/s will show a 1m line. You can apply a scale factor in the last parameter (that controls length) 
+            // by just multiplying by a number. 
+            // --------------------------------------------------------
             // Gizmos.color = Color.yellow;
             // Gizmos.DrawRay(wheels[i].wheelObject.transform.position, wheels[i].longitudinalVelocity * wheels[i].wheelObject.transform.forward);
             // Gizmos.DrawRay(wheels[i].wheelObject.transform.position, -wheels[i].lateralVelocity * wheels[i].wheelObject.transform.right);
+            
 
+            // Shows the longitudinal and lateral tyre forces, similar to the previous section with velocities.
+            // Lengths are scaled so that 1000N gives a 1m line.
+            // If you want to see both velocities and forces at the same time,
+            // change the colour for one of them.
+            //--------------------------------------------------------
             Gizmos.color = Color.yellow;
             Gizmos.DrawRay(wheels[i].wheelObject.transform.position, wheels[i].wheelObject.transform.right * (wheels[i].lateralForce/1000));
             Gizmos.DrawRay(wheels[i].wheelObject.transform.position, wheels[i].wheelObject.transform.forward * (wheels[i].longitudinalForce/1000));
+            
+            
+            // Shows the vertical load on the wheel.
+            // --------------------------------------------------------
+            // Gizmos.color = Color.yellow;
             // Gizmos.DrawRay(wheels[i].wheelObject.transform.position, wheels[i].wheelObject.transform.up * wheels[i].verticalLoad/1000);
-            // Gizmos.DrawRay(COM_Finder.transform.position, -drag * transform.forward /1000);
-          
+            
+            
+
+            // Shows the forces form the anti rollbar forces - no longer needed.
+            // --------------------------------------------------------
             // Gizmos.color = Color.yellow;
             // if(i == 2 | i == 3){
             //     Gizmos.DrawRay(wheels[i].wheelObject.transform.position, wheels[i].wheelObject.transform.up * antiRollForces[i-2]/1000);
             // }
 
-            // Gizmos.DrawRay(wheels[i].wheelObject.transform.position, wheels[i].forceVector/1000 );
+
+
+            // Shows the 2D force vector of the wheel (longitudinal and lateral only)
+            // --------------------------------------------------------
+            // Gizmos.DrawRay(wheels[i].wheelObject.transform.position, wheels[i].forceVector/1000);
             
         }
 
+        // Shows the COM's longitudinal and lateral velocities.
+        // --------------------------------------------------------
         // Gizmos.color = Color.white;
         // Gizmos.DrawRay(COM_Finder.transform.position, COMlongitudinalVelocity * transform.forward);
         // Gizmos.DrawRay(COM_Finder.transform.position, COMLateralVelocity* transform.right);
@@ -1405,38 +1456,9 @@ public class RaycastController : MonoBehaviour{
         
     }
 
-    void ApplySteering(){
+    void ApplySteering(){       
+        // Applies steering to the wheels 
 
-        // // Applies Ackermann sterring if it is enabled.
-        // if(enableAntiAckermann){
-        //     //Steering right
-        //     if(steerInput > 0){
-        //         steerAngleLeft = Mathf.Rad2Deg * Mathf.Atan(wheelBase / (turnRadius - (rearTrack/2))) * steerInput;
-        //         steerAngleRight = Mathf.Rad2Deg * Mathf.Atan(wheelBase / (turnRadius + (rearTrack/2))) * steerInput;
-
-        //     }//Steering left            
-        //     else if (steerInput < 0){
-        //         steerAngleLeft = Mathf.Rad2Deg * Mathf.Atan(wheelBase / (turnRadius + (rearTrack/2))) * steerInput;
-        //         steerAngleRight = Mathf.Rad2Deg * Mathf.Atan(wheelBase / (turnRadius - (rearTrack/2))) * steerInput;
-                
-
-        //     } // Not steering
-        //     else{
-        //         steerAngleLeft = 0;
-        //         steerAngleRight = 0;
-
-        //     }
-            
-        // }
-        // // If Ackermann steering is disabled, both wheels have the same steer angle.
-        // else{
-
-        //     steerAngleLeft = steerAngle * steerInput;
-        //     steerAngleRight = steerAngle * steerInput;           
-
-        // }
-
-        
         if(enableAntiAckermann){
             if(steerInput >= 0){
                 steerAngleLeft = outerSteerAngle * steerInput;
@@ -1453,12 +1475,22 @@ public class RaycastController : MonoBehaviour{
         }
         
 
-        wheelAngleLeft = Mathf.Lerp(wheelAngleLeft, steerAngleLeft, steerSpeed * Time.deltaTime);
-        wheelAngleRight = Mathf.Lerp(wheelAngleRight, steerAngleRight, steerSpeed * Time.deltaTime);
+        // Smoothly moves the wheel instead of making it instantly change direcitons.
+        // This also adds a dealy as a side effect, 
+        // so only use it for keyboard where the input can go from -1 to 1 instantly.
+        // This is not needed for a steering wheel.
+        // wheelAngleLeft = Mathf.Lerp(wheelAngleLeft, steerAngleLeft, steerSpeed * Time.deltaTime);
+        // wheelAngleRight = Mathf.Lerp(wheelAngleRight, steerAngleRight, steerSpeed * Time.deltaTime);
+
+        // Comment these lines out if you are using the Lerp above.
+        // otherwise leave these enabled for instant steering response.
+        // E.g., going from 1 to 0 will instantly rotate the wheels from pointing right to pointing forward.
         wheelAngleLeft=steerAngleLeft;
         wheelAngleRight=steerAngleRight;
 
 
+        // Rotates the wheel according to the steering angle and toe.
+        // Camber is not shown but still goes into the tyre model calculations and effects the resulting tyre forces.
         wheelObjects[0].transform.localRotation = Quaternion.Euler(
             wheelObjects[0].transform.localRotation.x, 
             wheelObjects[0].transform.localRotation.y - toeAngleFront + wheelAngleLeft,
@@ -1488,7 +1520,7 @@ public class RaycastController : MonoBehaviour{
 
     }
 
-    // Use these for the UI:
+    // Used for the UI to access data in this script:
     public Suspension[] getSuspensions(){
         return suspensions;
     }
@@ -1506,6 +1538,8 @@ public class RaycastController : MonoBehaviour{
     public bool checkIfAcclerating(){return isAcclerating;}
     public float getUserInput(){return userInput;}
 
+
+    // No longer needed.
     public float getAntiRollForce(Suspension leftSuspension, Suspension rightSuspension, float antiRollStiffness, float wheelId){
 
         float travelLeft = 0;

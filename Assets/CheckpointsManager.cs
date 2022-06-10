@@ -4,6 +4,11 @@ using UnityEngine;
 using System;
 using TMPro;
 
+// Manages the checkpints system.. 
+
+// Code adpated from: 
+// https://www.youtube.com/watch?v=IOYNg6v9sfc 
+// The code for the checkpoint system is not exactly the same but it is similar.
 public class CheckpointsManager : MonoBehaviour
 {
 

@@ -7,38 +7,60 @@ using System;
 
 
 
-
+// One object of the Wheel class is used to model each wheel of the car.
 public class Wheel{
-
-    // void Start(){
-        // wc=this;
-    // }
+    // Don't attach this script to anything,
+    // This is only used by the "RaycastController" script to model the tyre physics. 
     
+    // id: 0 for fornt left,
+    //     1 for front right,
+    //     2 for rear left,
+    //     3 for rear right
     public float id;
+
+    // Wheel Object is an empty game object with just a Transform component.  
+    // This rotates with the steering and toe but not the spinning of the wheel.
+    // Therefore, the z direction is always forward and x direction is always lateral (in the Unity axis system).    
     public GameObject wheelObject;
+
+    // This GameObject with a mesh is a child of the wheelObject.
+    // The mesh is basically used to render the wheel in 3D.
+    // Since it is a child, it will follow the locaiton and rotation of the parent.
+    // A rotation about the local x axis is applied to show the spinning of the wheel. 
+    // Steering is done by the parent so no need to define it for the child.
     public GameObject wheelMesh;
+
+    // Rigidbody of the car, not the wheel. The wheel has no Rigidbody component. 
+    // All forces are applied to the car at different locations.
     public Rigidbody rb;
+
+
     public float wheelRadius;
     public float wheelMass;
     public int tyrePressure;
     public float momentOfInertia;
     public float drivetrainInertia;  
     
+    // Rolling resistnace coefficient.
     public float rrCoefficient = 0.0003f;
 
-    // public static Wheel wc;
-
+    
 
     public float slipAngle;
     public float slipRatio;
-    public Vector3 wheelVelocityLS;        
+
+    // Wheel velocity in local space.
+    public Vector3 wheelVelocityLS;
+
     public float longitudinalVelocity;
     public float lateralVelocity;
+
     public float wheelTorque;
     public float engineTorque;
     public float brakingTorque;
     public float rollingResistance;
     public float torque;
+
     public float brakeBias;
 
     public float lateralForce; //Sideways direction    
@@ -49,6 +71,7 @@ public class Wheel{
     
     public Vector3 forceVector;
 
+    // Tyre constants
     public float D_long;
     public float C_long;
     public float B_long;
@@ -66,19 +89,25 @@ public class Wheel{
     public float a_3_lat;
     public float a_4_lat;
 
+    // Tyre static and dynamic limits.    
     public float fLongLimit;
     public float fLatLimit;
     public float fLongDynamicLimit;
     public float fLatDynamicLimit;
 
-
+    // Angular accerleation and angular velocity.
     public float alpha;
     public float omega;
 
     public float verticalLoad;
     public float tyreEfficiency;
     
+    // All the toqrues that act opposite to engine toque.
+    // Includes force coming from the ground to the wheel (converted to torque by multiplying with wheel radius).
+    // Tyre force acts on ground, ground creates equal and opposite reactive force that acts on the wheels.
+    // Reactive force both pushes the car and changes the anuglar velocity of wheels.
     public float feedbackTorque;
+
     public float maxBrakingTorque;
 
     public float camberAngle;
@@ -89,6 +118,12 @@ public class Wheel{
 
 
     public Wheel(float id, GameObject wheelObject, GameObject wheelMesh, Rigidbody rb, float wheelRadius, float wheelMass, float brakeBias, float drivetrainInertia, float engineIdleRPM, float engineMaxRPM, int tyrePressure, float tyreEfficiency, float maxBrakingTorque, Dictionary<int, Dictionary<string, float>> longitudinalConstants, Dictionary<int, Dictionary<string, float>> lateralConstants){
+        // This is the constructor method.
+        // All the parameters listed in the brackets above 
+        // need to be provided to create a suspension class object.
+        
+
+        // Assigns values given in the constructor to the variables in the class.
         this.id = id;
         this.wheelObject = wheelObject;
         this.wheelMesh = wheelMesh;
@@ -125,18 +160,15 @@ public class Wheel{
         this.a_4_lat = lateralConstants[tyrePressure]["a_4"];
 
         
-
-        
-
         // if(id == 2| id == 3){
         //     lockedDiff = true;
         // }
         
-              
+             
 
     }
 
-
+    // The folling methods are helper functions used to calculate tyre forces and motion.
     public float tyreEquationLongitudinal(float slip, float fDynamicLimit, float fStaticLimit, float verticalLoad, float B_long, float C_long, float D_long, float E_long, float a_1_long, float a_2_long, float a_3_long){        
         float force = (fDynamicLimit/fStaticLimit)*((a_1_long*verticalLoad - a_2_long*Mathf.Pow(verticalLoad, 2))*D_long)* Mathf.Sin( C_long * Mathf.Atan(B_long*Mathf.Pow(verticalLoad, a_3_long) * slip - E_long * ( (B_long*Mathf.Pow(verticalLoad, a_3_long)*slip) - Mathf.Atan(B_long*Mathf.Pow(verticalLoad, a_3_long)*slip))));
         
@@ -150,16 +182,7 @@ public class Wheel{
     }
 
 
-    // public float complexTyreEquationNew(float slip, float fDynamicLimit, float fStaticLimit, float B, float C, float D, float E, float a_1, float a_2){
-    //     float force = (fDynamicLimit/fStaticLimit)*((a_1*verticalLoad - a_2*Mathf.Pow(verticalLoad, 2))*D)* Mathf.Sin( C * Mathf.Atan(B * slip - E * ( (B*slip) - Mathf.Atan(B*slip))));
-    //     return force;
-
-    // }
-
-    // public float tyreCurvePeak(float a_1, float a_2, float D, float verticalLoad){
-    //     return (a_1*verticalLoad - a_2*Mathf.Pow(verticalLoad, 2))*D;
-    // }
-
+    
     public float tyreCurvePeakLateral(float a_1_lat, float a_2_lat, float a_4_lat, float verticalLoad, float camberAngle, float D_lat){
 
         return ((a_1_lat*verticalLoad - a_2_lat*Mathf.Pow(verticalLoad, 2))*D_lat*(1-a_4_lat*Mathf.Pow(camberAngle,2)));
@@ -212,9 +235,7 @@ public class Wheel{
         return slipAngle;
     }
 
-    // public float getRollingResistance(float verticalLoad, float omega, float radius, float coefficient){
-    //     return (verticalLoad * omega * radius * coefficient);
-    // }
+   
     
     public float getRollingResistance(float longitudinalVelocity, float lateralVelocity, float verticalLoad, float radius, int tyrePressure){
         float speed = Mathf.Pow(Mathf.Pow(longitudinalVelocity, 2) + Mathf.Pow(lateralVelocity,2), 0.5f);        
@@ -224,11 +245,12 @@ public class Wheel{
 
     }
 
+
+    // Gets called every timestep to update tyre forces and RPM.
     public Vector3 getUpdatedForce(float userInput, float currentGearRatio, float finalDriveRatio, float primaryGearRatio, RaycastHit hit, float timeDelta, float verticalLoad, float camberAngle){
         
-
         
-        // Debug.Log(userInput);
+        // No negative vertical load.
         if(verticalLoad < 0){
             verticalLoad = 0;
         }
@@ -237,26 +259,32 @@ public class Wheel{
         this.camberAngle = camberAngle;
         
        
-        
+        // Move the wheel so that the bottom of the wheel touches the hit point.         
         wheelObject.transform.position = hit.point + hit.normal * wheelRadius;
+        
+        // Find the local velocity vector at the hit point.        
         wheelVelocityLS = wheelObject.transform.InverseTransformDirection(rb.GetPointVelocity(hit.point));
 
+        // Use compoennts of the local velocity to get longitudinal and lateral velocities.
         lateralVelocity = wheelVelocityLS.x;
         longitudinalVelocity = wheelVelocityLS.z;              
         
-       
-
-        // fLongLimit = tyreEfficiency * tyreCurvePeak(a_1_long, a_2_long, D_long, verticalLoad);
-        // fLatLimit = tyreEfficiency * tyreCurvePeak(a_1_lat, a_2_lat, D_lat, verticalLoad);
-
+        // Get static limits.        
         fLongLimit = tyreCurvePeakLongitudinal(a_1_long, a_2_long, D_long, verticalLoad);
         fLatLimit = tyreCurvePeakLateral(a_1_lat, a_2_lat, a_4_lat, verticalLoad, camberAngle, D_lat);
 
         
-        
+        // Calculate dynamic limits from the static limits and forces from previous timestep.
         fLongDynamicLimit = dynamicPeakLongitudinal(lateralForce, fLongLimit, fLatLimit);
         fLatDynamicLimit = dynamicPeakLateral(longitudinalForce, fLongLimit, fLatLimit);
 
+        // Calculate braking toque.
+        // When speed is below 1m/s braking torque is gradually reduced,
+        // otherwise the car would just rock back and forth.
+        // This is done by simply multiplying by velocity when its lower than 1m/s.
+        // At 0m/s there is 0% braking force, even when the brake is fully pressed.
+        // At 0.5m/s there is 50% braking force, even when the brake is fully pressed.
+        // At 1m/s or higher there is 100% braking force at when the brake is fully pressed.
         if(userInput <0){
             if(Mathf.Abs(longitudinalVelocity) > 1){
                 if(id == 2 | id == 3){
@@ -290,7 +318,8 @@ public class Wheel{
 
         feedbackTorque = rollingResistance + brakingTorque - longitudinalForce*wheelRadius;
         torque = wheelTorque + feedbackTorque;
-                
+
+        // Drivetrain inertia only effects the rotation of rear wheels.        
         if(id == 2| id == 3){
             alpha = torque /(drivetrainInertia + momentOfInertia);
         }
@@ -306,41 +335,38 @@ public class Wheel{
         //     omega = diffControlledOmega;
         // }
         
-
+        // Clamp wheels based on input and if they are front and rear.
         if(userInput >=0){
+
+            // Rear wheels clamped between engine rpm range scaled by gear ratios.
             if(id == 2 | id == 3){
                 omega = Mathf.Clamp(omega, (1/9.5493f) * engineIdleRPM/(currentGearRatio * finalDriveRatio * primaryGearRatio), (1/9.5493f) * engineMaxRPM/(currentGearRatio * finalDriveRatio * primaryGearRatio));
             }
+            // Front wheels clamped between extreme values, essentially unclamped.            
             else{
+                
                 omega = Mathf.Clamp(omega, -100000000f,10000000000f);
             }
             
         }
         else{
+            // Min value is 0 when fully pressing the brakes (i.e., userInput is -1).
             omega = Mathf.Clamp(omega, 0,10000000000f);
         }
-
-        
-          
-
-
+      
+       
+        // Rotate the GameObject that has the wheel mesh to show the wheels spinning.
         wheelMesh.transform.Rotate(Mathf.Rad2Deg * omega * timeDelta, 0, 0, Space.Self); 
         
+
         slipRatio = calculateSlipRatio(longitudinalVelocity, omega, wheelRadius);        
-        // longitudinalForce = complexTyreEquation(slipRatio, fLongDynamicLimit, C_long, B_long, E_long); 
-        // longitudinalForce = complexTyreEquationNew(slipRatio, fLongDynamicLimit, fLongLimit, B_long, C_long, D_long, E_long, a_1_long, a_2_long);       
         longitudinalForce = tyreEquationLongitudinal(slipRatio, fLongDynamicLimit, fLongLimit, verticalLoad, B_long, C_long, D_long, E_long, a_1_long, a_2_long, a_3_long);
 
 
-        slipAngle = calculateSlipAngle(longitudinalVelocity, lateralVelocity, threshold: 0.1f);     
-        // lateralForce = complexTyreEquation(slipAngle, fLatDynamicLimit, C_lat, B_lat, E_lat);
-        // lateralForce = complexTyreEquationNew(slipAngle, fLatDynamicLimit, fLatLimit, B_long, C_long, D_long, E_long, a_1_long, a_2_long);
-        
-        
+        slipAngle = calculateSlipAngle(longitudinalVelocity, lateralVelocity, threshold: 0.1f);   
         lateralForce = tyreEquationLateral(slipAngle, fLatDynamicLimit, fLatLimit, verticalLoad, camberAngle, B_lat, C_lat, D_lat, E_lat, a_1_lat, a_2_lat, a_3_lat, a_4_lat);
 
-
-
+        // Checks if any of the forces is Not a Number (NaN) due to divide by 0 or infinity errors. 
         if(float.IsNaN(longitudinalForce)){
             longitudinalForce = 0;
         }
@@ -348,40 +374,23 @@ public class Wheel{
             lateralForce = 0;
         }
 
-        // if(id == 2| id == 3){
-        //     longitudinalForce = Mathf.Clamp(longitudinalForce, -Mathf.Abs(diffLongForceLimit), Mathf.Abs(diffLongForceLimit));
-        // }
         
-
-        
+        // Clamp set to high values only generated by crashing.
+        // Stops the car from flying off or falling through the map when crashing.
         longitudinalForce = Mathf.Clamp(longitudinalForce, -50000, 50000);
         lateralForce = Mathf.Clamp(lateralForce, -50000,50000);
 
-        // Debug.Log($"Wheel {id}: Slip Ratio = {slipRatio}, Slip Angle = {slipAngle}, Flong = {longitudinalForce}, Flat = {lateralForce}");
-        // Debug.Log($"Wheel {id}: Camber = {camberAngle}");
-
+        
         if(id == 0 | id == 1){
             longitudinalForce = 1.25f*longitudinalForce;
             lateralForce = 1.25f*lateralForce;
         }
+
         forceVector = longitudinalForce * wheelObject.transform.forward + lateralForce * wheelObject.transform.right;
-        
-       
-        // Debug.Log($"Wheel id = {id}, Longitudinal Velocity = {longitudinalVelocity}, wR = {omega*wheelRadius}, slip ratio = {slipRatio} ");
-        
-        // Debug.Log($" Wheel id = {id}, Limits = ({fLongLimit},{fLatLimit}), Dynamic Limits = ({fLongDynamicLimit},{fLatDynamicLimit}), Forces = ({longitudinalForce},{lateralForce}), Load = {verticalLoad}");
-        // Debug.Log($"Wheel id = {id}, Longitudinal Velocity = {longitudinalVelocity}, Lateral Velocity = {lateralVelocity}, slip ratio = {slipRatio}, slip angle = {slipAngle}");
-
-
-        
-
-
+                   
         return forceVector;
 
 
     }
 
-    // public float getSlipAngle(){return slipAngle;}
-
-    // public float getSlipRatio(){return slipRatio;}
 }

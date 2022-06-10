@@ -4,10 +4,17 @@ using UnityEngine;
 
 
 public class Suspension{
+    // Dont attach this script to any GameObject. 
+    // This is only used by the "RaycastController" script to model the suspension physics. 
 
+
+    // id: 0 for fornt left,
+    //     1 for front right,
+    //     2 for rear left,
+    //     3 for rear right
     public float id;
     public float naturalLength;
-    public float springTravel;
+    public float springTravel; // maximum distance the spring can move from rest.
     public float springStiffness;       
     public float dampingCoefficient;
     public float bumpStiffness; 
@@ -30,6 +37,10 @@ public class Suspension{
     
 
     public Suspension(float id, float restLength, float springTravel, float springStiffness, float dampingCoefficient, float bumpStiffness, float bumpTravel, float wheelRadius){
+        // Constructor for this class.
+        // All the parameters listed in the brackets above need to be provided to create a suspension class object.
+
+        // Assigns values given in the constructor to the variables in the class.
         this.id = id;
         this.naturalLength = restLength;
         this.springTravel = springTravel;
@@ -51,11 +62,16 @@ public class Suspension{
 
     public Vector3 getUpdatedForce(RaycastHit hit, float timeDelta, bool contact){
         this.contact = contact;
+        // Calculate spring displacement and velocity.
         previousLength = springLength;
         springLength = hit.distance - wheelRadius;
         springLength = Mathf.Clamp(springLength, minLength - bumpTravel, maxLength);
         springVelocity = (springLength - previousLength)/timeDelta;
         displacement = naturalLength - springLength;
+
+        // Calculate spring force from displacement and velocity.
+        // Bump stiffesses only used below min length becasue
+        // bumps stops only activate when the spring is about to bottom out.
         if(springLength < minLength){
             springForce = springStiffness * displacement + bumpStiffness * (minLength - springLength);
             // Debug.Log($"Bumpstop activated for suspension {id}");
@@ -65,22 +81,14 @@ public class Suspension{
             springForce = springStiffness * displacement;
         }
 
-        // springForce = springStiffness * (naturalLength - springLength);  
-        
-        
+               
         damperForce = dampingCoefficient * springVelocity;
         damperForce = Mathf.Clamp(damperForce, -50000, 50000);
+
         force = springForce - damperForce;
-        
+
         forceVector = (springForce - damperForce) * hit.normal;
         
-
-        
-        
-
-        // Debug.Log($"Spring id = {id}, Rest Length ={restLength}, current length = {springLength}, suspension force = {springForce - damperForce}");
-        
-        // Debug.Log($"Suspension {id}: force = {force}, force vector = {forceVector}, spring force = {springForce}, damper force = {damperForce}, length = {springLength}, velocity = {springVelocity}");
         return forceVector;
 
     }
@@ -124,44 +132,6 @@ public class Suspension{
         return WLongitudinal;
     }
 
-    // public float calculateCamberFront(float x){
-    //     float y;
-    //     y = (4.3895E-9f) * Mathf.Pow(x,4) +  1.7466E-7f * Mathf.Pow(x,3) + (4.5144E-4f) * Mathf.Pow(x,2) + (2.6678E-2f) * x + 3.1363f;
-    //     return y;
-    // }
-
-    // public float calculateCamberRear(float x){
-    //     float y;
-    //     y = (1.0222E-8f) * Mathf.Pow(x,4) - (7.5916E-7f) * Mathf.Pow(x,3) + (4.4086E-4f) * Mathf.Pow(x,2) - (2.7342E-3f) * x + (1.7161f);
-    //     return y;
-    // }
-
-    // public float calculateSpringDisplacementFront(float x){
-    //     float y;
-    //     y = (-1.6983E-7f) * Mathf.Pow(x,4) - (4.2658E-5f) * Mathf.Pow(x,3) + (1.7252E-3f) * Mathf.Pow(x,2) + (9.7968E-1f) * x - (7.2350E-3f);
-    //     return y;
-    // }
-
-    // public float calculateSpringDisplacementRear(float x){
-    //     float y;
-    //     y = -(1.7066E-7f) * Mathf.Pow(x,4) - (4.0199E-5f) * Mathf.Pow(x,3) + (1.5618E-3f) * Mathf.Pow(x,2) + (9.8534E-1f) * x - (1.8784E-1f);
-    //     return y;
-    // }
-
-    // public float calculateToeFront(float x){
-
-    //     float y;
-    //     y = (7.4904E-9f) * Mathf.Pow(x,4) + (8.6268E-8f) * Mathf.Pow(x,3) + (1.0578E-3f) * Mathf.Pow(x,2) + (3.4286E-2f) * x + (3.2588f);
-    //     return y;
-
-    // }
-
     
-
-
-
-
-
-
     
 }

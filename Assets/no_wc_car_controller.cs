@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 // Code adapted from: https://www.youtube.com/watch?v=x0LUiE0dxP0 
-
+// Early versoin of the RaycastController script, no longer used.
 public class no_wc_car_controller : MonoBehaviour{
     public Rigidbody rb;
 

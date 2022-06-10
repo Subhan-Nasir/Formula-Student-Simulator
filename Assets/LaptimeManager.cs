@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+// Records laptime 
 public class LaptimeManager : MonoBehaviour
 {
     private bool startCrossed = false;
